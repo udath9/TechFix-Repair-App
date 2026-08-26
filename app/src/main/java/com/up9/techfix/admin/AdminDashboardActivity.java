@@ -1,5 +1,6 @@
 package com.up9.techfix.admin;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -35,10 +36,13 @@ public class AdminDashboardActivity extends AppCompatActivity {
         btnLogout = findViewById(R.id.btnLogout);
 
         btnBranches.setOnClickListener(v -> {
+            Intent intent =
+                    new Intent(
+                            AdminDashboardActivity.this,
+                            ManageBranchesActivity.class
+                    );
 
-            // We will connect this later
-            // startActivity(new Intent(this, ManageBranchesActivity.class));
-
+            startActivity(intent);
         });
 
         btnCategories.setOnClickListener(v -> {
