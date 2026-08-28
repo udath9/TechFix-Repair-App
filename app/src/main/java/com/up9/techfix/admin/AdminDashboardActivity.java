@@ -82,8 +82,13 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         btnSpareParts.setOnClickListener(v -> {
 
-            // We will connect this later
+            Intent intent =
+                    new Intent(
+                            AdminDashboardActivity.this,
+                            ManageSparePartsActivity.class
+                    );
 
+            startActivity(intent);
         });
 
         btnRepairs.setOnClickListener(v -> {

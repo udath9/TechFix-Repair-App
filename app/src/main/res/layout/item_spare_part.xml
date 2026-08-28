@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/txtPartName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="iPhone 13 Display"
+        android:textColor="#1A1A1A"
+        android:textSize="19sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/txtPartCode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Part Code: IP13-DISPLAY"
+        android:textColor="#1565C0"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/txtPartCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Category: Mobile Phone"
+        android:textColor="#555555"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/txtPartQuantity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Stock: 8"
+        android:textColor="#333333"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/txtPartPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Unit Price: Rs. 35000.00"
+        android:textColor="#333333"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/txtPartSupplier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Supplier: ABC Electronics"
+        android:textColor="#555555"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/txtPartAvailability"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Available"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnEditSparePart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit" />
+
+        <Button
+            android:id="@+id/btnDeleteSparePart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Delete" />
+
+    </LinearLayout>
+
+</LinearLayout>
