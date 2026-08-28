@@ -1,10 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".customer.CustomerHomeActivity">
+    android:layout_height="match_parent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/tvWelcome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Welcome to TechFix!"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="30dp" />
+
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="What would you like to do today?"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/tvWelcome"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnServices"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:text="🔧&#10;Browse Repair&#10;Services"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnBookRepair"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnBookRepair"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:text="🛠&#10;Book a&#10;Repair"
+            android:textSize="16sp"
+            app:layout_constraintTop_toTopOf="@id/btnServices"
+            app:layout_constraintStart_toEndOf="@id/btnServices"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="8dp" />
+
+        <Button
+            android:id="@+id/btnTrackRepair"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:text="📍&#10;Track My&#10;Repair"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/btnServices"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnHistory"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnHistory"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:text="📋&#10;Repair&#10;History"
+            android:textSize="16sp"
+            app:layout_constraintTop_toTopOf="@id/btnTrackRepair"
+            app:layout_constraintStart_toEndOf="@id/btnTrackRepair"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="8dp" />
+
+        <Button
+            android:id="@+id/btnPayment"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:text="💳&#10;Payment&#10;Information"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/btnTrackRepair"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnBranches"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnBranches"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:text="📍&#10;View&#10;Branches"
+            android:textSize="16sp"
+            app:layout_constraintTop_toTopOf="@id/btnPayment"
+            app:layout_constraintStart_toEndOf="@id/btnPayment"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="8dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>
