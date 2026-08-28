@@ -45,6 +45,13 @@
         <activity
             android:name=".admin.CategoryFormActivity"
             android:exported="false" />
+        <activity
+            android:name=".admin.ManageServicesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".admin.ServiceFormActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

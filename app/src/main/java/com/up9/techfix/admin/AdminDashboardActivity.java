@@ -59,7 +59,13 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         btnServices.setOnClickListener(v -> {
 
-            // We will connect this later
+            Intent intent =
+                    new Intent(
+                            AdminDashboardActivity.this,
+                            ManageServicesActivity.class
+                    );
+
+            startActivity(intent);
 
         });
 
