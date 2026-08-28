@@ -66,6 +66,14 @@
         <activity
             android:name=".admin.SparePartFormActivity"
             android:exported="false" />
+        <activity
+            android:name=".admin.ManageAppointmentsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".admin.ManageAppointmentActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>
