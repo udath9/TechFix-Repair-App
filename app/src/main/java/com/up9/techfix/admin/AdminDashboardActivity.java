@@ -104,7 +104,13 @@ public class AdminDashboardActivity extends AppCompatActivity {
         });
 
         btnPayments.setOnClickListener(v -> {
+            Intent intent =
+                    new Intent(
+                            AdminDashboardActivity.this,
+                            ManagePaymentsActivity.class
+                    );
 
+            startActivity(intent);
 
         });
 
