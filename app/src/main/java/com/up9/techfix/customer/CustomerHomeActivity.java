@@ -7,6 +7,7 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
+import com.up9.techfix.map.BranchesActivity;
 import com.up9.techfix.payment.PaymentActivity;
 import com.up9.techfix.service.ServicesActivity;
 import com.up9.techfix.booking.BookRepairActivity;
