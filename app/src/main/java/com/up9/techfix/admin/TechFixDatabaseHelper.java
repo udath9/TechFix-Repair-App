@@ -14,7 +14,9 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "TechFix.db";
     private static final int DATABASE_VERSION = 5;
 
-    // Branch table
+    // BRANCH TABLE
+
+
     public static final String TABLE_BRANCHES = "branches";
 
     public static final String COL_BRANCH_ID = "id";
@@ -26,6 +28,8 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
 
     // CATEGORY TABLE
+
+
     public static final String TABLE_CATEGORIES = "categories";
 
     public static final String COL_CATEGORY_ID = "id";
@@ -33,6 +37,8 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_CATEGORY_DESCRIPTION = "description";
 
     // REPAIR SERVICES TABLE
+   
+
     public static final String TABLE_SERVICES = "repair_services";
 
     public static final String COL_SERVICE_ID = "id";
@@ -42,69 +48,44 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_SERVICE_PRICE = "price";
     public static final String COL_SERVICE_ESTIMATED_DAYS = "estimated_days";
 
+
     // REPAIR SAMPLE TABLE
 
-    public static final String TABLE_REPAIR_SAMPLES =
-            "repair_samples";
 
-    public static final String COL_SAMPLE_ID =
-            "id";
+    public static final String TABLE_REPAIR_SAMPLES = "repair_samples";
 
-    public static final String COL_SAMPLE_DEVICE_NAME =
-            "device_name";
+    public static final String COL_SAMPLE_ID = "id";
+    public static final String COL_SAMPLE_DEVICE_NAME = "device_name";
+    public static final String COL_SAMPLE_CATEGORY = "category";
+    public static final String COL_SAMPLE_SERVICE = "service";
+    public static final String COL_SAMPLE_DESCRIPTION = "description";
+    public static final String COL_SAMPLE_IMAGE_URI = "image_uri";
 
-    public static final String COL_SAMPLE_CATEGORY =
-            "category";
+    // SPARE PARTS TABLE
+  
 
-    public static final String COL_SAMPLE_SERVICE =
-            "service";
+    public static final String TABLE_SPARE_PARTS = "spare_parts";
 
-    public static final String COL_SAMPLE_DESCRIPTION =
-            "description";
-
-    public static final String COL_SAMPLE_IMAGE_URI =
-            "image_uri";
-
-    // STOCK / SPARE PARTS TABLE
-
-    public static final String TABLE_SPARE_PARTS =
-            "spare_parts";
-
-    public static final String COL_SPARE_PART_ID =
-            "id";
-
-    public static final String COL_SPARE_PART_NAME =
-            "name";
-
-    public static final String COL_SPARE_PART_CATEGORY =
-            "category";
-
-    public static final String COL_SPARE_PART_NUMBER =
-            "part_number";
-
-    public static final String COL_SPARE_PART_QUANTITY =
-            "quantity";
-
-    public static final String COL_SPARE_PART_MINIMUM_STOCK =
-            "minimum_stock";
-
-    public static final String COL_SPARE_PART_UNIT_PRICE =
-            "unit_price";
-
-    public static final String COL_SPARE_PART_SUPPLIER =
-            "supplier";
-
-    public static final String COL_SPARE_PART_DESCRIPTION =
-            "description";
-
-    public static final String COL_SPARE_PART_IMAGE_URI =
-            "image_uri";
+    public static final String COL_SPARE_PART_ID = "id";
+    public static final String COL_SPARE_PART_NAME = "name";
+    public static final String COL_SPARE_PART_CATEGORY = "category";
+    public static final String COL_SPARE_PART_NUMBER = "part_number";
+    public static final String COL_SPARE_PART_QUANTITY = "quantity";
+    public static final String COL_SPARE_PART_MINIMUM_STOCK = "minimum_stock";
+    public static final String COL_SPARE_PART_UNIT_PRICE = "unit_price";
+    public static final String COL_SPARE_PART_SUPPLIER = "supplier";
+    public static final String COL_SPARE_PART_DESCRIPTION = "description";
+    public static final String COL_SPARE_PART_IMAGE_URI = "image_uri";
 
 
+  
 
     public TechFixDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
+
+
+  
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -120,6 +101,7 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
                         ")";
 
         db.execSQL(createBranchesTable);
+
 
         String createCategoriesTable =
                 "CREATE TABLE " + TABLE_CATEGORIES + " (" +
@@ -142,6 +124,7 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         db.execSQL(createServicesTable);
 
+
         String createRepairSamplesTable =
                 "CREATE TABLE " + TABLE_REPAIR_SAMPLES + " (" +
                         COL_SAMPLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -153,6 +136,8 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
                         ")";
 
         db.execSQL(createRepairSamplesTable);
+
+
         String createSparePartsTable =
                 "CREATE TABLE " + TABLE_SPARE_PARTS + " (" +
                         COL_SPARE_PART_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -168,10 +153,8 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
                         ")";
 
         db.execSQL(createSparePartsTable);
-
-
-
     }
+
 
     @Override
     public void onUpgrade(
@@ -180,125 +163,87 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
             int newVersion
     ) {
 
+        // --------------------------------------------------------
         // Version 2 - Categories
+        // --------------------------------------------------------
+
         if (oldVersion < 2) {
 
             String createCategoriesTable =
                     "CREATE TABLE " + TABLE_CATEGORIES + " (" +
-                            COL_CATEGORY_ID +
-                            " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-
-                            COL_CATEGORY_NAME +
-                            " TEXT NOT NULL, " +
-
-                            COL_CATEGORY_DESCRIPTION +
-                            " TEXT" +
-
+                            COL_CATEGORY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                            COL_CATEGORY_NAME + " TEXT NOT NULL, " +
+                            COL_CATEGORY_DESCRIPTION + " TEXT" +
                             ")";
 
             db.execSQL(createCategoriesTable);
         }
 
 
+        // --------------------------------------------------------
         // Version 3 - Repair Services
+        // --------------------------------------------------------
+
         if (oldVersion < 3) {
 
             String createServicesTable =
                     "CREATE TABLE " + TABLE_SERVICES + " (" +
-                            COL_SERVICE_ID +
-                            " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-
-                            COL_SERVICE_NAME +
-                            " TEXT NOT NULL, " +
-
-                            COL_SERVICE_CATEGORY +
-                            " TEXT NOT NULL, " +
-
-                            COL_SERVICE_DESCRIPTION +
-                            " TEXT, " +
-
-                            COL_SERVICE_PRICE +
-                            " REAL NOT NULL, " +
-
-                            COL_SERVICE_ESTIMATED_DAYS +
-                            " INTEGER NOT NULL" +
-
+                            COL_SERVICE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                            COL_SERVICE_NAME + " TEXT NOT NULL, " +
+                            COL_SERVICE_CATEGORY + " TEXT NOT NULL, " +
+                            COL_SERVICE_DESCRIPTION + " TEXT, " +
+                            COL_SERVICE_PRICE + " REAL NOT NULL, " +
+                            COL_SERVICE_ESTIMATED_DAYS + " INTEGER NOT NULL" +
                             ")";
 
             db.execSQL(createServicesTable);
         }
 
 
+        // --------------------------------------------------------
         // Version 4 - Repair Samples
+        // --------------------------------------------------------
+
         if (oldVersion < 4) {
 
             String createRepairSamplesTable =
                     "CREATE TABLE " + TABLE_REPAIR_SAMPLES + " (" +
-
-                            COL_SAMPLE_ID +
-                            " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-
-                            COL_SAMPLE_DEVICE_NAME +
-                            " TEXT NOT NULL, " +
-
-                            COL_SAMPLE_CATEGORY +
-                            " TEXT NOT NULL, " +
-
-                            COL_SAMPLE_SERVICE +
-                            " TEXT NOT NULL, " +
-
-                            COL_SAMPLE_DESCRIPTION +
-                            " TEXT, " +
-
-                            COL_SAMPLE_IMAGE_URI +
-                            " TEXT" +
-
+                            COL_SAMPLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                            COL_SAMPLE_DEVICE_NAME + " TEXT NOT NULL, " +
+                            COL_SAMPLE_CATEGORY + " TEXT NOT NULL, " +
+                            COL_SAMPLE_SERVICE + " TEXT NOT NULL, " +
+                            COL_SAMPLE_DESCRIPTION + " TEXT, " +
+                            COL_SAMPLE_IMAGE_URI + " TEXT" +
                             ")";
 
             db.execSQL(createRepairSamplesTable);
         }
+
+
+        // --------------------------------------------------------
+        // Version 5 - Spare Parts
+        // --------------------------------------------------------
+
         if (oldVersion < 5) {
 
             String createSparePartsTable =
                     "CREATE TABLE " + TABLE_SPARE_PARTS + " (" +
-                            COL_SPARE_PART_ID +
-                            " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-
-                            COL_SPARE_PART_NAME +
-                            " TEXT NOT NULL, " +
-
-                            COL_SPARE_PART_CATEGORY +
-                            " TEXT NOT NULL, " +
-
-                            COL_SPARE_PART_NUMBER +
-                            " TEXT, " +
-
-                            COL_SPARE_PART_QUANTITY +
-                            " INTEGER NOT NULL DEFAULT 0, " +
-
-                            COL_SPARE_PART_MINIMUM_STOCK +
-                            " INTEGER NOT NULL DEFAULT 0, " +
-
-                            COL_SPARE_PART_UNIT_PRICE +
-                            " REAL NOT NULL DEFAULT 0, " +
-
-                            COL_SPARE_PART_SUPPLIER +
-                            " TEXT, " +
-
-                            COL_SPARE_PART_DESCRIPTION +
-                            " TEXT, " +
-
-                            COL_SPARE_PART_IMAGE_URI +
-                            " TEXT" +
-
+                            COL_SPARE_PART_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                            COL_SPARE_PART_NAME + " TEXT NOT NULL, " +
+                            COL_SPARE_PART_CATEGORY + " TEXT NOT NULL, " +
+                            COL_SPARE_PART_NUMBER + " TEXT, " +
+                            COL_SPARE_PART_QUANTITY + " INTEGER NOT NULL DEFAULT 0, " +
+                            COL_SPARE_PART_MINIMUM_STOCK + " INTEGER NOT NULL DEFAULT 0, " +
+                            COL_SPARE_PART_UNIT_PRICE + " REAL NOT NULL DEFAULT 0, " +
+                            COL_SPARE_PART_SUPPLIER + " TEXT, " +
+                            COL_SPARE_PART_DESCRIPTION + " TEXT, " +
+                            COL_SPARE_PART_IMAGE_URI + " TEXT" +
                             ")";
 
             db.execSQL(createSparePartsTable);
-
-
-
         }
     }
+
 
     public long insertBranch(
             String name,
@@ -312,30 +257,11 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
 
-        values.put(
-                COL_BRANCH_NAME,
-                name
-        );
-
-        values.put(
-                COL_BRANCH_ADDRESS,
-                address
-        );
-
-        values.put(
-                COL_BRANCH_PHONE,
-                phone
-        );
-
-        values.put(
-                COL_BRANCH_LATITUDE,
-                latitude
-        );
-
-        values.put(
-                COL_BRANCH_LONGITUDE,
-                longitude
-        );
+        values.put(COL_BRANCH_NAME, name);
+        values.put(COL_BRANCH_ADDRESS, address);
+        values.put(COL_BRANCH_PHONE, phone);
+        values.put(COL_BRANCH_LATITUDE, latitude);
+        values.put(COL_BRANCH_LONGITUDE, longitude);
 
         long result =
                 db.insert(
@@ -349,13 +275,12 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
+
     public List<Branch> getAllBranches() {
 
-        List<Branch> branches =
-                new ArrayList<>();
+        List<Branch> branches = new ArrayList<>();
 
-        SQLiteDatabase db =
-                getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
 
         Cursor cursor =
                 db.query(
@@ -434,6 +359,7 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
         return branches;
     }
 
+
     public int updateBranch(
             int id,
             String name,
@@ -443,36 +369,15 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
             double longitude
     ) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
-        ContentValues values =
-                new ContentValues();
+        ContentValues values = new ContentValues();
 
-        values.put(
-                COL_BRANCH_NAME,
-                name
-        );
-
-        values.put(
-                COL_BRANCH_ADDRESS,
-                address
-        );
-
-        values.put(
-                COL_BRANCH_PHONE,
-                phone
-        );
-
-        values.put(
-                COL_BRANCH_LATITUDE,
-                latitude
-        );
-
-        values.put(
-                COL_BRANCH_LONGITUDE,
-                longitude
-        );
+        values.put(COL_BRANCH_NAME, name);
+        values.put(COL_BRANCH_ADDRESS, address);
+        values.put(COL_BRANCH_PHONE, phone);
+        values.put(COL_BRANCH_LATITUDE, latitude);
+        values.put(COL_BRANCH_LONGITUDE, longitude);
 
         int result =
                 db.update(
@@ -489,10 +394,10 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
+
     public int deleteBranch(int id) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
         int result =
                 db.delete(
@@ -508,26 +413,18 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
+
     public long insertCategory(
             String name,
             String description
     ) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
-        ContentValues values =
-                new ContentValues();
+        ContentValues values = new ContentValues();
 
-        values.put(
-                COL_CATEGORY_NAME,
-                name
-        );
-
-        values.put(
-                COL_CATEGORY_DESCRIPTION,
-                description
-        );
+        values.put(COL_CATEGORY_NAME, name);
+        values.put(COL_CATEGORY_DESCRIPTION, description);
 
         long result =
                 db.insert(
@@ -540,13 +437,13 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
+
+
     public List<DeviceCategory> getAllCategories() {
 
-        List<DeviceCategory> categories =
-                new ArrayList<>();
+        List<DeviceCategory> categories = new ArrayList<>();
 
-        SQLiteDatabase db =
-                getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
 
         Cursor cursor =
                 db.query(
@@ -600,27 +497,20 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return categories;
     }
+
+
     public int updateCategory(
             int id,
             String name,
             String description
     ) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
-        ContentValues values =
-                new ContentValues();
+        ContentValues values = new ContentValues();
 
-        values.put(
-                COL_CATEGORY_NAME,
-                name
-        );
-
-        values.put(
-                COL_CATEGORY_DESCRIPTION,
-                description
-        );
+        values.put(COL_CATEGORY_NAME, name);
+        values.put(COL_CATEGORY_DESCRIPTION, description);
 
         int result =
                 db.update(
@@ -636,10 +526,11 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
+
+
     public int deleteCategory(int id) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
         int result =
                 db.delete(
@@ -655,6 +546,7 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
+
     public long insertService(
             String name,
             String category,
@@ -663,36 +555,15 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
             int estimatedDays
     ) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
-        ContentValues values =
-                new ContentValues();
+        ContentValues values = new ContentValues();
 
-        values.put(
-                COL_SERVICE_NAME,
-                name
-        );
-
-        values.put(
-                COL_SERVICE_CATEGORY,
-                category
-        );
-
-        values.put(
-                COL_SERVICE_DESCRIPTION,
-                description
-        );
-
-        values.put(
-                COL_SERVICE_PRICE,
-                price
-        );
-
-        values.put(
-                COL_SERVICE_ESTIMATED_DAYS,
-                estimatedDays
-        );
+        values.put(COL_SERVICE_NAME, name);
+        values.put(COL_SERVICE_CATEGORY, category);
+        values.put(COL_SERVICE_DESCRIPTION, description);
+        values.put(COL_SERVICE_PRICE, price);
+        values.put(COL_SERVICE_ESTIMATED_DAYS, estimatedDays);
 
         long result =
                 db.insert(
@@ -705,13 +576,13 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
+
+
     public List<RepairService> getAllServices() {
 
-        List<RepairService> services =
-                new ArrayList<>();
+        List<RepairService> services = new ArrayList<>();
 
-        SQLiteDatabase db =
-                getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
 
         Cursor cursor =
                 db.query(
@@ -789,6 +660,8 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return services;
     }
+
+
     public int updateService(
             int id,
             String name,
@@ -798,36 +671,15 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
             int estimatedDays
     ) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
-        ContentValues values =
-                new ContentValues();
+        ContentValues values = new ContentValues();
 
-        values.put(
-                COL_SERVICE_NAME,
-                name
-        );
-
-        values.put(
-                COL_SERVICE_CATEGORY,
-                category
-        );
-
-        values.put(
-                COL_SERVICE_DESCRIPTION,
-                description
-        );
-
-        values.put(
-                COL_SERVICE_PRICE,
-                price
-        );
-
-        values.put(
-                COL_SERVICE_ESTIMATED_DAYS,
-                estimatedDays
-        );
+        values.put(COL_SERVICE_NAME, name);
+        values.put(COL_SERVICE_CATEGORY, category);
+        values.put(COL_SERVICE_DESCRIPTION, description);
+        values.put(COL_SERVICE_PRICE, price);
+        values.put(COL_SERVICE_ESTIMATED_DAYS, estimatedDays);
 
         int result =
                 db.update(
@@ -843,10 +695,11 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
+
+
     public int deleteService(int id) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
         int result =
                 db.delete(
@@ -861,6 +714,7 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
+
     public long insertRepairSample(
             String deviceName,
             String category,
@@ -869,36 +723,15 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
             String imageUri
     ) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
-        ContentValues values =
-                new ContentValues();
+        ContentValues values = new ContentValues();
 
-        values.put(
-                COL_SAMPLE_DEVICE_NAME,
-                deviceName
-        );
-
-        values.put(
-                COL_SAMPLE_CATEGORY,
-                category
-        );
-
-        values.put(
-                COL_SAMPLE_SERVICE,
-                service
-        );
-
-        values.put(
-                COL_SAMPLE_DESCRIPTION,
-                description
-        );
-
-        values.put(
-                COL_SAMPLE_IMAGE_URI,
-                imageUri
-        );
+        values.put(COL_SAMPLE_DEVICE_NAME, deviceName);
+        values.put(COL_SAMPLE_CATEGORY, category);
+        values.put(COL_SAMPLE_SERVICE, service);
+        values.put(COL_SAMPLE_DESCRIPTION, description);
+        values.put(COL_SAMPLE_IMAGE_URI, imageUri);
 
         long result =
                 db.insert(
@@ -911,13 +744,13 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
+
+
     public List<RepairSample> getAllRepairSamples() {
 
-        List<RepairSample> samples =
-                new ArrayList<>();
+        List<RepairSample> samples = new ArrayList<>();
 
-        SQLiteDatabase db =
-                getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
 
         Cursor cursor =
                 db.query(
@@ -995,6 +828,8 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return samples;
     }
+
+
     public int updateRepairSample(
             int id,
             String deviceName,
@@ -1004,36 +839,15 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
             String imageUri
     ) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
-        ContentValues values =
-                new ContentValues();
+        ContentValues values = new ContentValues();
 
-        values.put(
-                COL_SAMPLE_DEVICE_NAME,
-                deviceName
-        );
-
-        values.put(
-                COL_SAMPLE_CATEGORY,
-                category
-        );
-
-        values.put(
-                COL_SAMPLE_SERVICE,
-                service
-        );
-
-        values.put(
-                COL_SAMPLE_DESCRIPTION,
-                description
-        );
-
-        values.put(
-                COL_SAMPLE_IMAGE_URI,
-                imageUri
-        );
+        values.put(COL_SAMPLE_DEVICE_NAME, deviceName);
+        values.put(COL_SAMPLE_CATEGORY, category);
+        values.put(COL_SAMPLE_SERVICE, service);
+        values.put(COL_SAMPLE_DESCRIPTION, description);
+        values.put(COL_SAMPLE_IMAGE_URI, imageUri);
 
         int result =
                 db.update(
@@ -1049,10 +863,11 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
+
+
     public int deleteRepairSample(int id) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
         int result =
                 db.delete(
@@ -1067,6 +882,8 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
+
+
     public long insertSparePart(
             String name,
             String category,
@@ -1079,56 +896,19 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
             String imageUri
     ) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
-        ContentValues values =
-                new ContentValues();
+        ContentValues values = new ContentValues();
 
-        values.put(
-                COL_SPARE_PART_NAME,
-                name
-        );
-
-        values.put(
-                COL_SPARE_PART_CATEGORY,
-                category
-        );
-
-        values.put(
-                COL_SPARE_PART_NUMBER,
-                partNumber
-        );
-
-        values.put(
-                COL_SPARE_PART_QUANTITY,
-                quantity
-        );
-
-        values.put(
-                COL_SPARE_PART_MINIMUM_STOCK,
-                minimumStock
-        );
-
-        values.put(
-                COL_SPARE_PART_UNIT_PRICE,
-                unitPrice
-        );
-
-        values.put(
-                COL_SPARE_PART_SUPPLIER,
-                supplier
-        );
-
-        values.put(
-                COL_SPARE_PART_DESCRIPTION,
-                description
-        );
-
-        values.put(
-                COL_SPARE_PART_IMAGE_URI,
-                imageUri
-        );
+        values.put(COL_SPARE_PART_NAME, name);
+        values.put(COL_SPARE_PART_CATEGORY, category);
+        values.put(COL_SPARE_PART_NUMBER, partNumber);
+        values.put(COL_SPARE_PART_QUANTITY, quantity);
+        values.put(COL_SPARE_PART_MINIMUM_STOCK, minimumStock);
+        values.put(COL_SPARE_PART_UNIT_PRICE, unitPrice);
+        values.put(COL_SPARE_PART_SUPPLIER, supplier);
+        values.put(COL_SPARE_PART_DESCRIPTION, description);
+        values.put(COL_SPARE_PART_IMAGE_URI, imageUri);
 
         long result =
                 db.insert(
@@ -1141,13 +921,13 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
+
+
     public List<SparePart> getAllSpareParts() {
 
-        List<SparePart> spareParts =
-                new ArrayList<>();
+        List<SparePart> spareParts = new ArrayList<>();
 
-        SQLiteDatabase db =
-                getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
 
         Cursor cursor =
                 db.query(
@@ -1257,6 +1037,8 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return spareParts;
     }
+
+
     public int updateSparePart(
             int id,
             String name,
@@ -1270,56 +1052,19 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
             String imageUri
     ) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
-        ContentValues values =
-                new ContentValues();
+        ContentValues values = new ContentValues();
 
-        values.put(
-                COL_SPARE_PART_NAME,
-                name
-        );
-
-        values.put(
-                COL_SPARE_PART_CATEGORY,
-                category
-        );
-
-        values.put(
-                COL_SPARE_PART_NUMBER,
-                partNumber
-        );
-
-        values.put(
-                COL_SPARE_PART_QUANTITY,
-                quantity
-        );
-
-        values.put(
-                COL_SPARE_PART_MINIMUM_STOCK,
-                minimumStock
-        );
-
-        values.put(
-                COL_SPARE_PART_UNIT_PRICE,
-                unitPrice
-        );
-
-        values.put(
-                COL_SPARE_PART_SUPPLIER,
-                supplier
-        );
-
-        values.put(
-                COL_SPARE_PART_DESCRIPTION,
-                description
-        );
-
-        values.put(
-                COL_SPARE_PART_IMAGE_URI,
-                imageUri
-        );
+        values.put(COL_SPARE_PART_NAME, name);
+        values.put(COL_SPARE_PART_CATEGORY, category);
+        values.put(COL_SPARE_PART_NUMBER, partNumber);
+        values.put(COL_SPARE_PART_QUANTITY, quantity);
+        values.put(COL_SPARE_PART_MINIMUM_STOCK, minimumStock);
+        values.put(COL_SPARE_PART_UNIT_PRICE, unitPrice);
+        values.put(COL_SPARE_PART_SUPPLIER, supplier);
+        values.put(COL_SPARE_PART_DESCRIPTION, description);
+        values.put(COL_SPARE_PART_IMAGE_URI, imageUri);
 
         int result =
                 db.update(
@@ -1335,10 +1080,11 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
+
+
     public int deleteSparePart(int id) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
         int result =
                 db.delete(
@@ -1353,16 +1099,16 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
+
+
     public int updateStockQuantity(
             int sparePartId,
             int newQuantity
     ) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
-        ContentValues values =
-                new ContentValues();
+        ContentValues values = new ContentValues();
 
         values.put(
                 COL_SPARE_PART_QUANTITY,
@@ -1384,10 +1130,10 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
+
     public List<SparePart> getLowStockItems() {
 
-        List<SparePart> lowStockItems =
-                new ArrayList<>();
+        List<SparePart> lowStockItems = new ArrayList<>();
 
         List<SparePart> allParts =
                 getAllSpareParts();

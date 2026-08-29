@@ -50,6 +50,12 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
     private final List<RepairService> serviceList =
             new ArrayList<>();
 
+    /*
+     * Image picker
+     *
+     * OpenDocument is used so that we can request
+     * persistent read permission for the selected image.
+     */
     private final ActivityResultLauncher<String[]> imagePicker =
             registerForActivityResult(
                     new ActivityResultContracts.OpenDocument(),
@@ -72,11 +78,12 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
 
                             } catch (SecurityException ignored) {
 
+                                // Some image providers do not
+                                // support persistent permission.
                             }
                         }
                     }
             );
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,22 +105,18 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
 
         checkEditMode();
 
-
         btnChooseImage.setOnClickListener(
                 v -> openImagePicker()
         );
-
 
         btnSaveSample.setOnClickListener(
                 v -> saveRepairSample()
         );
 
-
         btnCancelSample.setOnClickListener(
                 v -> finish()
         );
     }
-
 
     private void initializeViews() {
 
@@ -122,55 +125,46 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
                         R.id.txtRepairSampleFormTitle
                 );
 
-
         imgRepairSample =
                 findViewById(
                         R.id.imgRepairSample
                 );
-
 
         btnChooseImage =
                 findViewById(
                         R.id.btnChooseImage
                 );
 
-
         btnSaveSample =
                 findViewById(
                         R.id.btnSaveRepairSample
                 );
-
 
         btnCancelSample =
                 findViewById(
                         R.id.btnCancelRepairSample
                 );
 
-
         edtDeviceName =
                 findViewById(
                         R.id.edtRepairDeviceName
                 );
-
 
         edtDescription =
                 findViewById(
                         R.id.edtRepairDescription
                 );
 
-
         spinnerCategory =
                 findViewById(
                         R.id.spinnerRepairCategory
                 );
-
 
         spinnerService =
                 findViewById(
                         R.id.spinnerRepairService
                 );
     }
-
 
     private void openImagePicker() {
 
@@ -179,6 +173,9 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
         );
     }
 
+    /*
+     * Load device categories from SQLite.
+     */
     private void loadCategories() {
 
         categoryList.clear();
@@ -187,10 +184,8 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
                 databaseHelper.getAllCategories()
         );
 
-
         List<String> categoryNames =
                 new ArrayList<>();
-
 
         for (DeviceCategory category :
                 categoryList) {
@@ -200,14 +195,12 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
             );
         }
 
-
         if (categoryNames.isEmpty()) {
 
             categoryNames.add(
                     "No categories available"
             );
         }
-
 
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(
@@ -216,15 +209,16 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
                         categoryNames
                 );
 
-
         adapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item
         );
 
-
         spinnerCategory.setAdapter(adapter);
     }
 
+    /*
+     * Load repair services from SQLite.
+     */
     private void loadServices() {
 
         serviceList.clear();
@@ -233,10 +227,8 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
                 databaseHelper.getAllServices()
         );
 
-
         List<String> serviceNames =
                 new ArrayList<>();
-
 
         for (RepairService service :
                 serviceList) {
@@ -246,14 +238,12 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
             );
         }
 
-
         if (serviceNames.isEmpty()) {
 
             serviceNames.add(
                     "No services available"
             );
         }
-
 
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(
@@ -262,27 +252,27 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
                         serviceNames
                 );
 
-
         adapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item
         );
 
-
         spinnerService.setAdapter(adapter);
     }
 
+    /*
+     * Check whether this screen is being used
+     * for adding or editing a repair sample.
+     */
     private void checkEditMode() {
 
         Intent intent =
                 getIntent();
-
 
         isEditMode =
                 intent.getBooleanExtra(
                         "editMode",
                         false
                 );
-
 
         if (!isEditMode) {
 
@@ -297,29 +287,24 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
             return;
         }
 
-
         sampleId =
                 intent.getIntExtra(
                         "sampleId",
                         -1
                 );
 
-
         txtFormTitle.setText(
                 "Edit Repair Sample"
         );
-
 
         btnSaveSample.setText(
                 "Update Repair Sample"
         );
 
-
         String deviceName =
                 intent.getStringExtra(
                         "deviceName"
                 );
-
 
         if (deviceName != null) {
 
@@ -328,12 +313,10 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
             );
         }
 
-
         String description =
                 intent.getStringExtra(
                         "description"
                 );
-
 
         if (description != null) {
 
@@ -342,12 +325,10 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
             );
         }
 
-
         selectedImageUri =
                 intent.getStringExtra(
                         "imageUri"
                 );
-
 
         if (selectedImageUri != null
                 && !selectedImageUri.isEmpty()) {
@@ -371,24 +352,20 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
             }
         }
 
-
         String selectedCategory =
                 intent.getStringExtra(
                         "category"
                 );
-
 
         String selectedService =
                 intent.getStringExtra(
                         "service"
                 );
 
-
         setSpinnerSelection(
                 spinnerCategory,
                 selectedCategory
         );
-
 
         setSpinnerSelection(
                 spinnerService,
@@ -396,6 +373,9 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
         );
     }
 
+    /*
+     * Select an existing value in a Spinner.
+     */
     private void setSpinnerSelection(
             Spinner spinner,
             String value
@@ -405,15 +385,12 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
             return;
         }
 
-
         ArrayAdapter<?> adapter =
                 (ArrayAdapter<?>) spinner.getAdapter();
-
 
         if (adapter == null) {
             return;
         }
-
 
         for (int i = 0;
              i < adapter.getCount();
@@ -421,7 +398,6 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
 
             Object item =
                     adapter.getItem(i);
-
 
             if (item != null
                     && item.toString()
@@ -434,6 +410,9 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
         }
     }
 
+    /*
+     * Save or update repair sample.
+     */
     private void saveRepairSample() {
 
         String deviceName =
@@ -442,13 +421,15 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
                         .toString()
                         .trim();
 
-
         String description =
                 edtDescription
                         .getText()
                         .toString()
                         .trim();
 
+        /*
+         * Validate device name.
+         */
         if (deviceName.isEmpty()) {
 
             edtDeviceName.setError(
@@ -460,6 +441,9 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
             return;
         }
 
+        /*
+         * Validate categories.
+         */
         if (categoryList.isEmpty()) {
 
             Toast.makeText(
@@ -471,6 +455,9 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
             return;
         }
 
+        /*
+         * Validate services.
+         */
         if (serviceList.isEmpty()) {
 
             Toast.makeText(
@@ -482,6 +469,9 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
             return;
         }
 
+        /*
+         * Validate image.
+         */
         if (selectedImageUri == null
                 || selectedImageUri.isEmpty()) {
 
@@ -494,9 +484,11 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
             return;
         }
 
+        /*
+         * Get selected category.
+         */
         Object selectedCategoryItem =
                 spinnerCategory.getSelectedItem();
-
 
         if (selectedCategoryItem == null) {
 
@@ -509,14 +501,15 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
             return;
         }
 
-
         String category =
                 selectedCategoryItem
                         .toString();
 
+        /*
+         * Get selected service.
+         */
         Object selectedServiceItem =
                 spinnerService.getSelectedItem();
-
 
         if (selectedServiceItem == null) {
 
@@ -529,11 +522,13 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
             return;
         }
 
-
         String service =
                 selectedServiceItem
                         .toString();
 
+        /*
+         * UPDATE
+         */
         if (isEditMode) {
 
             if (sampleId == -1) {
@@ -547,7 +542,6 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
                 return;
             }
 
-
             int result =
                     databaseHelper.updateRepairSample(
                             sampleId,
@@ -558,7 +552,6 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
                             selectedImageUri
                     );
 
-
             if (result > 0) {
 
                 Toast.makeText(
@@ -567,11 +560,9 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT
                 ).show();
 
-
                 setResult(
                         RESULT_OK
                 );
-
 
                 finish();
 
@@ -584,10 +575,12 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
                 ).show();
             }
 
-
             return;
         }
 
+        /*
+         * INSERT
+         */
         long result =
                 databaseHelper.insertRepairSample(
                         deviceName,
@@ -597,7 +590,6 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
                         selectedImageUri
                 );
 
-
         if (result != -1) {
 
             Toast.makeText(
@@ -606,11 +598,9 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT
             ).show();
 
-
             setResult(
                     RESULT_OK
             );
-
 
             finish();
 

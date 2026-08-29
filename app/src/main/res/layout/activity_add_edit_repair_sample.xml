@@ -11,6 +11,8 @@
         android:orientation="vertical"
         android:padding="20dp">
 
+        <!-- FORM TITLE -->
+
         <TextView
             android:id="@+id/txtRepairSampleFormTitle"
             android:layout_width="match_parent"
@@ -20,6 +22,9 @@
             android:textSize="25sp"
             android:textStyle="bold" />
 
+
+        <!-- REPAIR SAMPLE IMAGE -->
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -27,6 +32,7 @@
             android:text="Repair Sample Image"
             android:textColor="#333333"
             android:textStyle="bold" />
+
 
         <ImageView
             android:id="@+id/imgRepairSample"
@@ -38,6 +44,7 @@
             android:scaleType="centerCrop"
             android:src="@android:drawable/ic_menu_gallery" />
 
+
         <Button
             android:id="@+id/btnChooseImage"
             android:layout_width="match_parent"
@@ -45,6 +52,9 @@
             android:layout_marginTop="10dp"
             android:text="Upload / Choose Image"
             android:textSize="16sp" />
+
+
+        <!-- DEVICE NAME -->
 
         <TextView
             android:layout_width="match_parent"
@@ -64,6 +74,9 @@
             android:inputType="textCapWords"
             android:padding="12dp" />
 
+
+        <!-- DEVICE CATEGORY -->
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -79,6 +92,9 @@
             android:layout_height="55dp"
             android:layout_marginTop="8dp" />
 
+
+        <!-- REPAIR SERVICE -->
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -93,6 +109,9 @@
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:layout_marginTop="8dp" />
+
+
+        <!-- DESCRIPTION -->
 
         <TextView
             android:layout_width="match_parent"
@@ -113,6 +132,9 @@
             android:inputType="textCapSentences|textMultiLine"
             android:padding="12dp" />
 
+
+        <!-- SAVE BUTTON -->
+
         <Button
             android:id="@+id/btnSaveRepairSample"
             android:layout_width="match_parent"
@@ -120,6 +142,9 @@
             android:layout_marginTop="30dp"
             android:text="Save Repair Sample"
             android:textSize="16sp" />
+
+
+        <!-- CANCEL BUTTON -->
 
         <Button
             android:id="@+id/btnCancelRepairSample"
