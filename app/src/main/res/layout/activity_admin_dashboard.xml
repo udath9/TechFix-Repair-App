@@ -11,8 +11,6 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Header -->
-
         <TextView
             android:id="@+id/txtWelcome"
             android:layout_width="wrap_content"
@@ -29,8 +27,6 @@
             android:text="Manage your TechFix repair center"
             android:textColor="#777777"
             android:textSize="14sp" />
-
-        <!-- Statistics -->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -96,8 +92,6 @@
 
         </LinearLayout>
 
-        <!-- Management -->
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -107,8 +101,6 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <!-- Branches -->
-
         <Button
             android:id="@+id/btnBranches"
             android:layout_width="match_parent"
@@ -116,8 +108,6 @@
             android:layout_marginTop="15dp"
             android:text="Manage Branches"
             android:textSize="15sp" />
-
-        <!-- Categories -->
 
         <Button
             android:id="@+id/btnCategories"
@@ -127,8 +117,6 @@
             android:text="Manage Device Categories"
             android:textSize="15sp" />
 
-        <!-- Services -->
-
         <Button
             android:id="@+id/btnServices"
             android:layout_width="match_parent"
@@ -136,8 +124,6 @@
             android:layout_marginTop="10dp"
             android:text="Manage Repair Services"
             android:textSize="15sp" />
-
-        <!-- Technicians -->
 
         <Button
             android:id="@+id/btnTechnicians"
@@ -147,8 +133,6 @@
             android:text="Manage Technicians"
             android:textSize="15sp" />
 
-        <!-- Spare Parts -->
-
         <Button
             android:id="@+id/btnSpareParts"
             android:layout_width="match_parent"
@@ -157,9 +141,7 @@
             android:text="Manage Spare Parts"
             android:textSize="15sp" />
 
-        <!-- Repairs -->
-
-        <Button
+       <Button
             android:id="@+id/btnRepairs"
             android:layout_width="match_parent"
             android:layout_height="55dp"
@@ -167,7 +149,13 @@
             android:text="Manage Repair Appointments"
             android:textSize="15sp" />
 
-        <!-- Payments -->
+        <Button
+            android:id="@+id/btnRepairSamples"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_marginTop="10dp"
+            android:text="Manage Repair Samples"
+            android:textSize="15sp" />
 
         <Button
             android:id="@+id/btnPayments"
@@ -176,8 +164,6 @@
             android:layout_marginTop="10dp"
             android:text="Manage Payments"
             android:textSize="15sp" />
-
-        <!-- Logout -->
 
         <Button
             android:id="@+id/btnLogout"

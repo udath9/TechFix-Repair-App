@@ -1,5 +1,6 @@
 package com.up9.techfix.admin;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -19,7 +20,9 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private Button btnRepairs;
     private Button btnPayments;
     private Button btnLogout;
+    private Button btnRepairSamples;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +36,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         btnSpareParts = findViewById(R.id.btnSpareParts);
         btnRepairs = findViewById(R.id.btnRepairs);
         btnPayments = findViewById(R.id.btnPayments);
+        btnRepairSamples=findViewById(R.id.btnRepairSamples);
         btnLogout = findViewById(R.id.btnLogout);
 
         btnBranches.setOnClickListener(v -> {
@@ -112,6 +116,16 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
             startActivity(intent);
 
+        });
+        btnRepairSamples.setOnClickListener(v -> {
+
+            Intent intent =
+                    new Intent(
+                            AdminDashboardActivity.this,
+                            ManageRepairSamplesActivity.class
+                    );
+
+            startActivity(intent);
         });
 
         btnLogout.setOnClickListener(v -> {
