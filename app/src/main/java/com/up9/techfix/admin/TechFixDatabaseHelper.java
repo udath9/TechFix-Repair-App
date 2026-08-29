@@ -12,7 +12,7 @@ import java.util.List;
 public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "TechFix.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     // Branch table
     public static final String TABLE_BRANCHES = "branches";
@@ -64,6 +64,44 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
     public static final String COL_SAMPLE_IMAGE_URI =
             "image_uri";
+
+    // STOCK / SPARE PARTS TABLE
+
+    public static final String TABLE_SPARE_PARTS =
+            "spare_parts";
+
+    public static final String COL_SPARE_PART_ID =
+            "id";
+
+    public static final String COL_SPARE_PART_NAME =
+            "name";
+
+    public static final String COL_SPARE_PART_CATEGORY =
+            "category";
+
+    public static final String COL_SPARE_PART_NUMBER =
+            "part_number";
+
+    public static final String COL_SPARE_PART_QUANTITY =
+            "quantity";
+
+    public static final String COL_SPARE_PART_MINIMUM_STOCK =
+            "minimum_stock";
+
+    public static final String COL_SPARE_PART_UNIT_PRICE =
+            "unit_price";
+
+    public static final String COL_SPARE_PART_SUPPLIER =
+            "supplier";
+
+    public static final String COL_SPARE_PART_DESCRIPTION =
+            "description";
+
+    public static final String COL_SPARE_PART_IMAGE_URI =
+            "image_uri";
+
+
+
     public TechFixDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -115,6 +153,24 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
                         ")";
 
         db.execSQL(createRepairSamplesTable);
+        String createSparePartsTable =
+                "CREATE TABLE " + TABLE_SPARE_PARTS + " (" +
+                        COL_SPARE_PART_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        COL_SPARE_PART_NAME + " TEXT NOT NULL, " +
+                        COL_SPARE_PART_CATEGORY + " TEXT NOT NULL, " +
+                        COL_SPARE_PART_NUMBER + " TEXT, " +
+                        COL_SPARE_PART_QUANTITY + " INTEGER NOT NULL DEFAULT 0, " +
+                        COL_SPARE_PART_MINIMUM_STOCK + " INTEGER NOT NULL DEFAULT 0, " +
+                        COL_SPARE_PART_UNIT_PRICE + " REAL NOT NULL DEFAULT 0, " +
+                        COL_SPARE_PART_SUPPLIER + " TEXT, " +
+                        COL_SPARE_PART_DESCRIPTION + " TEXT, " +
+                        COL_SPARE_PART_IMAGE_URI + " TEXT" +
+                        ")";
+
+        db.execSQL(createSparePartsTable);
+
+
+
     }
 
     @Override
@@ -200,6 +256,47 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
                             ")";
 
             db.execSQL(createRepairSamplesTable);
+        }
+        if (oldVersion < 5) {
+
+            String createSparePartsTable =
+                    "CREATE TABLE " + TABLE_SPARE_PARTS + " (" +
+                            COL_SPARE_PART_ID +
+                            " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+
+                            COL_SPARE_PART_NAME +
+                            " TEXT NOT NULL, " +
+
+                            COL_SPARE_PART_CATEGORY +
+                            " TEXT NOT NULL, " +
+
+                            COL_SPARE_PART_NUMBER +
+                            " TEXT, " +
+
+                            COL_SPARE_PART_QUANTITY +
+                            " INTEGER NOT NULL DEFAULT 0, " +
+
+                            COL_SPARE_PART_MINIMUM_STOCK +
+                            " INTEGER NOT NULL DEFAULT 0, " +
+
+                            COL_SPARE_PART_UNIT_PRICE +
+                            " REAL NOT NULL DEFAULT 0, " +
+
+                            COL_SPARE_PART_SUPPLIER +
+                            " TEXT, " +
+
+                            COL_SPARE_PART_DESCRIPTION +
+                            " TEXT, " +
+
+                            COL_SPARE_PART_IMAGE_URI +
+                            " TEXT" +
+
+                            ")";
+
+            db.execSQL(createSparePartsTable);
+
+
+
         }
     }
 
@@ -969,5 +1066,341 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
         db.close();
 
         return result;
+    }
+    public long insertSparePart(
+            String name,
+            String category,
+            String partNumber,
+            int quantity,
+            int minimumStock,
+            double unitPrice,
+            String supplier,
+            String description,
+            String imageUri
+    ) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        ContentValues values =
+                new ContentValues();
+
+        values.put(
+                COL_SPARE_PART_NAME,
+                name
+        );
+
+        values.put(
+                COL_SPARE_PART_CATEGORY,
+                category
+        );
+
+        values.put(
+                COL_SPARE_PART_NUMBER,
+                partNumber
+        );
+
+        values.put(
+                COL_SPARE_PART_QUANTITY,
+                quantity
+        );
+
+        values.put(
+                COL_SPARE_PART_MINIMUM_STOCK,
+                minimumStock
+        );
+
+        values.put(
+                COL_SPARE_PART_UNIT_PRICE,
+                unitPrice
+        );
+
+        values.put(
+                COL_SPARE_PART_SUPPLIER,
+                supplier
+        );
+
+        values.put(
+                COL_SPARE_PART_DESCRIPTION,
+                description
+        );
+
+        values.put(
+                COL_SPARE_PART_IMAGE_URI,
+                imageUri
+        );
+
+        long result =
+                db.insert(
+                        TABLE_SPARE_PARTS,
+                        null,
+                        values
+                );
+
+        db.close();
+
+        return result;
+    }
+    public List<SparePart> getAllSpareParts() {
+
+        List<SparePart> spareParts =
+                new ArrayList<>();
+
+        SQLiteDatabase db =
+                getReadableDatabase();
+
+        Cursor cursor =
+                db.query(
+                        TABLE_SPARE_PARTS,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        COL_SPARE_PART_ID + " ASC"
+                );
+
+        if (cursor.moveToFirst()) {
+
+            do {
+
+                int id =
+                        cursor.getInt(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SPARE_PART_ID
+                                )
+                        );
+
+                String name =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SPARE_PART_NAME
+                                )
+                        );
+
+                String category =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SPARE_PART_CATEGORY
+                                )
+                        );
+
+                String partNumber =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SPARE_PART_NUMBER
+                                )
+                        );
+
+                int quantity =
+                        cursor.getInt(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SPARE_PART_QUANTITY
+                                )
+                        );
+
+                int minimumStock =
+                        cursor.getInt(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SPARE_PART_MINIMUM_STOCK
+                                )
+                        );
+
+                double unitPrice =
+                        cursor.getDouble(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SPARE_PART_UNIT_PRICE
+                                )
+                        );
+
+                String supplier =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SPARE_PART_SUPPLIER
+                                )
+                        );
+
+                String description =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SPARE_PART_DESCRIPTION
+                                )
+                        );
+
+                String imageUri =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SPARE_PART_IMAGE_URI
+                                )
+                        );
+
+                spareParts.add(
+                        new SparePart(
+                                id,
+                                name,
+                                category,
+                                partNumber,
+                                quantity,
+                                minimumStock,
+                                unitPrice,
+                                supplier,
+                                description,
+                                imageUri
+                        )
+                );
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+
+        return spareParts;
+    }
+    public int updateSparePart(
+            int id,
+            String name,
+            String category,
+            String partNumber,
+            int quantity,
+            int minimumStock,
+            double unitPrice,
+            String supplier,
+            String description,
+            String imageUri
+    ) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        ContentValues values =
+                new ContentValues();
+
+        values.put(
+                COL_SPARE_PART_NAME,
+                name
+        );
+
+        values.put(
+                COL_SPARE_PART_CATEGORY,
+                category
+        );
+
+        values.put(
+                COL_SPARE_PART_NUMBER,
+                partNumber
+        );
+
+        values.put(
+                COL_SPARE_PART_QUANTITY,
+                quantity
+        );
+
+        values.put(
+                COL_SPARE_PART_MINIMUM_STOCK,
+                minimumStock
+        );
+
+        values.put(
+                COL_SPARE_PART_UNIT_PRICE,
+                unitPrice
+        );
+
+        values.put(
+                COL_SPARE_PART_SUPPLIER,
+                supplier
+        );
+
+        values.put(
+                COL_SPARE_PART_DESCRIPTION,
+                description
+        );
+
+        values.put(
+                COL_SPARE_PART_IMAGE_URI,
+                imageUri
+        );
+
+        int result =
+                db.update(
+                        TABLE_SPARE_PARTS,
+                        values,
+                        COL_SPARE_PART_ID + " = ?",
+                        new String[]{
+                                String.valueOf(id)
+                        }
+                );
+
+        db.close();
+
+        return result;
+    }
+    public int deleteSparePart(int id) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        int result =
+                db.delete(
+                        TABLE_SPARE_PARTS,
+                        COL_SPARE_PART_ID + " = ?",
+                        new String[]{
+                                String.valueOf(id)
+                        }
+                );
+
+        db.close();
+
+        return result;
+    }
+    public int updateStockQuantity(
+            int sparePartId,
+            int newQuantity
+    ) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        ContentValues values =
+                new ContentValues();
+
+        values.put(
+                COL_SPARE_PART_QUANTITY,
+                newQuantity
+        );
+
+        int result =
+                db.update(
+                        TABLE_SPARE_PARTS,
+                        values,
+                        COL_SPARE_PART_ID + " = ?",
+                        new String[]{
+                                String.valueOf(sparePartId)
+                        }
+                );
+
+        db.close();
+
+        return result;
+    }
+
+    public List<SparePart> getLowStockItems() {
+
+        List<SparePart> lowStockItems =
+                new ArrayList<>();
+
+        List<SparePart> allParts =
+                getAllSpareParts();
+
+        for (SparePart part : allParts) {
+
+            if (part.getQuantity()
+                    <= part.getMinimumStock()) {
+
+                lowStockItems.add(part);
+            }
+        }
+
+        return lowStockItems;
     }
 }

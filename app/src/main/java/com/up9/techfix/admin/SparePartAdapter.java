@@ -68,11 +68,11 @@ public class SparePartAdapter
                 sparePartList.get(position);
 
         holder.txtPartName.setText(
-                part.getPartName()
+                part.getName()
         );
 
         holder.txtPartCode.setText(
-                "Part Code: " + part.getPartCode()
+                "Part Code: " + part.getPartNumber()
         );
 
         holder.txtPartCategory.setText(
@@ -94,16 +94,22 @@ public class SparePartAdapter
                 "Supplier: " + part.getSupplier()
         );
 
-        if (part.isAvailable()) {
+        if (part.getQuantity() <= 0) {
 
             holder.txtPartAvailability.setText(
-                    "Available"
+                    "Out of Stock"
+            );
+
+        } else if (part.isLowStock()) {
+
+            holder.txtPartAvailability.setText(
+                    "Low Stock"
             );
 
         } else {
 
             holder.txtPartAvailability.setText(
-                    "Out of Stock"
+                    "Available"
             );
         }
 
@@ -112,10 +118,19 @@ public class SparePartAdapter
         );
 
         holder.btnDeleteSparePart.setOnClickListener(
-                v -> listener.onDelete(
-                        part,
-                        holder.getAdapterPosition()
-                )
+                v -> {
+
+                    int adapterPosition =
+                            holder.getAdapterPosition();
+
+                    if (adapterPosition != RecyclerView.NO_POSITION) {
+
+                        listener.onDelete(
+                                sparePartList.get(adapterPosition),
+                                adapterPosition
+                        );
+                    }
+                }
         );
     }
 

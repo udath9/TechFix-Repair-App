@@ -3,49 +3,62 @@ package com.up9.techfix.admin;
 public class SparePart {
 
     private int id;
-    private String partName;
-    private String partCode;
+    private String name;
     private String category;
+    private String partNumber;
     private int quantity;
+    private int minimumStock;
     private double unitPrice;
     private String supplier;
+    private String description;
+    private String imageUri;
 
     public SparePart(
             int id,
-            String partName,
-            String partCode,
+            String name,
             String category,
+            String partNumber,
             int quantity,
+            int minimumStock,
             double unitPrice,
-            String supplier
+            String supplier,
+            String description,
+            String imageUri
     ) {
         this.id = id;
-        this.partName = partName;
-        this.partCode = partCode;
+        this.name = name;
         this.category = category;
+        this.partNumber = partNumber;
         this.quantity = quantity;
+        this.minimumStock = minimumStock;
         this.unitPrice = unitPrice;
         this.supplier = supplier;
+        this.description = description;
+        this.imageUri = imageUri;
     }
 
     public int getId() {
         return id;
     }
 
-    public String getPartName() {
-        return partName;
-    }
-
-    public String getPartCode() {
-        return partCode;
+    public String getName() {
+        return name;
     }
 
     public String getCategory() {
         return category;
     }
 
+    public String getPartNumber() {
+        return partNumber;
+    }
+
     public int getQuantity() {
         return quantity;
+    }
+
+    public int getMinimumStock() {
+        return minimumStock;
     }
 
     public double getUnitPrice() {
@@ -56,20 +69,36 @@ public class SparePart {
         return supplier;
     }
 
-    public void setPartName(String partName) {
-        this.partName = partName;
+    public String getDescription() {
+        return description;
     }
 
-    public void setPartCode(String partCode) {
-        this.partCode = partCode;
+    public String getImageUri() {
+        return imageUri;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setCategory(String category) {
         this.category = category;
     }
 
+    public void setPartNumber(String partNumber) {
+        this.partNumber = partNumber;
+    }
+
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public void setMinimumStock(int minimumStock) {
+        this.minimumStock = minimumStock;
     }
 
     public void setUnitPrice(double unitPrice) {
@@ -80,7 +109,19 @@ public class SparePart {
         this.supplier = supplier;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setImageUri(String imageUri) {
+        this.imageUri = imageUri;
+    }
+
     public boolean isAvailable() {
         return quantity > 0;
+    }
+
+    public boolean isLowStock() {
+        return quantity <= minimumStock;
     }
 }

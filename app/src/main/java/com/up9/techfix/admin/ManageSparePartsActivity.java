@@ -1,7 +1,8 @@
 package com.up9.techfix.admin;
-import com.up9.techfix.R;
+
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -10,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.widget.Button;
+import com.up9.techfix.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,17 +28,19 @@ public class ManageSparePartsActivity
 
     private List<SparePart> sparePartList;
 
+    private TechFixDatabaseHelper databaseHelper;
+
     private int editingPosition = -1;
 
     private final ActivityResultLauncher<Intent>
             sparePartFormLauncher =
             registerForActivityResult(
-                    new ActivityResultContracts
-                            .StartActivityForResult(),
+                    new ActivityResultContracts.StartActivityForResult(),
                     result -> {
 
                         if (result.getResultCode()
                                 != RESULT_OK) {
+
                             return;
                         }
 
@@ -45,105 +48,11 @@ public class ManageSparePartsActivity
                                 result.getData();
 
                         if (data == null) {
+
                             return;
                         }
 
-                        String partName =
-                                data.getStringExtra(
-                                        "partName"
-                                );
-
-                        String partCode =
-                                data.getStringExtra(
-                                        "partCode"
-                                );
-
-                        String category =
-                                data.getStringExtra(
-                                        "category"
-                                );
-
-                        int quantity =
-                                data.getIntExtra(
-                                        "quantity",
-                                        0
-                                );
-
-                        double unitPrice =
-                                data.getDoubleExtra(
-                                        "unitPrice",
-                                        0
-                                );
-
-                        String supplier =
-                                data.getStringExtra(
-                                        "supplier"
-                                );
-
-                        if (editingPosition == -1) {
-
-                            int newId =
-                                    sparePartList.size()
-                                            + 1;
-
-                            SparePart sparePart =
-                                    new SparePart(
-                                            newId,
-                                            partName,
-                                            partCode,
-                                            category,
-                                            quantity,
-                                            unitPrice,
-                                            supplier
-                                    );
-
-                            sparePartList.add(
-                                    sparePart
-                            );
-
-                            sparePartAdapter
-                                    .notifyItemInserted(
-                                            sparePartList.size() - 1
-                                    );
-
-                        } else {
-
-                            SparePart sparePart =
-                                    sparePartList.get(
-                                            editingPosition
-                                    );
-
-                            sparePart.setPartName(
-                                    partName
-                            );
-
-                            sparePart.setPartCode(
-                                    partCode
-                            );
-
-                            sparePart.setCategory(
-                                    category
-                            );
-
-                            sparePart.setQuantity(
-                                    quantity
-                            );
-
-                            sparePart.setUnitPrice(
-                                    unitPrice
-                            );
-
-                            sparePart.setSupplier(
-                                    supplier
-                            );
-
-                            sparePartAdapter
-                                    .notifyItemChanged(
-                                            editingPosition
-                                    );
-
-                            editingPosition = -1;
-                        }
+                        saveSparePartToDatabase(data);
                     }
             );
 
@@ -168,14 +77,15 @@ public class ManageSparePartsActivity
                         R.id.btnAddSparePart
                 );
 
+        databaseHelper =
+                new TechFixDatabaseHelper(this);
+
         recyclerSpareParts.setLayoutManager(
                 new LinearLayoutManager(this)
         );
 
         sparePartList =
                 new ArrayList<>();
-
-        loadSampleSpareParts();
 
         sparePartAdapter =
                 new SparePartAdapter(
@@ -186,6 +96,8 @@ public class ManageSparePartsActivity
         recyclerSpareParts.setAdapter(
                 sparePartAdapter
         );
+
+        loadSpareParts();
 
         btnAddSparePart.setOnClickListener(
                 v -> {
@@ -205,55 +117,103 @@ public class ManageSparePartsActivity
         );
     }
 
-    private void loadSampleSpareParts() {
+    private void loadSpareParts() {
 
-        sparePartList.add(
-                new SparePart(
-                        1,
-                        "iPhone 13 Display",
-                        "IP13-DISPLAY",
-                        "Mobile Phone",
-                        8,
-                        35000,
-                        "ABC Electronics"
-                )
+        sparePartList.clear();
+
+        sparePartList.addAll(
+                databaseHelper.getAllSpareParts()
         );
 
-        sparePartList.add(
-                new SparePart(
-                        2,
-                        "Samsung A54 Battery",
-                        "SA54-BAT",
-                        "Mobile Phone",
-                        15,
-                        8500,
-                        "Mobile Parts Lanka"
-                )
-        );
+        sparePartAdapter.notifyDataSetChanged();
+    }
 
-        sparePartList.add(
-                new SparePart(
-                        3,
-                        "Laptop SSD 512GB",
-                        "SSD-512",
-                        "Laptop",
-                        5,
-                        18000,
-                        "TechWorld Lanka"
-                )
-        );
+    private void saveSparePartToDatabase(
+            Intent data
+    ) {
 
-        sparePartList.add(
-                new SparePart(
-                        4,
-                        "Laptop Keyboard",
-                        "LAP-KEY-01",
-                        "Laptop",
-                        0,
-                        12000,
-                        "Computer Parts LK"
-                )
-        );
+        String partName =
+                data.getStringExtra(
+                        "partName"
+                );
+
+        String partCode =
+                data.getStringExtra(
+                        "partCode"
+                );
+
+        String category =
+                data.getStringExtra(
+                        "category"
+                );
+
+        int quantity =
+                data.getIntExtra(
+                        "quantity",
+                        0
+                );
+
+        int minimumStock =
+                data.getIntExtra(
+                        "minimumStock",
+                        0
+                );
+
+        double unitPrice =
+                data.getDoubleExtra(
+                        "unitPrice",
+                        0
+                );
+
+        String supplier =
+                data.getStringExtra(
+                        "supplier"
+                );
+
+        if (editingPosition == -1) {
+
+            long result =
+                    databaseHelper.insertSparePart(
+                            partName,
+                            category,
+                            partCode,
+                            quantity,
+                            minimumStock,
+                            unitPrice,
+                            supplier,
+                            "",
+                            ""
+                    );
+
+            if (result != -1) {
+
+                loadSpareParts();
+            }
+
+        } else {
+
+            SparePart sparePart =
+                    sparePartList.get(
+                            editingPosition
+                    );
+
+            databaseHelper.updateSparePart(
+                    sparePart.getId(),
+                    partName,
+                    category,
+                    partCode,
+                    quantity,
+                    minimumStock,
+                    unitPrice,
+                    supplier,
+                    sparePart.getDescription(),
+                    sparePart.getImageUri()
+            );
+
+            editingPosition = -1;
+
+            loadSpareParts();
+        }
     }
 
     @Override
@@ -284,12 +244,12 @@ public class ManageSparePartsActivity
 
         intent.putExtra(
                 "partName",
-                sparePart.getPartName()
+                sparePart.getName()
         );
 
         intent.putExtra(
                 "partCode",
-                sparePart.getPartCode()
+                sparePart.getPartNumber()
         );
 
         intent.putExtra(
@@ -300,6 +260,11 @@ public class ManageSparePartsActivity
         intent.putExtra(
                 "quantity",
                 sparePart.getQuantity()
+        );
+
+        intent.putExtra(
+                "minimumStock",
+                sparePart.getMinimumStock()
         );
 
         intent.putExtra(
@@ -329,21 +294,18 @@ public class ManageSparePartsActivity
                 )
                 .setMessage(
                         "Are you sure you want to delete "
-                                + sparePart.getPartName()
+                                + sparePart.getName()
                                 + "?"
                 )
                 .setPositiveButton(
                         "Delete",
                         (dialog, which) -> {
 
-                            sparePartList.remove(
-                                    position
+                            databaseHelper.deleteSparePart(
+                                    sparePart.getId()
                             );
 
-                            sparePartAdapter
-                                    .notifyItemRemoved(
-                                            position
-                                    );
+                            loadSpareParts();
                         }
                 )
                 .setNegativeButton(
@@ -351,5 +313,17 @@ public class ManageSparePartsActivity
                         null
                 )
                 .show();
+    }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+
+        if (databaseHelper != null
+                && sparePartAdapter != null) {
+
+            loadSpareParts();
+        }
     }
 }

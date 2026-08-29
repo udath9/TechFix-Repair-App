@@ -84,6 +84,14 @@
             android:hint="Example: 10"
             android:inputType="number"
             android:padding="12dp" />
+        <EditText
+            android:id="@+id/edtMinimumStock"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Minimum Stock"
+            android:inputType="number"
+            android:padding="12dp"
+            android:layout_marginTop="8dp" />
 
         <TextView
             android:layout_width="match_parent"
