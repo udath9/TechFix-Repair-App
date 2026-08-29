@@ -63,6 +63,20 @@ public class BookRepairActivity extends AppCompatActivity {
         setupDeviceCategories();
         setupServices();
 
+        String selectedService = getIntent().getStringExtra("selectedService");
+
+        if (selectedService != null) {
+
+            ArrayAdapter<String> adapter =
+                    (ArrayAdapter<String>) spinnerService.getAdapter();
+
+            int position = adapter.getPosition(selectedService);
+
+            if (position >= 0) {
+                spinnerService.setSelection(position);
+            }
+        }
+
         btnSubmitRepair.setOnClickListener(v -> {
             submitRepairRequest();
         });
