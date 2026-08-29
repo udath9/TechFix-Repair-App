@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.up9.techfix.R;
 import com.up9.techfix.payment.PaymentActivity;
 import com.up9.techfix.service.ServicesActivity;
+import com.up9.techfix.booking.BookRepairActivity;
 
 public class CustomerHomeActivity extends AppCompatActivity {
 
@@ -33,6 +34,14 @@ public class CustomerHomeActivity extends AppCompatActivity {
 
         btnServices.setOnClickListener(v -> {
             Intent intent = new Intent(CustomerHomeActivity.this, ServicesActivity.class);
+            startActivity(intent);
+        });
+
+        btnBookRepair.setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    CustomerHomeActivity.this,
+                    BookRepairActivity.class
+            );
             startActivity(intent);
         });
 

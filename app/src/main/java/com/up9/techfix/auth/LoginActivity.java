@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
+import com.up9.techfix.customer.CustomerHomeActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -62,10 +63,12 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        Toast.makeText(
-                this,
-                "Login details are valid!",
-                Toast.LENGTH_SHORT
-        ).show();
+        Intent intent = new Intent(
+                LoginActivity.this,
+                CustomerHomeActivity.class
+        );
+
+        startActivity(intent);
+        finish();
     }
 }

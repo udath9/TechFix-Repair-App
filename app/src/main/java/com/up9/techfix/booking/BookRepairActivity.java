@@ -7,11 +7,19 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
 
 public class BookRepairActivity extends AppCompatActivity {
+    private FusedLocationProviderClient fusedLocationClient;
 
     private Spinner spinnerDeviceCategory;
     private Spinner spinnerService;
@@ -25,6 +33,9 @@ public class BookRepairActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_repair);
+
+        fusedLocationClient =
+                LocationServices.getFusedLocationProviderClient(this);
 
         spinnerDeviceCategory = findViewById(R.id.spinnerDeviceCategory);
         spinnerService = findViewById(R.id.spinnerService);
@@ -42,11 +53,7 @@ public class BookRepairActivity extends AppCompatActivity {
         });
 
         btnLocation.setOnClickListener(v -> {
-            Toast.makeText(
-                    this,
-                    "GPS feature will be added next.",
-                    Toast.LENGTH_SHORT
-            ).show();
+            getCurrentLocation();
         });
 
         btnUploadImage.setOnClickListener(v -> {
@@ -157,5 +164,56 @@ public class BookRepairActivity extends AppCompatActivity {
                         selectedService,
                 Toast.LENGTH_LONG
         ).show();
+
+
+    }
+    private void getCurrentLocation() {
+
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(
+                    new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    },
+                    100
+            );
+
+            return;
+        }
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, location -> {
+
+                    if (location != null) {
+
+                        double latitude = location.getLatitude();
+                        double longitude = location.getLongitude();
+
+                        Toast.makeText(
+                                this,
+                                "Location found!\nLat: "
+                                        + latitude
+                                        + "\nLng: "
+                                        + longitude,
+                                Toast.LENGTH_LONG
+                        ).show();
+
+                    } else {
+
+                        Toast.makeText(
+                                this,
+                                "Unable to get your location.",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                });
     }
 }
