@@ -1,16 +1,24 @@
 package com.up9.techfix.booking;
 
+import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.app.AlertDialog;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
 import androidx.core.content.ContextCompat;
 
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -20,14 +28,19 @@ import com.up9.techfix.R;
 
 public class BookRepairActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
-
+    private ActivityResultLauncher<String> imagePickerLauncher;
+    private ActivityResultLauncher<String> cameraPermissionLauncher;
+    private ActivityResultLauncher<Void> cameraLauncher;
+    private TextView tvNearestBranch;
     private Spinner spinnerDeviceCategory;
     private Spinner spinnerService;
     private EditText etDeviceModel;
     private EditText etProblemDescription;
     private Button btnLocation;
     private Button btnUploadImage;
+    private ImageView ivDeviceImage;
     private Button btnSubmitRepair;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +57,8 @@ public class BookRepairActivity extends AppCompatActivity {
         btnLocation = findViewById(R.id.btnLocation);
         btnUploadImage = findViewById(R.id.btnUploadImage);
         btnSubmitRepair = findViewById(R.id.btnSubmitRepair);
+        tvNearestBranch = findViewById(R.id.tvNearestBranch);
+        ivDeviceImage = findViewById(R.id.ivDeviceImage);
 
         setupDeviceCategories();
         setupServices();
@@ -56,12 +71,88 @@ public class BookRepairActivity extends AppCompatActivity {
             getCurrentLocation();
         });
 
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+
+                    if (uri != null) {
+                        ivDeviceImage.setImageURI(uri);
+                        ivDeviceImage.setVisibility(View.VISIBLE);
+
+                        Toast.makeText(
+                                this,
+                                "Device image selected!",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                }
+        );
+
+        cameraPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+
+                    if (isGranted) {
+                        cameraLauncher.launch(null);
+                    } else {
+                        Toast.makeText(
+                                this,
+                                "Camera permission is required to take a photo.",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                }
+        );
+
+        cameraLauncher = registerForActivityResult(
+                new ActivityResultContracts.TakePicturePreview(),
+                bitmap -> {
+
+                    if (bitmap != null) {
+                        ivDeviceImage.setImageBitmap(bitmap);
+                        ivDeviceImage.setVisibility(View.VISIBLE);
+
+                        Toast.makeText(
+                                this,
+                                "Photo captured!",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                }
+        );
         btnUploadImage.setOnClickListener(v -> {
-            Toast.makeText(
-                    this,
-                    "Camera/Gallery feature will be added next.",
-                    Toast.LENGTH_SHORT
-            ).show();
+
+            String[] options = {
+                    "Take Photo",
+                    "Choose from Gallery"
+            };
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Upload Device Image")
+                    .setItems(options, (dialog, which) -> {
+
+                        if (which == 0) {
+
+                            if (ContextCompat.checkSelfPermission(
+                                    this,
+                                    Manifest.permission.CAMERA
+                            ) == PackageManager.PERMISSION_GRANTED) {
+
+                                cameraLauncher.launch(null);
+
+                            } else {
+
+                                cameraPermissionLauncher.launch(
+                                        Manifest.permission.CAMERA
+                                );
+                            }
+
+                        } else {
+
+                            imagePickerLauncher.launch("image/*");
+                        }
+                    })
+                    .show();
         });
     }
 
@@ -194,17 +285,57 @@ public class BookRepairActivity extends AppCompatActivity {
 
                     if (location != null) {
 
-                        double latitude = location.getLatitude();
-                        double longitude = location.getLongitude();
+                        double customerLatitude = location.getLatitude();
+                        double customerLongitude = location.getLongitude();
 
-                        Toast.makeText(
-                                this,
-                                "Location found!\nLat: "
-                                        + latitude
-                                        + "\nLng: "
-                                        + longitude,
-                                Toast.LENGTH_LONG
-                        ).show();
+                        // TechFix Colombo
+                        double colomboLatitude = 6.9271;
+                        double colomboLongitude = 79.8612;
+
+                        // TechFix Galle
+                        double galleLatitude = 6.0329;
+                        double galleLongitude = 80.2168;
+
+                        float[] colomboDistance = new float[1];
+                        float[] galleDistance = new float[1];
+
+                        Location.distanceBetween(
+                                customerLatitude,
+                                customerLongitude,
+                                colomboLatitude,
+                                colomboLongitude,
+                                colomboDistance
+                        );
+
+                        Location.distanceBetween(
+                                customerLatitude,
+                                customerLongitude,
+                                galleLatitude,
+                                galleLongitude,
+                                galleDistance
+                        );
+
+                        String nearestBranch;
+                        float nearestDistance;
+
+                        if (colomboDistance[0] < galleDistance[0]) {
+                            nearestBranch = "Colombo";
+                            nearestDistance = colomboDistance[0];
+                        } else {
+                            nearestBranch = "Galle";
+                            nearestDistance = galleDistance[0];
+                        }
+
+                        double distanceInKm = nearestDistance / 1000.0;
+
+                        tvNearestBranch.setText(
+                                "Nearest TechFix Branch: " + nearestBranch
+                                        + "\nDistance: "
+                                        + String.format("%.2f", distanceInKm)
+                                        + " km"
+                        );
+
+                        tvNearestBranch.setVisibility(View.VISIBLE);
 
                     } else {
 
