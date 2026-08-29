@@ -5,24 +5,26 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="15dp"
     android:background="#FFFFFF"
+    android:elevation="3dp"
     android:orientation="vertical"
     android:padding="15dp">
 
     <ImageView
-        android:id="@+id/imgRepairSample"
+        android:id="@+id/imgSample"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
+        android:layout_height="200dp"
         android:contentDescription="Repair sample image"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:src="@android:drawable/ic_menu_gallery" />
 
     <TextView
-        android:id="@+id/txtSampleDevice"
+        android:id="@+id/txtSampleDeviceName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="12dp"
         android:text="iPhone 13"
         android:textColor="#1A1A1A"
-        android:textSize="18sp"
+        android:textSize="20sp"
         android:textStyle="bold" />
 
     <TextView
@@ -30,7 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:text="Mobile Phone"
+        android:text="Category: Mobile Phone"
         android:textColor="#555555"
         android:textSize="14sp" />
 
@@ -38,8 +40,8 @@
         android:id="@+id/txtSampleService"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Screen Replacement"
+        android:layout_marginTop="3dp"
+        android:text="Service: Screen Replacement"
         android:textColor="#555555"
         android:textSize="14sp" />
 
@@ -47,29 +49,30 @@
         android:id="@+id/txtSampleDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Original screen replaced successfully."
-        android:textColor="#555555"
+        android:layout_marginTop="8dp"
+        android:text="Screen replacement completed."
+        android:textColor="#333333"
         android:textSize="14sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:gravity="end"
+        android:layout_marginTop="12dp"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/btnEditSample"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
             android:text="Edit" />
 
         <Button
             android:id="@+id/btnDeleteSample"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
             android:text="Delete" />
 
     </LinearLayout>

@@ -95,14 +95,25 @@ public class ServiceFormActivity extends AppCompatActivity {
                         R.id.btnCancelService
                 );
 
+
+        // Load categories from SQLite
+
         loadCategories();
 
+
+        // Check Add/Edit mode
+
         checkEditMode();
+
+
+        // Save
 
         btnSaveService.setOnClickListener(
                 v -> saveService()
         );
 
+
+        // Cancel
 
         btnCancelService.setOnClickListener(
                 v -> finish()
@@ -399,7 +410,6 @@ public class ServiceFormActivity extends AppCompatActivity {
 
             return;
         }
-
 
         if (estimatedDays <= 0) {
 

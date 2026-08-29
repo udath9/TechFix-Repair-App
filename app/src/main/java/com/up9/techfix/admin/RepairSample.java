@@ -7,7 +7,7 @@ public class RepairSample {
     private String category;
     private String service;
     private String description;
-    private int imageResource;
+    private String imageUri;
 
     public RepairSample(
             int id,
@@ -15,14 +15,14 @@ public class RepairSample {
             String category,
             String service,
             String description,
-            int imageResource
+            String imageUri
     ) {
         this.id = id;
         this.deviceName = deviceName;
         this.category = category;
         this.service = service;
         this.description = description;
-        this.imageResource = imageResource;
+        this.imageUri = imageUri;
     }
 
     public int getId() {
@@ -45,8 +45,8 @@ public class RepairSample {
         return description;
     }
 
-    public int getImageResource() {
-        return imageResource;
+    public String getImageUri() {
+        return imageUri;
     }
 
     public void setDeviceName(String deviceName) {
@@ -65,7 +65,7 @@ public class RepairSample {
         this.description = description;
     }
 
-    public void setImageResource(int imageResource) {
-        this.imageResource = imageResource;
+    public void setImageUri(String imageUri) {
+        this.imageUri = imageUri;
     }
 }
