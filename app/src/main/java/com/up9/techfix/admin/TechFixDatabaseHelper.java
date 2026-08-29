@@ -12,7 +12,7 @@ import java.util.List;
 public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "TechFix.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Branch table
     public static final String TABLE_BRANCHES = "branches";
@@ -23,6 +23,14 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_BRANCH_PHONE = "phone";
     public static final String COL_BRANCH_LATITUDE = "latitude";
     public static final String COL_BRANCH_LONGITUDE = "longitude";
+
+
+    // CATEGORY TABLE
+    public static final String TABLE_CATEGORIES = "categories";
+
+    public static final String COL_CATEGORY_ID = "id";
+    public static final String COL_CATEGORY_NAME = "name";
+    public static final String COL_CATEGORY_DESCRIPTION = "description";
 
     public TechFixDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -42,6 +50,15 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
                         ")";
 
         db.execSQL(createBranchesTable);
+
+        String createCategoriesTable =
+                "CREATE TABLE " + TABLE_CATEGORIES + " (" +
+                        COL_CATEGORY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        COL_CATEGORY_NAME + " TEXT NOT NULL, " +
+                        COL_CATEGORY_DESCRIPTION + " TEXT" +
+                        ")";
+
+        db.execSQL(createCategoriesTable);
     }
 
     @Override
@@ -51,14 +68,18 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
             int newVersion
     ) {
 
-        db.execSQL(
-                "DROP TABLE IF EXISTS " + TABLE_BRANCHES
-        );
+        if (oldVersion < 2) {
 
-        onCreate(db);
+            String createCategoriesTable =
+                    "CREATE TABLE " + TABLE_CATEGORIES + " (" +
+                            COL_CATEGORY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                            COL_CATEGORY_NAME + " TEXT NOT NULL, " +
+                            COL_CATEGORY_DESCRIPTION + " TEXT" +
+                            ")";
+
+            db.execSQL(createCategoriesTable);
+        }
     }
-
-    // INSERT BRANCH
 
     public long insertBranch(
             String name,
@@ -108,8 +129,6 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
         return result;
     }
-
-    // GET ALL BRANCHES
 
     public List<Branch> getAllBranches() {
 
@@ -196,9 +215,6 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
         return branches;
     }
 
-    // UPDATE BRANCH
-
-
     public int updateBranch(
             int id,
             String name,
@@ -254,9 +270,6 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    // DELETE BRANCH
-
-
     public int deleteBranch(int id) {
 
         SQLiteDatabase db =
@@ -266,6 +279,153 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
                 db.delete(
                         TABLE_BRANCHES,
                         COL_BRANCH_ID + " = ?",
+                        new String[]{
+                                String.valueOf(id)
+                        }
+                );
+
+        db.close();
+
+        return result;
+    }
+
+    public long insertCategory(
+            String name,
+            String description
+    ) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        ContentValues values =
+                new ContentValues();
+
+        values.put(
+                COL_CATEGORY_NAME,
+                name
+        );
+
+        values.put(
+                COL_CATEGORY_DESCRIPTION,
+                description
+        );
+
+        long result =
+                db.insert(
+                        TABLE_CATEGORIES,
+                        null,
+                        values
+                );
+
+        db.close();
+
+        return result;
+    }
+    public List<DeviceCategory> getAllCategories() {
+
+        List<DeviceCategory> categories =
+                new ArrayList<>();
+
+        SQLiteDatabase db =
+                getReadableDatabase();
+
+        Cursor cursor =
+                db.query(
+                        TABLE_CATEGORIES,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        COL_CATEGORY_ID + " ASC"
+                );
+
+        if (cursor.moveToFirst()) {
+
+            do {
+
+                int id =
+                        cursor.getInt(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_CATEGORY_ID
+                                )
+                        );
+
+                String name =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_CATEGORY_NAME
+                                )
+                        );
+
+                String description =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_CATEGORY_DESCRIPTION
+                                )
+                        );
+
+                categories.add(
+                        new DeviceCategory(
+                                id,
+                                name,
+                                description
+                        )
+                );
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+
+        return categories;
+    }
+    public int updateCategory(
+            int id,
+            String name,
+            String description
+    ) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        ContentValues values =
+                new ContentValues();
+
+        values.put(
+                COL_CATEGORY_NAME,
+                name
+        );
+
+        values.put(
+                COL_CATEGORY_DESCRIPTION,
+                description
+        );
+
+        int result =
+                db.update(
+                        TABLE_CATEGORIES,
+                        values,
+                        COL_CATEGORY_ID + " = ?",
+                        new String[]{
+                                String.valueOf(id)
+                        }
+                );
+
+        db.close();
+
+        return result;
+    }
+    public int deleteCategory(int id) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        int result =
+                db.delete(
+                        TABLE_CATEGORIES,
+                        COL_CATEGORY_ID + " = ?",
                         new String[]{
                                 String.valueOf(id)
                         }

@@ -1,13 +1,10 @@
 package com.up9.techfix.admin;
 
-
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,6 +21,8 @@ public class CategoryFormActivity extends AppCompatActivity {
     private Button btnCancelCategory;
 
     private boolean isEditMode = false;
+
+    private int categoryId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,25 +51,34 @@ public class CategoryFormActivity extends AppCompatActivity {
                 v -> saveCategory()
         );
 
-        btnCancelCategory.setOnClickListener(
-                v -> finish()
-        );
+        btnCancelCategory.setOnClickListener(v -> {
+            setResult(RESULT_CANCELED);
+            finish();
+        });
     }
 
     private void checkEditMode() {
 
         Intent intent = getIntent();
 
-        isEditMode =
-                intent.getBooleanExtra(
-                        "editMode",
-                        false
-                );
+        isEditMode = intent.getBooleanExtra(
+                "editMode",
+                false
+        );
 
         if (isEditMode) {
 
+            categoryId = intent.getIntExtra(
+                    "categoryId",
+                    -1
+            );
+
             txtCategoryFormTitle.setText(
                     "Edit Device Category"
+            );
+
+            btnSaveCategory.setText(
+                    "Update Category"
             );
 
             edtCategoryName.setText(
@@ -79,6 +87,16 @@ public class CategoryFormActivity extends AppCompatActivity {
 
             edtCategoryDescription.setText(
                     intent.getStringExtra("description")
+            );
+
+        } else {
+
+            txtCategoryFormTitle.setText(
+                    "Add Device Category"
+            );
+
+            btnSaveCategory.setText(
+                    "Save Category"
             );
         }
     }
@@ -108,19 +126,7 @@ public class CategoryFormActivity extends AppCompatActivity {
             return;
         }
 
-        if (description.isEmpty()) {
-
-            edtCategoryDescription.setError(
-                    "Enter category description"
-            );
-
-            edtCategoryDescription.requestFocus();
-
-            return;
-        }
-
-        Intent resultIntent =
-                new Intent();
+        Intent resultIntent = new Intent();
 
         resultIntent.putExtra(
                 "name",
@@ -132,14 +138,25 @@ public class CategoryFormActivity extends AppCompatActivity {
                 description
         );
 
+        resultIntent.putExtra(
+                "editMode",
+                isEditMode
+        );
+
         if (isEditMode) {
+
+            if (categoryId == -1) {
+
+                edtCategoryName.setError(
+                        "Invalid category ID"
+                );
+
+                return;
+            }
 
             resultIntent.putExtra(
                     "categoryId",
-                    getIntent().getIntExtra(
-                            "categoryId",
-                            -1
-                    )
+                    categoryId
             );
         }
 
@@ -147,14 +164,6 @@ public class CategoryFormActivity extends AppCompatActivity {
                 RESULT_OK,
                 resultIntent
         );
-
-        Toast.makeText(
-                this,
-                isEditMode
-                        ? "Category updated"
-                        : "Category added",
-                Toast.LENGTH_SHORT
-        ).show();
 
         finish();
     }
