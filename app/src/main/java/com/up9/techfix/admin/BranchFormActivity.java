@@ -26,39 +26,78 @@ public class BranchFormActivity extends AppCompatActivity {
 
     private boolean isEditMode = false;
 
+    private int branchId = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_branch_form);
 
-        txtFormTitle = findViewById(R.id.txtFormTitle);
+        txtFormTitle =
+                findViewById(R.id.txtFormTitle);
 
-        edtBranchName = findViewById(R.id.edtBranchName);
-        edtBranchAddress = findViewById(R.id.edtBranchAddress);
-        edtBranchPhone = findViewById(R.id.edtBranchPhone);
-        edtLatitude = findViewById(R.id.edtLatitude);
-        edtLongitude = findViewById(R.id.edtLongitude);
+        edtBranchName =
+                findViewById(R.id.edtBranchName);
 
-        btnSaveBranch = findViewById(R.id.btnSaveBranch);
-        btnCancel = findViewById(R.id.btnCancel);
+        edtBranchAddress =
+                findViewById(R.id.edtBranchAddress);
+
+        edtBranchPhone =
+                findViewById(R.id.edtBranchPhone);
+
+        edtLatitude =
+                findViewById(R.id.edtLatitude);
+
+        edtLongitude =
+                findViewById(R.id.edtLongitude);
+
+        btnSaveBranch =
+                findViewById(R.id.btnSaveBranch);
+
+        btnCancel =
+                findViewById(R.id.btnCancel);
 
         checkEditMode();
 
         btnSaveBranch.setOnClickListener(v -> saveBranch());
 
-        btnCancel.setOnClickListener(v -> finish());
+        btnCancel.setOnClickListener(v -> {
+
+            setResult(RESULT_CANCELED);
+
+            finish();
+        });
     }
 
     private void checkEditMode() {
 
         Intent intent = getIntent();
 
-        isEditMode = intent.getBooleanExtra("editMode", false);
+        isEditMode =
+                intent.getBooleanExtra(
+                        "editMode",
+                        false
+                );
 
         if (isEditMode) {
 
-            txtFormTitle.setText("Edit Branch");
+            branchId =
+                    intent.getIntExtra(
+                            "branchId",
+                            -1
+                    );
+
+            txtFormTitle.setText(
+                    "Edit Branch"
+            );
+
+            // Change button text
+            btnSaveBranch.setText(
+                    "Update Branch"
+            );
+
+            // Load existing branch data
 
             edtBranchName.setText(
                     intent.getStringExtra("name")
@@ -74,53 +113,118 @@ public class BranchFormActivity extends AppCompatActivity {
 
             edtLatitude.setText(
                     String.valueOf(
-                            intent.getDoubleExtra("latitude", 0)
+                            intent.getDoubleExtra(
+                                    "latitude",
+                                    0
+                            )
                     )
             );
 
             edtLongitude.setText(
                     String.valueOf(
-                            intent.getDoubleExtra("longitude", 0)
+                            intent.getDoubleExtra(
+                                    "longitude",
+                                    0
+                            )
                     )
+            );
+
+        } else {
+
+            txtFormTitle.setText(
+                    "Add Branch"
+            );
+
+            btnSaveBranch.setText(
+                    "Save Branch"
             );
         }
     }
 
     private void saveBranch() {
 
-        String name = edtBranchName.getText().toString().trim();
-        String address = edtBranchAddress.getText().toString().trim();
-        String phone = edtBranchPhone.getText().toString().trim();
-        String latitudeText = edtLatitude.getText().toString().trim();
-        String longitudeText = edtLongitude.getText().toString().trim();
+        String name =
+                edtBranchName
+                        .getText()
+                        .toString()
+                        .trim();
+
+        String address =
+                edtBranchAddress
+                        .getText()
+                        .toString()
+                        .trim();
+
+        String phone =
+                edtBranchPhone
+                        .getText()
+                        .toString()
+                        .trim();
+
+        String latitudeText =
+                edtLatitude
+                        .getText()
+                        .toString()
+                        .trim();
+
+        String longitudeText =
+                edtLongitude
+                        .getText()
+                        .toString()
+                        .trim();
 
         if (name.isEmpty()) {
-            edtBranchName.setError("Enter branch name");
+
+            edtBranchName.setError(
+                    "Enter branch name"
+            );
+
             edtBranchName.requestFocus();
+
             return;
         }
 
         if (address.isEmpty()) {
-            edtBranchAddress.setError("Enter branch address");
+
+            edtBranchAddress.setError(
+                    "Enter branch address"
+            );
+
             edtBranchAddress.requestFocus();
+
             return;
         }
 
         if (phone.isEmpty()) {
-            edtBranchPhone.setError("Enter phone number");
+
+            edtBranchPhone.setError(
+                    "Enter phone number"
+            );
+
             edtBranchPhone.requestFocus();
+
             return;
         }
 
         if (latitudeText.isEmpty()) {
-            edtLatitude.setError("Enter latitude");
+
+            edtLatitude.setError(
+                    "Enter latitude"
+            );
+
             edtLatitude.requestFocus();
+
             return;
         }
 
         if (longitudeText.isEmpty()) {
-            edtLongitude.setError("Enter longitude");
+
+            edtLongitude.setError(
+                    "Enter longitude"
+            );
+
             edtLongitude.requestFocus();
+
             return;
         }
 
@@ -129,8 +233,15 @@ public class BranchFormActivity extends AppCompatActivity {
 
         try {
 
-            latitude = Double.parseDouble(latitudeText);
-            longitude = Double.parseDouble(longitudeText);
+            latitude =
+                    Double.parseDouble(
+                            latitudeText
+                    );
+
+            longitude =
+                    Double.parseDouble(
+                            longitudeText
+                    );
 
         } catch (NumberFormatException e) {
 
@@ -149,6 +260,8 @@ public class BranchFormActivity extends AppCompatActivity {
                     "Latitude must be between -90 and 90"
             );
 
+            edtLatitude.requestFocus();
+
             return;
         }
 
@@ -158,27 +271,67 @@ public class BranchFormActivity extends AppCompatActivity {
                     "Longitude must be between -180 and 180"
             );
 
+            edtLongitude.requestFocus();
+
             return;
         }
 
-        Intent resultIntent = new Intent();
+        Intent resultIntent =
+                new Intent();
 
-        resultIntent.putExtra("name", name);
-        resultIntent.putExtra("address", address);
-        resultIntent.putExtra("phone", phone);
-        resultIntent.putExtra("latitude", latitude);
-        resultIntent.putExtra("longitude", longitude);
+        resultIntent.putExtra(
+                "name",
+                name
+        );
+
+        resultIntent.putExtra(
+                "address",
+                address
+        );
+
+        resultIntent.putExtra(
+                "phone",
+                phone
+        );
+
+        resultIntent.putExtra(
+                "latitude",
+                latitude
+        );
+
+        resultIntent.putExtra(
+                "longitude",
+                longitude
+        );
+
+        resultIntent.putExtra(
+                "editMode",
+                isEditMode
+        );
 
         if (isEditMode) {
 
+            if (branchId == -1) {
+
+                Toast.makeText(
+                        this,
+                        "Invalid branch ID",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
             resultIntent.putExtra(
                     "branchId",
-                    getIntent().getIntExtra("branchId", -1)
+                    branchId
             );
-
         }
 
-        setResult(RESULT_OK, resultIntent);
+        setResult(
+                RESULT_OK,
+                resultIntent
+        );
 
         finish();
     }

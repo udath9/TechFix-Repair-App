@@ -1,6 +1,9 @@
 package com.up9.techfix.admin;
+
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -9,11 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.widget.Button;
-
 import com.up9.techfix.R;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ManageBranchesActivity extends AppCompatActivity
@@ -27,7 +27,7 @@ public class ManageBranchesActivity extends AppCompatActivity
 
     private List<Branch> branchList;
 
-    private int editingPosition = -1;
+    private TechFixDatabaseHelper databaseHelper;
 
     private final ActivityResultLauncher<Intent> branchFormLauncher =
             registerForActivityResult(
@@ -65,14 +65,23 @@ public class ManageBranchesActivity extends AppCompatActivity
                                         0
                                 );
 
-                        if (editingPosition == -1) {
+                        boolean editMode =
+                                data.getBooleanExtra(
+                                        "editMode",
+                                        false
+                                );
 
-                            int newId =
-                                    branchList.size() + 1;
+                        int branchId =
+                                data.getIntExtra(
+                                        "branchId",
+                                        -1
+                                );
 
-                            Branch newBranch =
-                                    new Branch(
-                                            newId,
+                        if (editMode && branchId != -1) {
+
+                            int resultCode =
+                                    databaseHelper.updateBranch(
+                                            branchId,
                                             name,
                                             address,
                                             phone,
@@ -80,25 +89,53 @@ public class ManageBranchesActivity extends AppCompatActivity
                                             longitude
                                     );
 
-                            branchList.add(newBranch);
+                            if (resultCode > 0) {
+
+                                Toast.makeText(
+                                        this,
+                                        "Branch updated successfully",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+
+                            } else {
+
+                                Toast.makeText(
+                                        this,
+                                        "Failed to update branch",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
 
                         } else {
 
-                            Branch branch =
-                                    branchList.get(
-                                            editingPosition
+                            long newId =
+                                    databaseHelper.insertBranch(
+                                            name,
+                                            address,
+                                            phone,
+                                            latitude,
+                                            longitude
                                     );
 
-                            branch.setName(name);
-                            branch.setAddress(address);
-                            branch.setPhone(phone);
-                            branch.setLatitude(latitude);
-                            branch.setLongitude(longitude);
+                            if (newId != -1) {
 
-                            editingPosition = -1;
+                                Toast.makeText(
+                                        this,
+                                        "Branch added successfully",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+
+                            } else {
+
+                                Toast.makeText(
+                                        this,
+                                        "Failed to add branch",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
                         }
 
-                        branchAdapter.notifyDataSetChanged();
+                        loadBranches();
                     }
             );
 
@@ -121,14 +158,36 @@ public class ManageBranchesActivity extends AppCompatActivity
                         R.id.btnAddBranch
                 );
 
+        databaseHelper =
+                new TechFixDatabaseHelper(this);
+
         recyclerBranches.setLayoutManager(
                 new LinearLayoutManager(this)
         );
 
-        branchList =
-                new ArrayList<>();
+        loadBranches();
 
-        loadSampleBranches();
+        btnAddBranch.setOnClickListener(v -> {
+
+            Intent intent =
+                    new Intent(
+                            ManageBranchesActivity.this,
+                            BranchFormActivity.class
+                    );
+
+            intent.putExtra(
+                    "editMode",
+                    false
+            );
+
+            branchFormLauncher.launch(intent);
+        });
+    }
+
+    private void loadBranches() {
+
+        branchList =
+                databaseHelper.getAllBranches();
 
         branchAdapter =
                 new BranchAdapter(
@@ -139,51 +198,10 @@ public class ManageBranchesActivity extends AppCompatActivity
         recyclerBranches.setAdapter(
                 branchAdapter
         );
-
-        btnAddBranch.setOnClickListener(v -> {
-
-            editingPosition = -1;
-
-            Intent intent =
-                    new Intent(
-                            ManageBranchesActivity.this,
-                            BranchFormActivity.class
-                    );
-
-            branchFormLauncher.launch(intent);
-        });
-    }
-
-    private void loadSampleBranches() {
-
-        branchList.add(
-                new Branch(
-                        1,
-                        "Colombo Branch",
-                        "Colombo, Sri Lanka",
-                        "011-2345678",
-                        6.9271,
-                        79.8612
-                )
-        );
-
-        branchList.add(
-                new Branch(
-                        2,
-                        "Galle Branch",
-                        "Galle, Sri Lanka",
-                        "091-2345678",
-                        6.0329,
-                        80.2168
-                )
-        );
     }
 
     @Override
     public void onEdit(Branch branch) {
-
-        editingPosition =
-                branchList.indexOf(branch);
 
         Intent intent =
                 new Intent(
@@ -246,11 +264,29 @@ public class ManageBranchesActivity extends AppCompatActivity
                         "Delete",
                         (dialog, which) -> {
 
-                            branchList.remove(position);
+                            int result =
+                                    databaseHelper.deleteBranch(
+                                            branch.getId()
+                                    );
 
-                            branchAdapter.notifyItemRemoved(
-                                    position
-                            );
+                            if (result > 0) {
+
+                                Toast.makeText(
+                                        this,
+                                        "Branch deleted successfully",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+
+                                loadBranches();
+
+                            } else {
+
+                                Toast.makeText(
+                                        this,
+                                        "Failed to delete branch",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
                         }
                 )
                 .setNegativeButton(
@@ -258,5 +294,15 @@ public class ManageBranchesActivity extends AppCompatActivity
                         null
                 )
                 .show();
+    }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+
+        if (databaseHelper != null) {
+            loadBranches();
+        }
     }
 }
