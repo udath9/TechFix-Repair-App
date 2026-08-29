@@ -11,71 +11,152 @@
         android:orientation="vertical"
         android:padding="20dp">
 
+        <!-- FORM TITLE -->
+
         <TextView
-            android:id="@+id/txtSampleFormTitle"
+            android:id="@+id/txtRepairSampleFormTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Add Repair Sample"
             android:textColor="#1A1A1A"
-            android:textSize="24sp"
+            android:textSize="25sp"
             android:textStyle="bold" />
 
-        <ImageView
-            android:id="@+id/imgSelectedSample"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="20dp"
-            android:contentDescription="Selected repair image"
-            android:scaleType="centerCrop"
-            android:src="@drawable/iphone_repair" />
 
-        <Button
-            android:id="@+id/btnSelectImage"
+        <!-- IMAGE TITLE -->
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="Select Image" />
+            android:layout_marginTop="25dp"
+            android:text="Repair Sample Image"
+            android:textColor="#333333"
+            android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/edtSampleDevice"
+
+        <!-- IMAGE PREVIEW -->
+
+        <ImageView
+            android:id="@+id/imgRepairSample"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:layout_marginTop="10dp"
+            android:background="#E0E3E7"
+            android:contentDescription="Repair sample image"
+            android:scaleType="centerCrop"
+            android:src="@android:drawable/ic_menu_gallery" />
+
+
+        <!-- CHOOSE IMAGE BUTTON -->
+
+        <Button
+            android:id="@+id/btnChooseImage"
             android:layout_width="match_parent"
             android:layout_height="55dp"
+            android:layout_marginTop="10dp"
+            android:text="Upload / Choose Image"
+            android:textSize="16sp" />
+
+
+        <!-- DEVICE NAME -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:hint="Device name"
-            android:inputType="text"
+            android:text="Device Name"
+            android:textColor="#333333"
+            android:textStyle="bold" />
+
+
+        <EditText
+            android:id="@+id/edtRepairDeviceName"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_marginTop="8dp"
+            android:hint="Example: iPhone 13"
+            android:inputType="textCapWords"
             android:padding="12dp" />
+
+
+        <!-- DEVICE CATEGORY -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="Device Category"
+            android:textColor="#333333"
+            android:textStyle="bold" />
+
 
         <Spinner
-            android:id="@+id/spinnerSampleCategory"
+            android:id="@+id/spinnerRepairCategory"
             android:layout_width="match_parent"
             android:layout_height="55dp"
-            android:layout_marginTop="10dp" />
+            android:layout_marginTop="8dp" />
 
-        <EditText
-            android:id="@+id/edtSampleService"
+
+        <!-- REPAIR SERVICE -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="Repair Service"
+            android:textColor="#333333"
+            android:textStyle="bold" />
+
+
+        <Spinner
+            android:id="@+id/spinnerRepairService"
             android:layout_width="match_parent"
             android:layout_height="55dp"
-            android:layout_marginTop="10dp"
-            android:hint="Repair service"
-            android:inputType="text"
-            android:padding="12dp" />
+            android:layout_marginTop="8dp" />
+
+
+        <!-- DESCRIPTION -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="Repair Description"
+            android:textColor="#333333"
+            android:textStyle="bold" />
+
 
         <EditText
-            android:id="@+id/edtSampleDescription"
+            android:id="@+id/edtRepairDescription"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="110dp"
+            android:layout_marginTop="8dp"
             android:gravity="top"
-            android:hint="Repair description"
-            android:inputType="textMultiLine"
+            android:hint="Describe the repair performed"
+            android:inputType="textCapSentences|textMultiLine"
             android:padding="12dp" />
+
+
+        <!-- SAVE BUTTON -->
 
         <Button
             android:id="@+id/btnSaveRepairSample"
             android:layout_width="match_parent"
             android:layout_height="55dp"
-            android:layout_marginTop="25dp"
-            android:text="Save Sample" />
+            android:layout_marginTop="30dp"
+            android:text="Save Repair Sample"
+            android:textSize="16sp" />
+
+
+        <!-- CANCEL BUTTON -->
+
+        <Button
+            android:id="@+id/btnCancelRepairSample"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_marginTop="10dp"
+            android:text="Cancel"
+            android:textSize="16sp" />
 
     </LinearLayout>
 

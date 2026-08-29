@@ -1,41 +1,49 @@
 package com.up9.techfix.admin;
-import com.up9.techfix.R;
+
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-import android.widget.Toast;
+import android.widget.Button;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.up9.techfix.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ManageRepairSamplesActivity
         extends AppCompatActivity
-        implements RepairSampleAdapter.OnSampleActionListener {
+        implements RepairSampleAdapter.OnRepairSampleActionListener {
 
     private RecyclerView recyclerRepairSamples;
 
-    private Spinner spinnerSampleFilter;
+    private Button btnAddRepairSample;
 
     private RepairSampleAdapter sampleAdapter;
 
     private List<RepairSample> sampleList;
 
-    private List<RepairSample> filteredList;
+    private TechFixDatabaseHelper databaseHelper;
 
-    private final String[] filters = {
-            "All",
-            "Mobile Phone",
-            "Laptop",
-            "Desktop Computer",
-            "Tablet",
-            "Other"
-    };
+    private final ActivityResultLauncher<Intent>
+            repairSampleFormLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts
+                            .StartActivityForResult(),
+                    result -> {
+
+                        if (result.getResultCode()
+                                == RESULT_OK) {
+
+                            loadRepairSamples();
+                        }
+                    }
+            );
 
     @Override
     protected void onCreate(
@@ -53,14 +61,34 @@ public class ManageRepairSamplesActivity
                         R.id.recyclerRepairSamples
                 );
 
-        spinnerSampleFilter =
+        btnAddRepairSample =
                 findViewById(
-                        R.id.spinnerSampleFilter
+                        R.id.btnAddRepairSample
                 );
 
-        findViewById(
-                R.id.btnAddRepairSample
-        ).setOnClickListener(
+        databaseHelper =
+                new TechFixDatabaseHelper(this);
+
+        sampleList =
+                new ArrayList<>();
+
+        recyclerRepairSamples.setLayoutManager(
+                new LinearLayoutManager(this)
+        );
+
+        sampleAdapter =
+                new RepairSampleAdapter(
+                        sampleList,
+                        this
+                );
+
+        recyclerRepairSamples.setAdapter(
+                sampleAdapter
+        );
+
+        loadRepairSamples();
+
+        btnAddRepairSample.setOnClickListener(
                 v -> {
 
                     Intent intent =
@@ -69,140 +97,39 @@ public class ManageRepairSamplesActivity
                                     AddEditRepairSampleActivity.class
                             );
 
-                    startActivity(intent);
+                    intent.putExtra(
+                            "editMode",
+                            false
+                    );
+
+                    repairSampleFormLauncher.launch(
+                            intent
+                    );
                 }
         );
-
-        recyclerRepairSamples.setLayoutManager(
-                new LinearLayoutManager(this)
-        );
-
-        sampleList =
-                new ArrayList<>();
-
-        filteredList =
-                new ArrayList<>();
-
-        loadSampleData();
-
-        setupFilter();
-
-        sampleAdapter =
-                new RepairSampleAdapter(
-                        filteredList,
-                        this
-                );
-
-        recyclerRepairSamples.setAdapter(
-                sampleAdapter
-        );
-
-        applyFilter();
     }
 
-    private void loadSampleData() {
+    private void loadRepairSamples() {
 
-        sampleList.add(
-                new RepairSample(
-                        1,
-                        "iPhone 13",
-                        "Mobile Phone",
-                        "Screen Replacement",
-                        "Damaged display replaced successfully.",
-                        R.drawable.iphone_repair
-                )
+        sampleList.clear();
+
+        sampleList.addAll(
+                databaseHelper
+                        .getAllRepairSamples()
         );
 
-        sampleList.add(
-                new RepairSample(
-                        2,
-                        "Dell Inspiron 15",
-                        "Laptop",
-                        "Laptop Repair",
-                        "Laptop motherboard and cooling system repaired.",
-                        R.drawable.laptop_repair
-                )
-        );
-
-        sampleList.add(
-                new RepairSample(
-                        3,
-                        "Samsung Galaxy A54",
-                        "Mobile Phone",
-                        "Battery Replacement",
-                        "Old battery replaced with a new battery.",
-                        R.drawable.samsung_repair
-                )
-        );
+        sampleAdapter.notifyDataSetChanged();
     }
 
-    private void setupFilter() {
+    @Override
+    protected void onResume() {
 
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(
-                        this,
-                        android.R.layout.simple_spinner_item,
-                        filters
-                );
+        super.onResume();
 
-        adapter.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item
-        );
+        if (databaseHelper != null
+                && sampleAdapter != null) {
 
-        spinnerSampleFilter.setAdapter(
-                adapter
-        );
-
-        spinnerSampleFilter
-                .setOnItemSelectedListener(
-                        new android.widget.AdapterView
-                                .OnItemSelectedListener() {
-
-                            @Override
-                            public void onItemSelected(
-                                    android.widget.AdapterView<?> parent,
-                                    android.view.View view,
-                                    int position,
-                                    long id
-                            ) {
-
-                                applyFilter();
-                            }
-
-                            @Override
-                            public void onNothingSelected(
-                                    android.widget.AdapterView<?> parent
-                            ) {
-
-                            }
-                        }
-                );
-    }
-
-    private void applyFilter() {
-
-        filteredList.clear();
-
-        String selected =
-                spinnerSampleFilter
-                        .getSelectedItem()
-                        .toString();
-
-        for (RepairSample sample :
-                sampleList) {
-
-            if (selected.equals("All")
-                    || sample
-                    .getCategory()
-                    .equals(selected)) {
-
-                filteredList.add(sample);
-            }
-        }
-
-        if (sampleAdapter != null) {
-
-            sampleAdapter.notifyDataSetChanged();
+            loadRepairSamples();
         }
     }
 
@@ -211,41 +138,81 @@ public class ManageRepairSamplesActivity
             RepairSample sample
     ) {
 
-        Toast.makeText(
-                this,
-                "Edit sample #" + sample.getId(),
-                Toast.LENGTH_SHORT
-        ).show();
+        Intent intent =
+                new Intent(
+                        this,
+                        AddEditRepairSampleActivity.class
+                );
+
+        intent.putExtra(
+                "editMode",
+                true
+        );
+
+        intent.putExtra(
+                "sampleId",
+                sample.getId()
+        );
+
+        intent.putExtra(
+                "deviceName",
+                sample.getDeviceName()
+        );
+
+        intent.putExtra(
+                "category",
+                sample.getCategory()
+        );
+
+        intent.putExtra(
+                "service",
+                sample.getService()
+        );
+
+        intent.putExtra(
+                "description",
+                sample.getDescription()
+        );
+
+        intent.putExtra(
+                "imageUri",
+                sample.getImageUri()
+        );
+
+        repairSampleFormLauncher.launch(
+                intent
+        );
     }
 
     @Override
     public void onDelete(
-            RepairSample sample
+            RepairSample sample,
+            int position
     ) {
 
         new AlertDialog.Builder(this)
-                .setTitle("Delete Repair Sample")
-                .setMessage(
-                        "Are you sure you want to delete this sample?"
+                .setTitle(
+                        "Delete Repair Sample"
                 )
-                .setNegativeButton(
-                        "Cancel",
-                        null
+                .setMessage(
+                        "Are you sure you want to delete "
+                                + sample.getDeviceName()
+                                + "?"
                 )
                 .setPositiveButton(
                         "Delete",
                         (dialog, which) -> {
 
-                            sampleList.remove(sample);
+                            databaseHelper.deleteRepairSample(
+                                    sample.getId()
+                            );
 
-                            applyFilter();
-
-                            Toast.makeText(
-                                    this,
-                                    "Sample deleted",
-                                    Toast.LENGTH_SHORT
-                            ).show();
+                            loadRepairSamples();
                         }
+                )
+                .setNegativeButton(
+                        "Cancel",
+                        null
                 )
                 .show();
     }

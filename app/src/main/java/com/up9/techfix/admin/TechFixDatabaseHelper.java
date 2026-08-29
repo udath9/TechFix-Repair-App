@@ -12,7 +12,7 @@ import java.util.List;
 public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "TechFix.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     // Branch table
     public static final String TABLE_BRANCHES = "branches";
@@ -41,6 +41,29 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_SERVICE_DESCRIPTION = "description";
     public static final String COL_SERVICE_PRICE = "price";
     public static final String COL_SERVICE_ESTIMATED_DAYS = "estimated_days";
+
+    // REPAIR SAMPLE TABLE
+
+    public static final String TABLE_REPAIR_SAMPLES =
+            "repair_samples";
+
+    public static final String COL_SAMPLE_ID =
+            "id";
+
+    public static final String COL_SAMPLE_DEVICE_NAME =
+            "device_name";
+
+    public static final String COL_SAMPLE_CATEGORY =
+            "category";
+
+    public static final String COL_SAMPLE_SERVICE =
+            "service";
+
+    public static final String COL_SAMPLE_DESCRIPTION =
+            "description";
+
+    public static final String COL_SAMPLE_IMAGE_URI =
+            "image_uri";
     public TechFixDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -80,6 +103,18 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
                         ")";
 
         db.execSQL(createServicesTable);
+
+        String createRepairSamplesTable =
+                "CREATE TABLE " + TABLE_REPAIR_SAMPLES + " (" +
+                        COL_SAMPLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        COL_SAMPLE_DEVICE_NAME + " TEXT NOT NULL, " +
+                        COL_SAMPLE_CATEGORY + " TEXT NOT NULL, " +
+                        COL_SAMPLE_SERVICE + " TEXT NOT NULL, " +
+                        COL_SAMPLE_DESCRIPTION + " TEXT, " +
+                        COL_SAMPLE_IMAGE_URI + " TEXT" +
+                        ")";
+
+        db.execSQL(createRepairSamplesTable);
     }
 
     @Override
@@ -89,30 +124,82 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
             int newVersion
     ) {
 
+        // Version 2 - Categories
         if (oldVersion < 2) {
 
             String createCategoriesTable =
                     "CREATE TABLE " + TABLE_CATEGORIES + " (" +
-                            COL_CATEGORY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                            COL_CATEGORY_NAME + " TEXT NOT NULL, " +
-                            COL_CATEGORY_DESCRIPTION + " TEXT" +
+                            COL_CATEGORY_ID +
+                            " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+
+                            COL_CATEGORY_NAME +
+                            " TEXT NOT NULL, " +
+
+                            COL_CATEGORY_DESCRIPTION +
+                            " TEXT" +
+
                             ")";
 
             db.execSQL(createCategoriesTable);
         }
+
+
+        // Version 3 - Repair Services
         if (oldVersion < 3) {
 
             String createServicesTable =
                     "CREATE TABLE " + TABLE_SERVICES + " (" +
-                            COL_SERVICE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                            COL_SERVICE_NAME + " TEXT NOT NULL, " +
-                            COL_SERVICE_CATEGORY + " TEXT NOT NULL, " +
-                            COL_SERVICE_DESCRIPTION + " TEXT, " +
-                            COL_SERVICE_PRICE + " REAL NOT NULL, " +
-                            COL_SERVICE_ESTIMATED_DAYS + " INTEGER NOT NULL" +
+                            COL_SERVICE_ID +
+                            " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+
+                            COL_SERVICE_NAME +
+                            " TEXT NOT NULL, " +
+
+                            COL_SERVICE_CATEGORY +
+                            " TEXT NOT NULL, " +
+
+                            COL_SERVICE_DESCRIPTION +
+                            " TEXT, " +
+
+                            COL_SERVICE_PRICE +
+                            " REAL NOT NULL, " +
+
+                            COL_SERVICE_ESTIMATED_DAYS +
+                            " INTEGER NOT NULL" +
+
                             ")";
 
             db.execSQL(createServicesTable);
+        }
+
+
+        // Version 4 - Repair Samples
+        if (oldVersion < 4) {
+
+            String createRepairSamplesTable =
+                    "CREATE TABLE " + TABLE_REPAIR_SAMPLES + " (" +
+
+                            COL_SAMPLE_ID +
+                            " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+
+                            COL_SAMPLE_DEVICE_NAME +
+                            " TEXT NOT NULL, " +
+
+                            COL_SAMPLE_CATEGORY +
+                            " TEXT NOT NULL, " +
+
+                            COL_SAMPLE_SERVICE +
+                            " TEXT NOT NULL, " +
+
+                            COL_SAMPLE_DESCRIPTION +
+                            " TEXT, " +
+
+                            COL_SAMPLE_IMAGE_URI +
+                            " TEXT" +
+
+                            ")";
+
+            db.execSQL(createRepairSamplesTable);
         }
     }
 
@@ -668,6 +755,212 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
                 db.delete(
                         TABLE_SERVICES,
                         COL_SERVICE_ID + " = ?",
+                        new String[]{
+                                String.valueOf(id)
+                        }
+                );
+
+        db.close();
+
+        return result;
+    }
+    public long insertRepairSample(
+            String deviceName,
+            String category,
+            String service,
+            String description,
+            String imageUri
+    ) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        ContentValues values =
+                new ContentValues();
+
+        values.put(
+                COL_SAMPLE_DEVICE_NAME,
+                deviceName
+        );
+
+        values.put(
+                COL_SAMPLE_CATEGORY,
+                category
+        );
+
+        values.put(
+                COL_SAMPLE_SERVICE,
+                service
+        );
+
+        values.put(
+                COL_SAMPLE_DESCRIPTION,
+                description
+        );
+
+        values.put(
+                COL_SAMPLE_IMAGE_URI,
+                imageUri
+        );
+
+        long result =
+                db.insert(
+                        TABLE_REPAIR_SAMPLES,
+                        null,
+                        values
+                );
+
+        db.close();
+
+        return result;
+    }
+    public List<RepairSample> getAllRepairSamples() {
+
+        List<RepairSample> samples =
+                new ArrayList<>();
+
+        SQLiteDatabase db =
+                getReadableDatabase();
+
+        Cursor cursor =
+                db.query(
+                        TABLE_REPAIR_SAMPLES,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        COL_SAMPLE_ID + " ASC"
+                );
+
+        if (cursor.moveToFirst()) {
+
+            do {
+
+                int id =
+                        cursor.getInt(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SAMPLE_ID
+                                )
+                        );
+
+                String deviceName =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SAMPLE_DEVICE_NAME
+                                )
+                        );
+
+                String category =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SAMPLE_CATEGORY
+                                )
+                        );
+
+                String service =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SAMPLE_SERVICE
+                                )
+                        );
+
+                String description =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SAMPLE_DESCRIPTION
+                                )
+                        );
+
+                String imageUri =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SAMPLE_IMAGE_URI
+                                )
+                        );
+
+                samples.add(
+                        new RepairSample(
+                                id,
+                                deviceName,
+                                category,
+                                service,
+                                description,
+                                imageUri
+                        )
+                );
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+
+        return samples;
+    }
+    public int updateRepairSample(
+            int id,
+            String deviceName,
+            String category,
+            String service,
+            String description,
+            String imageUri
+    ) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        ContentValues values =
+                new ContentValues();
+
+        values.put(
+                COL_SAMPLE_DEVICE_NAME,
+                deviceName
+        );
+
+        values.put(
+                COL_SAMPLE_CATEGORY,
+                category
+        );
+
+        values.put(
+                COL_SAMPLE_SERVICE,
+                service
+        );
+
+        values.put(
+                COL_SAMPLE_DESCRIPTION,
+                description
+        );
+
+        values.put(
+                COL_SAMPLE_IMAGE_URI,
+                imageUri
+        );
+
+        int result =
+                db.update(
+                        TABLE_REPAIR_SAMPLES,
+                        values,
+                        COL_SAMPLE_ID + " = ?",
+                        new String[]{
+                                String.valueOf(id)
+                        }
+                );
+
+        db.close();
+
+        return result;
+    }
+    public int deleteRepairSample(int id) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        int result =
+                db.delete(
+                        TABLE_REPAIR_SAMPLES,
+                        COL_SAMPLE_ID + " = ?",
                         new String[]{
                                 String.valueOf(id)
                         }

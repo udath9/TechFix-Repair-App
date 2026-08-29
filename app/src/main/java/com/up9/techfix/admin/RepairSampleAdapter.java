@@ -1,5 +1,6 @@
 package com.up9.techfix.admin;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,30 +16,35 @@ import com.up9.techfix.R;
 import java.util.List;
 
 public class RepairSampleAdapter
-        extends RecyclerView.Adapter<RepairSampleAdapter.SampleViewHolder> {
+        extends RecyclerView.Adapter<RepairSampleAdapter.RepairSampleViewHolder> {
 
     private final List<RepairSample> sampleList;
 
-    private final OnSampleActionListener listener;
+    private final OnRepairSampleActionListener listener;
 
-    public interface OnSampleActionListener {
+    public interface OnRepairSampleActionListener {
 
         void onEdit(RepairSample sample);
 
-        void onDelete(RepairSample sample);
+        void onDelete(
+                RepairSample sample,
+                int position
+        );
     }
 
     public RepairSampleAdapter(
             List<RepairSample> sampleList,
-            OnSampleActionListener listener
+            OnRepairSampleActionListener listener
     ) {
+
         this.sampleList = sampleList;
+
         this.listener = listener;
     }
 
     @NonNull
     @Override
-    public SampleViewHolder onCreateViewHolder(
+    public RepairSampleViewHolder onCreateViewHolder(
             @NonNull ViewGroup parent,
             int viewType
     ) {
@@ -52,46 +58,84 @@ public class RepairSampleAdapter
                                 false
                         );
 
-        return new SampleViewHolder(view);
+        return new RepairSampleViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(
-            @NonNull SampleViewHolder holder,
+            @NonNull RepairSampleViewHolder holder,
             int position
     ) {
 
         RepairSample sample =
                 sampleList.get(position);
 
-        holder.imgRepairSample.setImageResource(
-                sample.getImageResource()
-        );
-
-        holder.txtSampleDevice.setText(
+        holder.txtSampleDeviceName.setText(
                 sample.getDeviceName()
         );
 
         holder.txtSampleCategory.setText(
-                "Category: " +
-                        sample.getCategory()
+                "Category: "
+                        + sample.getCategory()
         );
 
         holder.txtSampleService.setText(
-                "Service: " +
-                        sample.getService()
+                "Service: "
+                        + sample.getService()
         );
 
         holder.txtSampleDescription.setText(
                 sample.getDescription()
         );
 
+        String imageUri =
+                sample.getImageUri();
+
+        if (imageUri != null
+                && !imageUri.isEmpty()) {
+
+            try {
+
+                Uri uri =
+                        Uri.parse(imageUri);
+
+                holder.imgSample.setImageURI(
+                        uri
+                );
+
+            } catch (Exception e) {
+
+                holder.imgSample.setImageResource(
+                        android.R.drawable.ic_menu_gallery
+                );
+            }
+
+        } else {
+
+            holder.imgSample.setImageResource(
+                    android.R.drawable.ic_menu_gallery
+            );
+        }
+
         holder.btnEditSample.setOnClickListener(
                 v -> listener.onEdit(sample)
         );
 
         holder.btnDeleteSample.setOnClickListener(
-                v -> listener.onDelete(sample)
+                v -> {
+
+                    int adapterPosition =
+                            holder.getAdapterPosition();
+
+                    if (adapterPosition !=
+                            RecyclerView.NO_POSITION) {
+
+                        listener.onDelete(
+                                sample,
+                                adapterPosition
+                        );
+                    }
+                }
         );
     }
 
@@ -101,12 +145,12 @@ public class RepairSampleAdapter
         return sampleList.size();
     }
 
-    public static class SampleViewHolder
+    public static class RepairSampleViewHolder
             extends RecyclerView.ViewHolder {
 
-        ImageView imgRepairSample;
+        ImageView imgSample;
 
-        TextView txtSampleDevice;
+        TextView txtSampleDeviceName;
         TextView txtSampleCategory;
         TextView txtSampleService;
         TextView txtSampleDescription;
@@ -114,20 +158,20 @@ public class RepairSampleAdapter
         Button btnEditSample;
         Button btnDeleteSample;
 
-        public SampleViewHolder(
+        public RepairSampleViewHolder(
                 @NonNull View itemView
         ) {
 
             super(itemView);
 
-            imgRepairSample =
+            imgSample =
                     itemView.findViewById(
-                            R.id.imgRepairSample
+                            R.id.imgSample
                     );
 
-            txtSampleDevice =
+            txtSampleDeviceName =
                     itemView.findViewById(
-                            R.id.txtSampleDevice
+                            R.id.txtSampleDeviceName
                     );
 
             txtSampleCategory =
