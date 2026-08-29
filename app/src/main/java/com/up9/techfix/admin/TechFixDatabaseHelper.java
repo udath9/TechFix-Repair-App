@@ -12,7 +12,7 @@ import java.util.List;
 public class TechFixDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "TechFix.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     // Branch table
     public static final String TABLE_BRANCHES = "branches";
@@ -32,6 +32,15 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_CATEGORY_NAME = "name";
     public static final String COL_CATEGORY_DESCRIPTION = "description";
 
+    // REPAIR SERVICES TABLE
+    public static final String TABLE_SERVICES = "repair_services";
+
+    public static final String COL_SERVICE_ID = "id";
+    public static final String COL_SERVICE_NAME = "name";
+    public static final String COL_SERVICE_CATEGORY = "category";
+    public static final String COL_SERVICE_DESCRIPTION = "description";
+    public static final String COL_SERVICE_PRICE = "price";
+    public static final String COL_SERVICE_ESTIMATED_DAYS = "estimated_days";
     public TechFixDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -59,6 +68,18 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
                         ")";
 
         db.execSQL(createCategoriesTable);
+
+        String createServicesTable =
+                "CREATE TABLE " + TABLE_SERVICES + " (" +
+                        COL_SERVICE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        COL_SERVICE_NAME + " TEXT NOT NULL, " +
+                        COL_SERVICE_CATEGORY + " TEXT NOT NULL, " +
+                        COL_SERVICE_DESCRIPTION + " TEXT, " +
+                        COL_SERVICE_PRICE + " REAL NOT NULL, " +
+                        COL_SERVICE_ESTIMATED_DAYS + " INTEGER NOT NULL" +
+                        ")";
+
+        db.execSQL(createServicesTable);
     }
 
     @Override
@@ -78,6 +99,20 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
                             ")";
 
             db.execSQL(createCategoriesTable);
+        }
+        if (oldVersion < 3) {
+
+            String createServicesTable =
+                    "CREATE TABLE " + TABLE_SERVICES + " (" +
+                            COL_SERVICE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                            COL_SERVICE_NAME + " TEXT NOT NULL, " +
+                            COL_SERVICE_CATEGORY + " TEXT NOT NULL, " +
+                            COL_SERVICE_DESCRIPTION + " TEXT, " +
+                            COL_SERVICE_PRICE + " REAL NOT NULL, " +
+                            COL_SERVICE_ESTIMATED_DAYS + " INTEGER NOT NULL" +
+                            ")";
+
+            db.execSQL(createServicesTable);
         }
     }
 
@@ -426,6 +461,213 @@ public class TechFixDatabaseHelper extends SQLiteOpenHelper {
                 db.delete(
                         TABLE_CATEGORIES,
                         COL_CATEGORY_ID + " = ?",
+                        new String[]{
+                                String.valueOf(id)
+                        }
+                );
+
+        db.close();
+
+        return result;
+    }
+
+    public long insertService(
+            String name,
+            String category,
+            String description,
+            double price,
+            int estimatedDays
+    ) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        ContentValues values =
+                new ContentValues();
+
+        values.put(
+                COL_SERVICE_NAME,
+                name
+        );
+
+        values.put(
+                COL_SERVICE_CATEGORY,
+                category
+        );
+
+        values.put(
+                COL_SERVICE_DESCRIPTION,
+                description
+        );
+
+        values.put(
+                COL_SERVICE_PRICE,
+                price
+        );
+
+        values.put(
+                COL_SERVICE_ESTIMATED_DAYS,
+                estimatedDays
+        );
+
+        long result =
+                db.insert(
+                        TABLE_SERVICES,
+                        null,
+                        values
+                );
+
+        db.close();
+
+        return result;
+    }
+    public List<RepairService> getAllServices() {
+
+        List<RepairService> services =
+                new ArrayList<>();
+
+        SQLiteDatabase db =
+                getReadableDatabase();
+
+        Cursor cursor =
+                db.query(
+                        TABLE_SERVICES,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        COL_SERVICE_ID + " ASC"
+                );
+
+        if (cursor.moveToFirst()) {
+
+            do {
+
+                int id =
+                        cursor.getInt(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SERVICE_ID
+                                )
+                        );
+
+                String name =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SERVICE_NAME
+                                )
+                        );
+
+                String category =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SERVICE_CATEGORY
+                                )
+                        );
+
+                String description =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SERVICE_DESCRIPTION
+                                )
+                        );
+
+                double price =
+                        cursor.getDouble(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SERVICE_PRICE
+                                )
+                        );
+
+                int estimatedDays =
+                        cursor.getInt(
+                                cursor.getColumnIndexOrThrow(
+                                        COL_SERVICE_ESTIMATED_DAYS
+                                )
+                        );
+
+                services.add(
+                        new RepairService(
+                                id,
+                                name,
+                                category,
+                                description,
+                                price,
+                                estimatedDays
+                        )
+                );
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+
+        return services;
+    }
+    public int updateService(
+            int id,
+            String name,
+            String category,
+            String description,
+            double price,
+            int estimatedDays
+    ) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        ContentValues values =
+                new ContentValues();
+
+        values.put(
+                COL_SERVICE_NAME,
+                name
+        );
+
+        values.put(
+                COL_SERVICE_CATEGORY,
+                category
+        );
+
+        values.put(
+                COL_SERVICE_DESCRIPTION,
+                description
+        );
+
+        values.put(
+                COL_SERVICE_PRICE,
+                price
+        );
+
+        values.put(
+                COL_SERVICE_ESTIMATED_DAYS,
+                estimatedDays
+        );
+
+        int result =
+                db.update(
+                        TABLE_SERVICES,
+                        values,
+                        COL_SERVICE_ID + " = ?",
+                        new String[]{
+                                String.valueOf(id)
+                        }
+                );
+
+        db.close();
+
+        return result;
+    }
+    public int deleteService(int id) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        int result =
+                db.delete(
+                        TABLE_SERVICES,
+                        COL_SERVICE_ID + " = ?",
                         new String[]{
                                 String.valueOf(id)
                         }

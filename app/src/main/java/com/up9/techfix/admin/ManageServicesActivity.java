@@ -1,10 +1,8 @@
 package com.up9.techfix.admin;
-import com.up9.techfix.R;
-import android.os.Bundle;
-
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -13,136 +11,103 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.widget.Button;
+import com.up9.techfix.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ManageServicesActivity
-        extends AppCompatActivity
+public class ManageServicesActivity extends AppCompatActivity
         implements ServiceAdapter.OnServiceActionListener {
 
     private RecyclerView recyclerServices;
-
     private Button btnAddService;
 
     private ServiceAdapter serviceAdapter;
 
     private List<RepairService> serviceList;
 
+    private TechFixDatabaseHelper databaseHelper;
+
     private int editingPosition = -1;
 
-    private final ActivityResultLauncher<Intent>
-            serviceFormLauncher =
+    private final ActivityResultLauncher<Intent> serviceFormLauncher =
             registerForActivityResult(
-                    new ActivityResultContracts
-                            .StartActivityForResult(),
+                    new ActivityResultContracts.StartActivityForResult(),
                     result -> {
 
-                        if (result.getResultCode()
-                                != RESULT_OK) {
-
+                        if (result.getResultCode() != RESULT_OK) {
                             return;
                         }
 
-                        Intent data =
-                                result.getData();
+                        Intent data = result.getData();
 
                         if (data == null) {
                             return;
                         }
 
                         String name =
-                                data.getStringExtra(
-                                        "name"
-                                );
+                                data.getStringExtra("name");
 
                         String category =
-                                data.getStringExtra(
-                                        "category"
-                                );
+                                data.getStringExtra("category");
 
                         String description =
-                                data.getStringExtra(
-                                        "description"
-                                );
+                                data.getStringExtra("description");
 
                         double price =
-                                data.getDoubleExtra(
-                                        "price",
-                                        0
-                                );
+                                data.getDoubleExtra("price", 0);
 
                         int estimatedDays =
-                                data.getIntExtra(
-                                        "estimatedDays",
-                                        1
+                                data.getIntExtra("estimatedDays", 1);
+
+                        boolean isEditMode =
+                                data.getBooleanExtra(
+                                        "editMode",
+                                        false
                                 );
 
-                        if (editingPosition == -1) {
+                        if (isEditMode) {
 
-                            int newId =
-                                    serviceList.size()
-                                            + 1;
-
-                            RepairService service =
-                                    new RepairService(
-                                            newId,
-                                            name,
-                                            category,
-                                            description,
-                                            price,
-                                            estimatedDays
+                            int serviceId =
+                                    data.getIntExtra(
+                                            "serviceId",
+                                            -1
                                     );
 
-                            serviceList.add(service);
+                            if (serviceId == -1) {
+                                return;
+                            }
 
-                            serviceAdapter
-                                    .notifyItemInserted(
-                                            serviceList.size() - 1
-                                    );
-
-                        } else {
-
-                            RepairService service =
-                                    serviceList.get(
-                                            editingPosition
-                                    );
-
-                            service.setName(name);
-
-                            service.setCategory(
-                                    category
-                            );
-
-                            service.setDescription(
-                                    description
-                            );
-
-                            service.setPrice(price);
-
-                            service.setEstimatedDays(
+                            databaseHelper.updateService(
+                                    serviceId,
+                                    name,
+                                    category,
+                                    description,
+                                    price,
                                     estimatedDays
                             );
 
-                            serviceAdapter
-                                    .notifyItemChanged(
-                                            editingPosition
-                                    );
+                        } else {
 
-                            editingPosition = -1;
+                            databaseHelper.insertService(
+                                    name,
+                                    category,
+                                    description,
+                                    price,
+                                    estimatedDays
+                            );
                         }
+
+                        loadServices();
+
+                        editingPosition = -1;
                     }
             );
 
     @Override
-    protected void onCreate(
-            Bundle savedInstanceState
-    ) {
+    protected void onCreate(Bundle savedInstanceState) {
 
-        super.onCreate(
-                savedInstanceState
-        );
+        super.onCreate(savedInstanceState);
 
         setContentView(
                 R.layout.activity_manage_services
@@ -158,14 +123,15 @@ public class ManageServicesActivity
                         R.id.btnAddService
                 );
 
-        recyclerServices.setLayoutManager(
-                new LinearLayoutManager(this)
-        );
+        databaseHelper =
+                new TechFixDatabaseHelper(this);
 
         serviceList =
                 new ArrayList<>();
 
-        loadSampleServices();
+        recyclerServices.setLayoutManager(
+                new LinearLayoutManager(this)
+        );
 
         serviceAdapter =
                 new ServiceAdapter(
@@ -177,80 +143,55 @@ public class ManageServicesActivity
                 serviceAdapter
         );
 
-        btnAddService.setOnClickListener(
-                v -> {
+        loadServices();
 
-                    editingPosition = -1;
+        btnAddService.setOnClickListener(v -> {
 
-                    Intent intent =
-                            new Intent(
-                                    this,
-                                    ServiceFormActivity.class
-                            );
+            editingPosition = -1;
 
-                    serviceFormLauncher.launch(
-                            intent
+            Intent intent =
+                    new Intent(
+                            ManageServicesActivity.this,
+                            ServiceFormActivity.class
                     );
-                }
-        );
+
+            intent.putExtra(
+                    "editMode",
+                    false
+            );
+
+            serviceFormLauncher.launch(intent);
+        });
     }
 
-    private void loadSampleServices() {
+    private void loadServices() {
 
-        serviceList.add(
-                new RepairService(
-                        1,
-                        "Screen Replacement",
-                        "Mobile Phone",
-                        "Replacement of damaged mobile phone screens",
-                        25000,
-                        2
-                )
+        serviceList.clear();
+
+        serviceList.addAll(
+                databaseHelper.getAllServices()
         );
 
-        serviceList.add(
-                new RepairService(
-                        2,
-                        "Battery Replacement",
-                        "Mobile Phone",
-                        "Replacement of damaged or weak batteries",
-                        8000,
-                        1
-                )
-        );
-
-        serviceList.add(
-                new RepairService(
-                        3,
-                        "Windows Installation",
-                        "Laptop",
-                        "Operating system installation and setup",
-                        5000,
-                        1
-                )
-        );
-
-        serviceList.add(
-                new RepairService(
-                        4,
-                        "Keyboard Replacement",
-                        "Laptop",
-                        "Laptop keyboard replacement service",
-                        12000,
-                        2
-                )
-        );
+        serviceAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onEdit(
-            RepairService service
-    ) {
+    protected void onResume() {
+
+        super.onResume();
+
+        if (databaseHelper != null
+                && serviceAdapter != null) {
+
+            loadServices();
+        }
+    }
+
+    @Override
+    public void onEdit(RepairService service) {
 
         editingPosition =
-                serviceList.indexOf(
-                        service
-                );
+                serviceList.indexOf(service);
 
         Intent intent =
                 new Intent(
@@ -293,9 +234,7 @@ public class ManageServicesActivity
                 service.getEstimatedDays()
         );
 
-        serviceFormLauncher.launch(
-                intent
-        );
+        serviceFormLauncher.launch(intent);
     }
 
     @Override
@@ -305,9 +244,7 @@ public class ManageServicesActivity
     ) {
 
         new AlertDialog.Builder(this)
-                .setTitle(
-                        "Delete Repair Service"
-                )
+                .setTitle("Delete Repair Service")
                 .setMessage(
                         "Are you sure you want to delete "
                                 + service.getName()
@@ -317,14 +254,11 @@ public class ManageServicesActivity
                         "Delete",
                         (dialog, which) -> {
 
-                            serviceList.remove(
-                                    position
+                            databaseHelper.deleteService(
+                                    service.getId()
                             );
 
-                            serviceAdapter
-                                    .notifyItemRemoved(
-                                            position
-                                    );
+                            loadServices();
                         }
                 )
                 .setNegativeButton(

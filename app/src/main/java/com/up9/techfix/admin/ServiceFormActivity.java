@@ -7,10 +7,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServiceFormActivity extends AppCompatActivity {
 
@@ -28,55 +32,70 @@ public class ServiceFormActivity extends AppCompatActivity {
 
     private boolean isEditMode = false;
 
-    private String[] categories = {
-            "Mobile Phone",
-            "Laptop",
-            "Desktop",
-            "Tablet"
-    };
+    private int serviceId = -1;
+
+    private TechFixDatabaseHelper databaseHelper;
+
+    private ArrayAdapter<String> categoryAdapter;
+
+    private List<DeviceCategory> categoryList;
+
+    private List<String> categoryNames;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.service_form);
-
-        txtServiceFormTitle =
-                findViewById(R.id.txtServiceFormTitle);
-
-        edtServiceName =
-                findViewById(R.id.edtServiceName);
-
-        edtServiceDescription =
-                findViewById(R.id.edtServiceDescription);
-
-        edtServicePrice =
-                findViewById(R.id.edtServicePrice);
-
-        edtEstimatedDays =
-                findViewById(R.id.edtEstimatedDays);
-
-        spinnerCategory =
-                findViewById(R.id.spinnerCategory);
-
-        btnSaveService =
-                findViewById(R.id.btnSaveService);
-
-        btnCancelService =
-                findViewById(R.id.btnCancelService);
-
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(
-                        this,
-                        android.R.layout.simple_spinner_item,
-                        categories
-                );
-
-        adapter.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item
+        setContentView(
+                R.layout.service_form
         );
 
-        spinnerCategory.setAdapter(adapter);
+        databaseHelper =
+                new TechFixDatabaseHelper(this);
+
+        txtServiceFormTitle =
+                findViewById(
+                        R.id.txtServiceFormTitle
+                );
+
+        edtServiceName =
+                findViewById(
+                        R.id.edtServiceName
+                );
+
+        edtServiceDescription =
+                findViewById(
+                        R.id.edtServiceDescription
+                );
+
+        edtServicePrice =
+                findViewById(
+                        R.id.edtServicePrice
+                );
+
+        edtEstimatedDays =
+                findViewById(
+                        R.id.edtEstimatedDays
+                );
+
+        spinnerCategory =
+                findViewById(
+                        R.id.spinnerCategory
+                );
+
+        btnSaveService =
+                findViewById(
+                        R.id.btnSaveService
+                );
+
+        btnCancelService =
+                findViewById(
+                        R.id.btnCancelService
+                );
+
+        loadCategories();
 
         checkEditMode();
 
@@ -84,14 +103,68 @@ public class ServiceFormActivity extends AppCompatActivity {
                 v -> saveService()
         );
 
+
         btnCancelService.setOnClickListener(
                 v -> finish()
         );
     }
 
+
+    private void loadCategories() {
+
+        categoryList =
+                databaseHelper.getAllCategories();
+
+
+        categoryNames =
+                new ArrayList<>();
+
+
+        for (DeviceCategory category :
+                categoryList) {
+
+            categoryNames.add(
+                    category.getName()
+            );
+        }
+
+
+        categoryAdapter =
+                new ArrayAdapter<>(
+                        this,
+                        android.R.layout.simple_spinner_item,
+                        categoryNames
+                );
+
+
+        categoryAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item
+        );
+
+
+        spinnerCategory.setAdapter(
+                categoryAdapter
+        );
+
+
+        // If no categories exist
+
+        if (categoryNames.isEmpty()) {
+
+            Toast.makeText(
+                    this,
+                    "No device categories found. Please add a category first.",
+                    Toast.LENGTH_LONG
+            ).show();
+        }
+    }
+
+
     private void checkEditMode() {
 
-        Intent intent = getIntent();
+        Intent intent =
+                getIntent();
+
 
         isEditMode =
                 intent.getBooleanExtra(
@@ -99,19 +172,39 @@ public class ServiceFormActivity extends AppCompatActivity {
                         false
                 );
 
+
         if (isEditMode) {
+
+            serviceId =
+                    intent.getIntExtra(
+                            "serviceId",
+                            -1
+                    );
+
 
             txtServiceFormTitle.setText(
                     "Edit Repair Service"
             );
 
-            edtServiceName.setText(
-                    intent.getStringExtra("name")
+
+            btnSaveService.setText(
+                    "Update Service"
             );
 
-            edtServiceDescription.setText(
-                    intent.getStringExtra("description")
+
+            edtServiceName.setText(
+                    intent.getStringExtra(
+                            "name"
+                    )
             );
+
+
+            edtServiceDescription.setText(
+                    intent.getStringExtra(
+                            "description"
+                    )
+            );
+
 
             edtServicePrice.setText(
                     String.valueOf(
@@ -122,6 +215,7 @@ public class ServiceFormActivity extends AppCompatActivity {
                     )
             );
 
+
             edtEstimatedDays.setText(
                     String.valueOf(
                             intent.getIntExtra(
@@ -131,18 +225,28 @@ public class ServiceFormActivity extends AppCompatActivity {
                     )
             );
 
+
             String selectedCategory =
                     intent.getStringExtra(
                             "category"
                     );
 
+
             if (selectedCategory != null) {
 
-                for (int i = 0; i < categories.length; i++) {
+                for (
+                        int i = 0;
+                        i < categoryNames.size();
+                        i++
+                ) {
 
-                    if (categories[i].equals(
-                            selectedCategory
-                    )) {
+                    if (
+                            categoryNames
+                                    .get(i)
+                                    .equals(
+                                            selectedCategory
+                                    )
+                    ) {
 
                         spinnerCategory.setSelection(i);
 
@@ -150,8 +254,20 @@ public class ServiceFormActivity extends AppCompatActivity {
                     }
                 }
             }
+
+        } else {
+
+            txtServiceFormTitle.setText(
+                    "Add Repair Service"
+            );
+
+
+            btnSaveService.setText(
+                    "Save Service"
+            );
         }
     }
+
 
     private void saveService() {
 
@@ -161,10 +277,6 @@ public class ServiceFormActivity extends AppCompatActivity {
                         .toString()
                         .trim();
 
-        String category =
-                spinnerCategory
-                        .getSelectedItem()
-                        .toString();
 
         String description =
                 edtServiceDescription
@@ -172,11 +284,13 @@ public class ServiceFormActivity extends AppCompatActivity {
                         .toString()
                         .trim();
 
+
         String priceText =
                 edtServicePrice
                         .getText()
                         .toString()
                         .trim();
+
 
         String daysText =
                 edtEstimatedDays
@@ -194,6 +308,23 @@ public class ServiceFormActivity extends AppCompatActivity {
 
             return;
         }
+
+        if (categoryNames.isEmpty()) {
+
+            Toast.makeText(
+                    this,
+                    "Please add a device category first.",
+                    Toast.LENGTH_LONG
+            ).show();
+
+            return;
+        }
+
+
+        String category =
+                spinnerCategory
+                        .getSelectedItem()
+                        .toString();
 
         if (description.isEmpty()) {
 
@@ -228,23 +359,32 @@ public class ServiceFormActivity extends AppCompatActivity {
             return;
         }
 
+
         double price;
 
         int estimatedDays;
 
+
         try {
 
             price =
-                    Double.parseDouble(priceText);
+                    Double.parseDouble(
+                            priceText
+                    );
+
 
             estimatedDays =
-                    Integer.parseInt(daysText);
+                    Integer.parseInt(
+                            daysText
+                    );
 
         } catch (NumberFormatException e) {
 
-            edtServicePrice.setError(
-                    "Enter valid numbers"
-            );
+            Toast.makeText(
+                    this,
+                    "Please enter valid numbers.",
+                    Toast.LENGTH_SHORT
+            ).show();
 
             return;
         }
@@ -255,8 +395,11 @@ public class ServiceFormActivity extends AppCompatActivity {
                     "Price must be greater than 0"
             );
 
+            edtServicePrice.requestFocus();
+
             return;
         }
+
 
         if (estimatedDays <= 0) {
 
@@ -264,52 +407,65 @@ public class ServiceFormActivity extends AppCompatActivity {
                     "Days must be greater than 0"
             );
 
+            edtEstimatedDays.requestFocus();
+
             return;
         }
 
         Intent resultIntent =
                 new Intent();
 
+
         resultIntent.putExtra(
                 "name",
                 name
         );
+
 
         resultIntent.putExtra(
                 "category",
                 category
         );
 
+
         resultIntent.putExtra(
                 "description",
                 description
         );
+
 
         resultIntent.putExtra(
                 "price",
                 price
         );
 
+
         resultIntent.putExtra(
                 "estimatedDays",
                 estimatedDays
         );
 
+
+        resultIntent.putExtra(
+                "editMode",
+                isEditMode
+        );
+
+
         if (isEditMode) {
 
             resultIntent.putExtra(
                     "serviceId",
-                    getIntent().getIntExtra(
-                            "serviceId",
-                            -1
-                    )
+                    serviceId
             );
         }
+
 
         setResult(
                 RESULT_OK,
                 resultIntent
         );
+
 
         finish();
     }
