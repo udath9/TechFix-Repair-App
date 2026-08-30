@@ -1,12 +1,15 @@
 package com.up9.techfix.service;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -18,6 +21,7 @@ import java.util.Locale;
 
 public class ServiceDetailsActivity extends AppCompatActivity {
 
+    private ImageView ivServiceImage;
     private TextView tvServiceTitle;
     private TextView tvServicePrice;
     private TextView tvServiceDescription;
@@ -50,6 +54,9 @@ public class ServiceDetailsActivity extends AppCompatActivity {
                 }
         );
 
+        ivServiceImage =
+                findViewById(R.id.ivServiceImage);
+
         tvServiceTitle =
                 findViewById(R.id.tvServiceTitle);
 
@@ -63,10 +70,18 @@ public class ServiceDetailsActivity extends AppCompatActivity {
                 findViewById(R.id.btnBookThisService);
 
 
+        // Get service data sent from ServicesActivity
+
         Intent intent = getIntent();
+
+        int serviceId =
+                intent.getIntExtra("serviceId", -1);
 
         String serviceName =
                 intent.getStringExtra("serviceName");
+
+        String serviceImageUri =
+                intent.getStringExtra("serviceImageUri");
 
         String serviceDescription =
                 intent.getStringExtra("serviceDescription");
@@ -78,6 +93,42 @@ public class ServiceDetailsActivity extends AppCompatActivity {
                 );
 
 
+        // Display service image
+
+        if (serviceImageUri != null &&
+                !serviceImageUri.trim().isEmpty()) {
+
+            int imageResourceId =
+                    getResources().getIdentifier(
+                            serviceImageUri.trim(),
+                            "drawable",
+                            getPackageName()
+                    );
+
+            if (imageResourceId != 0) {
+
+                Drawable drawable =
+                        ContextCompat.getDrawable(
+                                this,
+                                imageResourceId
+                        );
+
+                if (drawable != null) {
+
+                    ivServiceImage.setImageDrawable(
+                            drawable
+                    );
+
+                    ivServiceImage.setVisibility(
+                            ImageView.VISIBLE
+                    );
+                }
+            }
+        }
+
+
+        // Display service name
+
         if (serviceName != null) {
 
             tvServiceTitle.setText(
@@ -85,6 +136,8 @@ public class ServiceDetailsActivity extends AppCompatActivity {
             );
         }
 
+
+        // Display service price
 
         tvServicePrice.setText(
                 String.format(
@@ -95,6 +148,8 @@ public class ServiceDetailsActivity extends AppCompatActivity {
         );
 
 
+        // Display service description
+
         if (serviceDescription != null) {
 
             tvServiceDescription.setText(
@@ -102,6 +157,8 @@ public class ServiceDetailsActivity extends AppCompatActivity {
             );
         }
 
+
+        // Book this service
 
         btnBookThisService.setOnClickListener(v -> {
 
@@ -112,8 +169,8 @@ public class ServiceDetailsActivity extends AppCompatActivity {
                     );
 
             bookingIntent.putExtra(
-                    "selectedService",
-                    serviceName
+                    "serviceId",
+                    serviceId
             );
 
             startActivity(

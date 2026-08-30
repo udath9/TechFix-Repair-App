@@ -313,6 +313,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("price", 3000);
         db.insert("services", null, values);
 
+        values.clear();
+
+        values.put("name", "testing");
+        values.put("image_uri", "testing");
+        values.put(
+                "description",
+                " testing testing testing testing testing testing testing testing testing."
+        );
+        values.put("price", 2500);
+        db.insert("services", null, values);
+
         db.close();
     }
 }

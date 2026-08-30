@@ -1,14 +1,17 @@
 package com.up9.techfix.service;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -69,23 +72,28 @@ public class ServicesActivity extends AppCompatActivity {
 
         for (int i = 0; i < services.size(); i++) {
 
-            // Create a new row every 2 services
+            // Create a new row for every 2 services
             if (i % 2 == 0) {
 
                 currentRow = new LinearLayout(this);
-
-                currentRow.setLayoutParams(
-                        new LinearLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT
-                        )
-                );
 
                 currentRow.setOrientation(
                         LinearLayout.HORIZONTAL
                 );
 
+                currentRow.setGravity(
+                        Gravity.CENTER
+                );
+
                 currentRow.setWeightSum(2);
+
+                LinearLayout.LayoutParams rowParams =
+                        new LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT
+                        );
+
+                currentRow.setLayoutParams(rowParams);
 
                 servicesContainer.addView(currentRow);
             }
@@ -103,23 +111,26 @@ public class ServicesActivity extends AppCompatActivity {
 
         Button button = new Button(this);
 
-        LinearLayout.LayoutParams params =
+        LinearLayout.LayoutParams buttonParams =
                 new LinearLayout.LayoutParams(
                         0,
-                        180,
+                        300,
                         1
                 );
 
-        params.setMargins(
-                6,
-                6,
-                6,
-                6
+        buttonParams.setMargins(
+                8,
+                8,
+                8,
+                8
         );
 
-        button.setLayoutParams(params);
+        button.setLayoutParams(buttonParams);
 
-        // Show only the service name for now
+        // =====================================================
+        // SERVICE NAME
+        // =====================================================
+
         button.setText(service.getName());
 
         button.setTextSize(16);
@@ -129,6 +140,56 @@ public class ServicesActivity extends AppCompatActivity {
         );
 
         button.setAllCaps(false);
+
+        // =====================================================
+        // SERVICE IMAGE
+        // =====================================================
+
+        String imageName = service.getImageUri();
+
+        if (imageName != null && !imageName.trim().isEmpty()) {
+
+            int imageResourceId =
+                    getResources().getIdentifier(
+                            imageName.trim(),
+                            "drawable",
+                            getPackageName()
+                    );
+
+            if (imageResourceId != 0) {
+
+                Drawable drawable =
+                        ContextCompat.getDrawable(
+                                this,
+                                imageResourceId
+                        );
+
+                if (drawable != null) {
+
+                    int imageSize = 80;
+
+                    drawable.setBounds(
+                            0,
+                            0,
+                            imageSize,
+                            imageSize
+                    );
+
+                    button.setCompoundDrawables(
+                            null,
+                            drawable,
+                            null,
+                            null
+                    );
+
+                    button.setCompoundDrawablePadding(12);
+                }
+            }
+        }
+
+        // =====================================================
+        // CLICK
+        // =====================================================
 
         button.setOnClickListener(v -> {
 
