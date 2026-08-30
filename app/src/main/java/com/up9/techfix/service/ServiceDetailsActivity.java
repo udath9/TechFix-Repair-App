@@ -14,6 +14,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.up9.techfix.R;
 import com.up9.techfix.booking.BookRepairActivity;
 
+import java.util.Locale;
+
 public class ServiceDetailsActivity extends AppCompatActivity {
 
     private TextView tvServiceTitle;
@@ -24,6 +26,7 @@ public class ServiceDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_service_details);
 
@@ -31,9 +34,10 @@ public class ServiceDetailsActivity extends AppCompatActivity {
                 findViewById(R.id.main),
                 (v, insets) -> {
 
-                    Insets systemBars = insets.getInsets(
-                            WindowInsetsCompat.Type.systemBars()
-                    );
+                    Insets systemBars =
+                            insets.getInsets(
+                                    WindowInsetsCompat.Type.systemBars()
+                            );
 
                     v.setPadding(
                             systemBars.left,
@@ -46,10 +50,15 @@ public class ServiceDetailsActivity extends AppCompatActivity {
                 }
         );
 
-        tvServiceTitle = findViewById(R.id.tvServiceTitle);
-        tvServicePrice = findViewById(R.id.tvServicePrice);
+        tvServiceTitle =
+                findViewById(R.id.tvServiceTitle);
+
+        tvServicePrice =
+                findViewById(R.id.tvServicePrice);
+
         tvServiceDescription =
                 findViewById(R.id.tvServiceDescription);
+
         btnBookThisService =
                 findViewById(R.id.btnBookThisService);
 
@@ -59,39 +68,57 @@ public class ServiceDetailsActivity extends AppCompatActivity {
         String serviceName =
                 intent.getStringExtra("serviceName");
 
-        String servicePrice =
-                intent.getStringExtra("servicePrice");
-
         String serviceDescription =
                 intent.getStringExtra("serviceDescription");
 
+        double servicePrice =
+                intent.getDoubleExtra(
+                        "servicePrice",
+                        0.0
+                );
+
 
         if (serviceName != null) {
-            tvServiceTitle.setText(serviceName);
+
+            tvServiceTitle.setText(
+                    serviceName
+            );
         }
 
-        if (servicePrice != null) {
-            tvServicePrice.setText(servicePrice);
-        }
+
+        tvServicePrice.setText(
+                String.format(
+                        Locale.getDefault(),
+                        "LKR %.2f",
+                        servicePrice
+                )
+        );
+
 
         if (serviceDescription != null) {
-            tvServiceDescription.setText(serviceDescription);
+
+            tvServiceDescription.setText(
+                    serviceDescription
+            );
         }
 
 
         btnBookThisService.setOnClickListener(v -> {
 
-            Intent bookingIntent = new Intent(
-                    ServiceDetailsActivity.this,
-                    BookRepairActivity.class
-            );
+            Intent bookingIntent =
+                    new Intent(
+                            ServiceDetailsActivity.this,
+                            BookRepairActivity.class
+                    );
 
             bookingIntent.putExtra(
                     "selectedService",
                     serviceName
             );
 
-            startActivity(bookingIntent);
+            startActivity(
+                    bookingIntent
+            );
         });
     }
 }

@@ -2,7 +2,10 @@ package com.up9.techfix.service;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,12 +14,20 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.up9.techfix.R;
+import com.up9.techfix.data.DatabaseHelper;
+import com.up9.techfix.data.Service;
+
+import java.util.List;
 
 public class ServicesActivity extends AppCompatActivity {
+
+    private DatabaseHelper databaseHelper;
+    private LinearLayout servicesContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_services);
 
@@ -39,105 +50,126 @@ public class ServicesActivity extends AppCompatActivity {
                 }
         );
 
-        Button btnScreenReplacement =
-                findViewById(R.id.btnScreenReplacement);
+        servicesContainer =
+                findViewById(R.id.servicesContainer);
 
-        Button btnBatteryReplacement =
-                findViewById(R.id.btnBatteryReplacement);
+        databaseHelper = new DatabaseHelper(this);
 
-        Button btnOperatingSystemRepair =
-                findViewById(R.id.btnOperatingSystemRepair);
-
-        Button btnHardwareRepair =
-                findViewById(R.id.btnHardwareRepair);
-
-        Button btnSoftwareTroubleshooting =
-                findViewById(R.id.btnSoftwareTroubleshooting);
-
-        Button btnVirusRemoval =
-                findViewById(R.id.btnVirusRemoval);
-
-
-        btnScreenReplacement.setOnClickListener(v -> {
-
-            openServiceDetails(
-                    "Screen Replacement",
-                    "From LKR 8,000",
-                    "Replacement of cracked, damaged or broken device screens."
-            );
-
-        });
-
-
-        btnBatteryReplacement.setOnClickListener(v -> {
-
-            openServiceDetails(
-                    "Battery Replacement",
-                    "From LKR 5,000",
-                    "Replacement of damaged, weak or faulty device batteries."
-            );
-
-        });
-
-
-        btnOperatingSystemRepair.setOnClickListener(v -> {
-
-            openServiceDetails(
-                    "Operating System Repair",
-                    "From LKR 3,000",
-                    "Repair and troubleshooting of operating system problems."
-            );
-
-        });
-
-
-        btnHardwareRepair.setOnClickListener(v -> {
-
-            openServiceDetails(
-                    "Hardware Repair",
-                    "From LKR 3,500",
-                    "Diagnosis and repair of faulty internal hardware components."
-            );
-
-        });
-
-
-        btnSoftwareTroubleshooting.setOnClickListener(v -> {
-
-            openServiceDetails(
-                    "Software Troubleshooting",
-                    "From LKR 2,500",
-                    "Diagnosis and resolution of software-related problems."
-            );
-
-        });
-
-
-        btnVirusRemoval.setOnClickListener(v -> {
-
-            openServiceDetails(
-                    "Virus / Malware Removal",
-                    "From LKR 3,000",
-                    "Detection and removal of viruses, malware and other unwanted software."
-            );
-
-        });
+        loadServices();
     }
 
+    private void loadServices() {
 
-    private void openServiceDetails(
-            String serviceName,
-            String servicePrice,
-            String serviceDescription) {
+        servicesContainer.removeAllViews();
+
+        List<Service> services =
+                databaseHelper.getAllServices();
+
+        LinearLayout currentRow = null;
+
+        for (int i = 0; i < services.size(); i++) {
+
+            // Create a new row every 2 services
+            if (i % 2 == 0) {
+
+                currentRow = new LinearLayout(this);
+
+                currentRow.setLayoutParams(
+                        new LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT
+                        )
+                );
+
+                currentRow.setOrientation(
+                        LinearLayout.HORIZONTAL
+                );
+
+                currentRow.setWeightSum(2);
+
+                servicesContainer.addView(currentRow);
+            }
+
+            Service service = services.get(i);
+
+            Button serviceButton =
+                    createServiceButton(service);
+
+            currentRow.addView(serviceButton);
+        }
+    }
+
+    private Button createServiceButton(Service service) {
+
+        Button button = new Button(this);
+
+        LinearLayout.LayoutParams params =
+                new LinearLayout.LayoutParams(
+                        0,
+                        180,
+                        1
+                );
+
+        params.setMargins(
+                6,
+                6,
+                6,
+                6
+        );
+
+        button.setLayoutParams(params);
+
+        // Show only the service name for now
+        button.setText(service.getName());
+
+        button.setTextSize(16);
+
+        button.setGravity(
+                Gravity.CENTER
+        );
+
+        button.setAllCaps(false);
+
+        button.setOnClickListener(v -> {
+
+            openServiceDetails(service);
+
+        });
+
+        return button;
+    }
+
+    private void openServiceDetails(Service service) {
 
         Intent intent = new Intent(
                 ServicesActivity.this,
                 ServiceDetailsActivity.class
         );
 
-        intent.putExtra("serviceName", serviceName);
-        intent.putExtra("servicePrice", servicePrice);
-        intent.putExtra("serviceDescription", serviceDescription);
+        intent.putExtra(
+                "serviceId",
+                service.getId()
+        );
+
+        intent.putExtra(
+                "serviceName",
+                service.getName()
+        );
+
+        intent.putExtra(
+                "serviceImageUri",
+                service.getImageUri()
+        );
+
+        intent.putExtra(
+                "serviceDescription",
+                service.getDescription()
+        );
+
+        intent.putExtra(
+                "servicePrice",
+                service.getPrice()
+        );
 
         startActivity(intent);
     }

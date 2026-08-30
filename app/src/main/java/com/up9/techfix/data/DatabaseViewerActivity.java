@@ -17,7 +17,7 @@ import com.up9.techfix.R;
 public class DatabaseViewerActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
-
+    private Button btnAddTestServices;
     private TableLayout tableCustomers;
     private TableLayout tableServices;
     private TableLayout tableBranches;
@@ -38,11 +38,20 @@ public class DatabaseViewerActivity extends AppCompatActivity {
         tableBranches = findViewById(R.id.tableBranches);
         tableRepairs = findViewById(R.id.tableRepairs);
         tablePayments = findViewById(R.id.tablePayments);
-
         btnRefresh = findViewById(R.id.btnRefresh);
+
+        btnAddTestServices =
+                findViewById(R.id.btnAddTestServices);
+
 
         // Display database when page opens
         displayDatabase();
+        btnAddTestServices.setOnClickListener(v -> {
+
+            databaseHelper.insertTestServices();
+
+            displayDatabase();
+        });
 
         // Refresh button
         btnRefresh.setOnClickListener(v -> {

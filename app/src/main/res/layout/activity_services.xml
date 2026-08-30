@@ -17,7 +17,6 @@
         android:textSize="28sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:layout_marginBottom="4dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -29,109 +28,26 @@
         android:text="What can we fix for you today?"
         android:textSize="16sp"
         android:gravity="center"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/tvServicesTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <ScrollView
+        android:id="@+id/scrollServices"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/tvServicesSubtitle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
+            android:id="@+id/servicesContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <!-- Row 1 -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="2">
-
-                <Button
-                    android:id="@+id/btnScreenReplacement"
-                    android:layout_width="0dp"
-                    android:layout_height="170dp"
-                    android:layout_weight="1"
-                    android:text="📱\nScreen Replacement\nFrom LKR 8,000"
-                    android:textSize="14sp"
-                    android:layout_margin="6dp" />
-
-                <Button
-                    android:id="@+id/btnBatteryReplacement"
-                    android:layout_width="0dp"
-                    android:layout_height="170dp"
-                    android:layout_weight="1"
-                    android:text="🔋\nBattery Replacement\nFrom LKR 5,000"
-                    android:textSize="14sp"
-                    android:layout_margin="6dp" />
-
-            </LinearLayout>
-
-            <!-- Row 2 -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="2">
-
-                <Button
-                    android:id="@+id/btnOperatingSystemRepair"
-                    android:layout_width="0dp"
-                    android:layout_height="170dp"
-                    android:layout_weight="1"
-                    android:text="💻\nOperating System\nRepair\nFrom LKR 3,000"
-                    android:textSize="14sp"
-                    android:layout_margin="6dp" />
-
-                <Button
-                    android:id="@+id/btnHardwareRepair"
-                    android:layout_width="0dp"
-                    android:layout_height="170dp"
-                    android:layout_weight="1"
-                    android:text="🔧\nHardware Repair\nFrom LKR 3,500"
-                    android:textSize="14sp"
-                    android:layout_margin="6dp" />
-
-            </LinearLayout>
-
-            <!-- Row 3 -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="2">
-
-                <Button
-                    android:id="@+id/btnSoftwareTroubleshooting"
-                    android:layout_width="0dp"
-                    android:layout_height="170dp"
-                    android:layout_weight="1"
-                    android:text="⚙️\nSoftware\nTroubleshooting\nFrom LKR 2,500"
-                    android:textSize="14sp"
-                    android:layout_margin="6dp" />
-
-                <Button
-                    android:id="@+id/btnVirusRemoval"
-                    android:layout_width="0dp"
-                    android:layout_height="170dp"
-                    android:layout_weight="1"
-                    android:text="🛡️\nVirus / Malware\nRemoval\nFrom LKR 3,000"
-                    android:textSize="14sp"
-                    android:layout_margin="6dp" />
-
-            </LinearLayout>
-
-        </LinearLayout>
+            android:orientation="vertical" />
 
     </ScrollView>
 

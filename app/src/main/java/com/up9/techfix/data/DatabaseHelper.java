@@ -177,4 +177,142 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return serviceList;
     }
+    public void insertDefaultServices() {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put("name", "Screen Replacement");
+        values.put("image_uri", "screen_replacement");
+        values.put("description",
+                "Replacement of cracked, damaged or broken device screens.");
+        values.put("price", 8000);
+
+        db.insert("services", null, values);
+
+        values.clear();
+
+        values.put("name", "Battery Replacement");
+        values.put("image_uri", "battery_replacement");
+        values.put("description",
+                "Replacement of damaged, weak or faulty device batteries.");
+        values.put("price", 5000);
+
+        db.insert("services", null, values);
+
+        values.clear();
+
+        values.put("name", "Operating System Repair");
+        values.put("image_uri", "operating_system");
+        values.put("description",
+                "Repair and troubleshooting of operating system problems.");
+        values.put("price", 3000);
+
+        db.insert("services", null, values);
+
+        values.clear();
+
+        values.put("name", "Hardware Repair");
+        values.put("image_uri", "hardware_repair");
+        values.put("description",
+                "Diagnosis and repair of faulty internal hardware components.");
+        values.put("price", 3500);
+
+        db.insert("services", null, values);
+
+        values.clear();
+
+        values.put("name", "Software Troubleshooting");
+        values.put("image_uri", "software_troubleshooting");
+        values.put("description",
+                "Diagnosis and resolution of software-related problems.");
+        values.put("price", 2500);
+
+        db.insert("services", null, values);
+
+        values.clear();
+
+        values.put("name", "Virus / Malware Removal");
+        values.put("image_uri", "virus_removal");
+        values.put("description",
+                "Detection and removal of viruses, malware and other unwanted software.");
+        values.put("price", 3000);
+
+        db.insert("services", null, values);
+    }
+
+    //delete when combining project
+    public void insertTestServices() {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put("name", "Screen Replacement");
+        values.put("image_uri", "screen_replacement");
+        values.put(
+                "description",
+                "Replacement of cracked, damaged or broken device screens."
+        );
+        values.put("price", 8000);
+        db.insert("services", null, values);
+
+        values.clear();
+
+        values.put("name", "Battery Replacement");
+        values.put("image_uri", "battery_replacement");
+        values.put(
+                "description",
+                "Replacement of damaged, weak or faulty device batteries."
+        );
+        values.put("price", 5000);
+        db.insert("services", null, values);
+
+        values.clear();
+
+        values.put("name", "Operating System Repair");
+        values.put("image_uri", "operating_system");
+        values.put(
+                "description",
+                "Repair and troubleshooting of operating system problems."
+        );
+        values.put("price", 3000);
+        db.insert("services", null, values);
+
+        values.clear();
+
+        values.put("name", "Hardware Repair");
+        values.put("image_uri", "hardware_repair");
+        values.put(
+                "description",
+                "Diagnosis and repair of faulty internal hardware components."
+        );
+        values.put("price", 3500);
+        db.insert("services", null, values);
+
+        values.clear();
+
+        values.put("name", "Software Troubleshooting");
+        values.put("image_uri", "software_troubleshooting");
+        values.put(
+                "description",
+                "Diagnosis and resolution of software-related problems."
+        );
+        values.put("price", 2500);
+        db.insert("services", null, values);
+
+        values.clear();
+
+        values.put("name", "Virus / Malware Removal");
+        values.put("image_uri", "virus_removal");
+        values.put(
+                "description",
+                "Detection and removal of viruses, malware and other unwanted software."
+        );
+        values.put("price", 3000);
+        db.insert("services", null, values);
+
+        db.close();
+    }
 }

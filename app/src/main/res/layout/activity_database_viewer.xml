@@ -30,6 +30,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Refresh Database"
+                android:layout_marginBottom="8dp" />
+
+            <!-- TEMPORARY TEST BUTTON -->
+
+            <Button
+                android:id="@+id/btnAddTestServices"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Add Test Services"
                 android:layout_marginBottom="24dp" />
 
             <!-- CUSTOMERS -->
