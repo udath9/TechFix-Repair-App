@@ -1,6 +1,7 @@
 package com.up9.techfix.auth;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.widget.Button;
@@ -40,6 +41,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         tvRegister.setOnClickListener(v -> {
+
             Intent intent = new Intent(
                     LoginActivity.this,
                     RegisterActivity.class
@@ -51,45 +53,102 @@ public class LoginActivity extends AppCompatActivity {
 
     private void validateLogin() {
 
-        String email = etEmail.getText().toString().trim();
-        String password = etPassword.getText().toString();
+        String email =
+                etEmail.getText().toString().trim();
+
+        String password =
+                etPassword.getText().toString();
 
         if (email.isEmpty()) {
-            etEmail.setError("Please enter your email");
+
+            etEmail.setError(
+                    "Please enter your email"
+            );
+
             etEmail.requestFocus();
+
             return;
         }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            etEmail.setError("Please enter a valid email");
+
+            etEmail.setError(
+                    "Please enter a valid email"
+            );
+
             etEmail.requestFocus();
+
             return;
         }
 
         if (password.isEmpty()) {
-            etPassword.setError("Please enter your password");
+
+            etPassword.setError(
+                    "Please enter your password"
+            );
+
             etPassword.requestFocus();
+
             return;
         }
 
+
         boolean loginSuccessful =
-                databaseHelper.checkCustomerLogin(email, password);
+                databaseHelper.checkCustomerLogin(
+                        email,
+                        password
+                );
+
 
         if (loginSuccessful) {
 
-            Toast.makeText(
-                    this,
-                    "Login successful!",
-                    Toast.LENGTH_SHORT
-            ).show();
+            int customerId =
+                    databaseHelper.getCustomerId(
+                            email,
+                            password
+                    );
 
-            Intent intent = new Intent(
-                    LoginActivity.this,
-                    CustomerHomeActivity.class
-            );
 
-            startActivity(intent);
-            finish();
+            if (customerId != -1) {
+
+                // Save logged-in customer ID
+
+                SharedPreferences preferences =
+                        getSharedPreferences(
+                                "TechFixSession",
+                                MODE_PRIVATE
+                        );
+
+                preferences.edit()
+                        .putInt("customerId", customerId)
+                        .apply();
+
+
+                Toast.makeText(
+                        this,
+                        "Login successful!",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+
+                Intent intent =
+                        new Intent(
+                                LoginActivity.this,
+                                CustomerHomeActivity.class
+                        );
+
+                startActivity(intent);
+
+                finish();
+
+            } else {
+
+                Toast.makeText(
+                        this,
+                        "Customer information not found.",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
 
         } else {
 
