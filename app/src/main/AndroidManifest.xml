@@ -27,6 +27,10 @@
         </activity>
         <activity
             android:name=".Technician.AssignedRepairsActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".Technician.RepairDetailsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>

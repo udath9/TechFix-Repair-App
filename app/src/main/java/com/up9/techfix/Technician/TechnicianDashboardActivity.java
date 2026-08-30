@@ -10,14 +10,18 @@ import com.up9.techfix.R;
 
 public class TechnicianDashboardActivity extends AppCompatActivity {
 
+    Button btnViewRepairs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_technician_dashboard);
 
-        Button btnViewRepairs = findViewById(R.id.btnViewRepairs);
+        btnViewRepairs = findViewById(R.id.btnViewRepairs);
 
         btnViewRepairs.setOnClickListener(v -> {
+
             Intent intent = new Intent(
                     TechnicianDashboardActivity.this,
                     AssignedRepairsActivity.class
