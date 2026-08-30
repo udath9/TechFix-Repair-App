@@ -773,4 +773,82 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             );
         }
     }
+    // =====================================================
+// GET CUSTOMER ACTIVE REPAIRS
+// =====================================================
+
+    public Cursor getCustomerActiveRepairs(int customerId) {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        return db.rawQuery(
+                "SELECT " +
+                        "r.id AS repair_id, " +
+                        "r.device_category, " +
+                        "r.device_model, " +
+                        "r.problem_description, " +
+                        "r.status, " +
+                        "r.repair_date, " +
+                        "s.name AS service_name, " +
+                        "s.price AS service_price, " +
+                        "b.name AS branch_name " +
+
+                        "FROM repairs r " +
+
+                        "LEFT JOIN services s " +
+                        "ON r.service_id = s.id " +
+
+                        "LEFT JOIN branches b " +
+                        "ON r.branch_id = b.id " +
+
+                        "WHERE r.customer_id = ? " +
+
+                        "AND r.status != 'Completed' " +
+                        "AND r.status != 'Cancelled' " +
+
+                        "ORDER BY r.id DESC",
+
+                new String[]{
+                        String.valueOf(customerId)
+                }
+        );
+    }
+
+
+// =====================================================
+// CANCEL REPAIR
+// Only Pending repairs can be cancelled.
+// =====================================================
+
+    public boolean cancelRepair(int repairId, int customerId) {
+
+        SQLiteDatabase db =
+                this.getWritableDatabase();
+
+        ContentValues values =
+                new ContentValues();
+
+        values.put(
+                "status",
+                "Cancelled"
+        );
+
+        int rowsUpdated =
+                db.update(
+                        "repairs",
+                        values,
+
+                        "id = ? " +
+                                "AND customer_id = ? " +
+                                "AND status = ?",
+
+                        new String[]{
+                                String.valueOf(repairId),
+                                String.valueOf(customerId),
+                                "Pending"
+                        }
+                );
+
+        return rowsUpdated > 0;
+    }
 }
