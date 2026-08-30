@@ -6,11 +6,14 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Database information
     private static final String DATABASE_NAME = "TechFix.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -34,6 +37,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "CREATE TABLE services (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "name TEXT NOT NULL, " +
+                        "image_uri TEXT, " +
                         "description TEXT, " +
                         "price REAL NOT NULL)"
         );
@@ -81,7 +85,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             int oldVersion,
             int newVersion
     ) {
-        // Database upgrade logic will be added when needed.
+
+        if (oldVersion < 2) {
+            db.execSQL(
+                    "ALTER TABLE services ADD COLUMN image_uri TEXT"
+            );
+        }
     }
     public long registerCustomer(
             String fullName,
@@ -114,5 +123,58 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
 
         return exists;
+    }
+    public List<Service> getAllServices() {
+
+        List<Service> serviceList = new ArrayList<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT id, name, image_uri, description, price " +
+                        "FROM services ORDER BY id ASC",
+                null
+        );
+
+        if (cursor.moveToFirst()) {
+
+            do {
+
+                int id = cursor.getInt(
+                        cursor.getColumnIndexOrThrow("id")
+                );
+
+                String name = cursor.getString(
+                        cursor.getColumnIndexOrThrow("name")
+                );
+
+                String imageUri = cursor.getString(
+                        cursor.getColumnIndexOrThrow("image_uri")
+                );
+
+                String description = cursor.getString(
+                        cursor.getColumnIndexOrThrow("description")
+                );
+
+                double price = cursor.getDouble(
+                        cursor.getColumnIndexOrThrow("price")
+                );
+
+                Service service = new Service(
+                        id,
+                        name,
+                        imageUri,
+                        description,
+                        price
+                );
+
+                serviceList.add(service);
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return serviceList;
     }
 }
