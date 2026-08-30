@@ -1,10 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="20dp"
     tools:context=".customer.RepairTrackingActivity">
+
+    <TextView
+        android:id="@+id/tvTrackingTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Track My Repair"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tvRepairId"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Repair ID: TF-1001"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/tvTrackingTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tvDeviceInfo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Device: Laptop&#10;Service: Screen Replacement"
+        android:textSize="17sp"
+        android:gravity="center"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/tvRepairId"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tvCurrentStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Current Status: Repair In Progress"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginTop="25dp"
+        app:layout_constraintTop_toBottomOf="@id/tvDeviceInfo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="25dp"
+        app:layout_constraintTop_toBottomOf="@id/tvCurrentStatus"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvStep1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="●  Appointment Received"
+                android:textSize="18sp"
+                android:padding="16dp" />
+
+            <TextView
+                android:id="@+id/tvStep2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="●  Repair In Progress"
+                android:textSize="18sp"
+                android:padding="16dp" />
+
+            <TextView
+                android:id="@+id/tvStep3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="○  Ready for Collection"
+                android:textSize="18sp"
+                android:padding="16dp" />
+
+            <TextView
+                android:id="@+id/tvStep4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="○  Completed"
+                android:textSize="18sp"
+                android:padding="16dp" />
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
