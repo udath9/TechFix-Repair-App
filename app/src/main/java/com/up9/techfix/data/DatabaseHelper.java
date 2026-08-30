@@ -100,4 +100,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return db.insert("customers", null, values);
     }
+    public boolean checkCustomerLogin(String email, String password) {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM customers WHERE email = ? AND password = ?",
+                new String[]{email, password}
+        );
+
+        boolean exists = cursor.getCount() > 0;
+
+        cursor.close();
+
+        return exists;
+    }
 }

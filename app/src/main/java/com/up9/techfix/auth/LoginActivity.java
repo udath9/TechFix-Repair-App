@@ -12,8 +12,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
 import com.up9.techfix.customer.CustomerHomeActivity;
+import com.up9.techfix.data.DatabaseHelper;
 
 public class LoginActivity extends AppCompatActivity {
+
+    private DatabaseHelper databaseHelper;
 
     private EditText etEmail;
     private EditText etPassword;
@@ -25,6 +28,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        databaseHelper = new DatabaseHelper(this);
+
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
@@ -35,7 +40,11 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         tvRegister.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            Intent intent = new Intent(
+                    LoginActivity.this,
+                    RegisterActivity.class
+            );
+
             startActivity(intent);
         });
     }
@@ -63,12 +72,32 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        Intent intent = new Intent(
-                LoginActivity.this,
-                CustomerHomeActivity.class
-        );
+        boolean loginSuccessful =
+                databaseHelper.checkCustomerLogin(email, password);
 
-        startActivity(intent);
-        finish();
+        if (loginSuccessful) {
+
+            Toast.makeText(
+                    this,
+                    "Login successful!",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            Intent intent = new Intent(
+                    LoginActivity.this,
+                    CustomerHomeActivity.class
+            );
+
+            startActivity(intent);
+            finish();
+
+        } else {
+
+            Toast.makeText(
+                    this,
+                    "Invalid email or password",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
     }
 }
