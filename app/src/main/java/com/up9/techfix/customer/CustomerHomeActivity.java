@@ -12,6 +12,9 @@ import com.up9.techfix.payment.PaymentActivity;
 import com.up9.techfix.service.ServicesActivity;
 import com.up9.techfix.booking.BookRepairActivity;
 
+
+import com.up9.techfix.data.DatabaseViewerActivity;
+
 public class CustomerHomeActivity extends AppCompatActivity {
 
     private Button btnServices;
@@ -63,6 +66,18 @@ public class CustomerHomeActivity extends AppCompatActivity {
 
         btnBranches.setOnClickListener(v -> {
             Intent intent = new Intent(CustomerHomeActivity.this, BranchesActivity.class);
+            startActivity(intent);
+        });
+
+        //delete later
+        Button btnDatabaseViewer = findViewById(R.id.btnDatabaseViewer);
+
+        btnDatabaseViewer.setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    CustomerHomeActivity.this,
+                    DatabaseViewerActivity.class
+            );
+
             startActivity(intent);
         });
     }

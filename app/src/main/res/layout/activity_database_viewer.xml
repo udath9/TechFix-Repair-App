@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TechFix SQLite Database"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/btnRefresh"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Refresh Database"
+                android:layout_marginBottom="24dp" />
+
+            <!-- CUSTOMERS -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="CUSTOMERS"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <TableLayout
+                android:id="@+id/tableCustomers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:stretchColumns="*"
+                android:shrinkColumns="*"
+                android:layout_marginBottom="30dp" />
+
+            <!-- SERVICES -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="SERVICES"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <TableLayout
+                android:id="@+id/tableServices"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:stretchColumns="*"
+                android:shrinkColumns="*"
+                android:layout_marginBottom="30dp" />
+
+            <!-- BRANCHES -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="BRANCHES"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <TableLayout
+                android:id="@+id/tableBranches"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:stretchColumns="*"
+                android:shrinkColumns="*"
+                android:layout_marginBottom="30dp" />
+
+            <!-- REPAIRS -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="REPAIRS"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <TableLayout
+                android:id="@+id/tableRepairs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:stretchColumns="*"
+                android:shrinkColumns="*"
+                android:layout_marginBottom="30dp" />
+
+            <!-- PAYMENTS -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="PAYMENTS"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <TableLayout
+                android:id="@+id/tablePayments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:stretchColumns="*"
+                android:shrinkColumns="*"
+                android:layout_marginBottom="30dp" />
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+</ScrollView>
