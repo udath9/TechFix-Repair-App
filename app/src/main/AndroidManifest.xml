@@ -37,6 +37,10 @@
             android:name=".Technician.UpdateRepairActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".Technician.InProgressRepairsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>
