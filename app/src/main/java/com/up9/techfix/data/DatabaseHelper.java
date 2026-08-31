@@ -851,4 +851,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return rowsUpdated > 0;
     }
+    public Cursor getRepairHistory(int customerId) {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        return db.rawQuery(
+                "SELECT " +
+                        "repairs.id AS repair_id, " +
+                        "repairs.device_category, " +
+                        "repairs.device_model, " +
+                        "services.name AS service_name, " +
+                        "branches.name AS branch_name, " +
+                        "repairs.repair_date, " +
+                        "repairs.status, " +
+                        "services.price " +
+
+                        "FROM repairs " +
+
+                        "LEFT JOIN services " +
+                        "ON repairs.service_id = services.id " +
+
+                        "LEFT JOIN branches " +
+                        "ON repairs.branch_id = branches.id " +
+
+                        "WHERE repairs.customer_id = ? " +
+
+                        "ORDER BY repairs.id DESC",
+
+                new String[]{
+                        String.valueOf(customerId)
+                }
+        );
+    }
 }

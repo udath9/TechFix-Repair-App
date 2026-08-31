@@ -1,105 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
+
     tools:context=".customer.RepairHistoryActivity">
+
+
+    <!-- ================================================= -->
+    <!-- TITLE -->
+    <!-- ================================================= -->
 
     <TextView
         android:id="@+id/tvHistoryTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+
         android:text="Repair History"
         android:textSize="28sp"
         android:textStyle="bold"
         android:gravity="center"
+
         android:layout_marginTop="10dp"
+
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+
+    <!-- ================================================= -->
+    <!-- REPAIR HISTORY -->
+    <!-- ================================================= -->
+
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
+
         android:layout_marginTop="20dp"
+
+        android:fillViewport="true"
+
         app:layout_constraintTop_toBottomOf="@id/tvHistoryTitle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+
         <LinearLayout
+            android:id="@+id/historyContainer"
+
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
 
-            <!-- Repair 1 -->
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Repair #TF-1001"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:padding="12dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Device: Laptop&#10;Service: Screen Replacement&#10;Branch: Colombo&#10;Date: 20 August 2026&#10;Status: Completed&#10;Price: LKR 8,000"
-                android:textSize="16sp"
-                android:padding="12dp" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginBottom="20dp" />
-
-
-            <!-- Repair 2 -->
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Repair #TF-0987"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:padding="12dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Device: Mobile Phone&#10;Service: Battery Replacement&#10;Branch: Galle&#10;Date: 05 July 2026&#10;Status: Completed&#10;Price: LKR 5,500"
-                android:textSize="16sp"
-                android:padding="12dp" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginBottom="20dp" />
-
-
-            <!-- Repair 3 -->
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Repair #TF-0942"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:padding="12dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Device: Tablet&#10;Service: Software Troubleshooting&#10;Branch: Colombo&#10;Date: 18 June 2026&#10;Status: Completed&#10;Price: LKR 3,500"
-                android:textSize="16sp"
-                android:padding="12dp" />
-
-        </LinearLayout>
+            android:orientation="vertical" />
 
     </ScrollView>
 
