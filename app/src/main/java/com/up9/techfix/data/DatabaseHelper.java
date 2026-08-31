@@ -883,4 +883,183 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
+    // =====================================================
+// GET UNPAID REPAIRS
+// =====================================================
+
+    public Cursor getUnpaidRepairs(int customerId) {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        return db.rawQuery(
+                "SELECT " +
+                        "repairs.id AS repair_id, " +
+                        "repairs.device_category, " +
+                        "repairs.device_model, " +
+                        "services.name AS service_name, " +
+                        "services.price AS amount, " +
+                        "branches.name AS branch_name, " +
+                        "repairs.status " +
+
+                        "FROM repairs " +
+
+                        "LEFT JOIN services " +
+                        "ON repairs.service_id = services.id " +
+
+                        "LEFT JOIN branches " +
+                        "ON repairs.branch_id = branches.id " +
+
+                        "WHERE repairs.customer_id = ? " +
+                        "AND repairs.status IN " +
+                        "('Ready for Collection', 'Completed') " +
+                        "AND repairs.id NOT IN " +
+                        "(" +
+                        "SELECT repair_id " +
+                        "FROM payments " +
+                        "WHERE status = 'Paid'" +
+                        ") " +
+
+                        "ORDER BY repairs.id DESC",
+
+                new String[]{
+                        String.valueOf(customerId)
+                }
+        );
+    }
+
+
+// =====================================================
+// GET PAYMENT HISTORY
+// =====================================================
+
+    public Cursor getPaymentHistory(int customerId) {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        return db.rawQuery(
+                "SELECT " +
+                        "payments.id AS payment_id, " +
+                        "payments.repair_id, " +
+                        "payments.amount, " +
+                        "payments.payment_date, " +
+                        "payments.status, " +
+                        "services.name AS service_name " +
+
+                        "FROM payments " +
+
+                        "INNER JOIN repairs " +
+                        "ON payments.repair_id = repairs.id " +
+
+                        "LEFT JOIN services " +
+                        "ON repairs.service_id = services.id " +
+
+                        "WHERE repairs.customer_id = ? " +
+
+                        "ORDER BY payments.id DESC",
+
+                new String[]{
+                        String.valueOf(customerId)
+                }
+        );
+    }
+
+
+// =====================================================
+// CREATE PAYMENT
+// =====================================================
+
+    public long createPayment(
+            int repairId,
+            double amount,
+            String paymentDate,
+            String status
+    ) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(
+                "repair_id",
+                repairId
+        );
+
+        values.put(
+                "amount",
+                amount
+        );
+
+        values.put(
+                "payment_date",
+                paymentDate
+        );
+
+        values.put(
+                "status",
+                status
+        );
+
+        return db.insert(
+                "payments",
+                null,
+                values
+        );
+    }
+    // =====================================================
+// TEST PAYMENT
+// DELETE WHEN COMBINING PROJECT
+// =====================================================
+
+    public void insertTestPayment() {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT id FROM repairs LIMIT 1",
+                null
+        );
+
+        if (!cursor.moveToFirst()) {
+
+            cursor.close();
+            db.close();
+            return;
+        }
+
+        int repairId = cursor.getInt(0);
+
+        cursor.close();
+
+        ContentValues values = new ContentValues();
+
+        values.put(
+                "repair_id",
+                repairId
+        );
+
+        values.put(
+                "amount",
+                8000
+        );
+
+        values.put(
+                "payment_date",
+                String.valueOf(
+                        System.currentTimeMillis()
+                )
+        );
+
+        values.put(
+                "status",
+                "Paid"
+        );
+
+        db.insert(
+                "payments",
+                null,
+                values
+        );
+
+        db.close();
+    }
 }
