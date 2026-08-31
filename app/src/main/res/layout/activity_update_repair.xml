@@ -11,8 +11,6 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -28,9 +26,6 @@
             android:text="Repair #TF-1001"
             android:textColor="#666666"
             android:textSize="14sp" />
-
-
-
 
         <TextView
             android:layout_width="wrap_content"
@@ -52,9 +47,6 @@
             android:textColor="#333333"
             android:textSize="16sp" />
 
-
-
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -70,9 +62,6 @@
             android:layout_height="55dp"
             android:layout_marginTop="10dp"
             android:background="#FFFFFF" />
-
-
-
 
         <TextView
             android:layout_width="wrap_content"
@@ -95,9 +84,6 @@
             android:padding="15dp"
             android:textSize="15sp" />
 
-
-
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -118,9 +104,6 @@
             android:padding="15dp"
             android:textSize="15sp" />
 
-
-
-
         <EditText
             android:id="@+id/etQuantity"
             android:layout_width="match_parent"
@@ -132,8 +115,30 @@
             android:padding="15dp"
             android:textSize="15sp" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:text="Repair Work Photo"
+            android:textColor="#222222"
+            android:textSize="19sp"
+            android:textStyle="bold" />
 
+        <ImageView
+            android:id="@+id/ivRepairPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:layout_marginTop="10dp"
+            android:background="#E0E0E0"
+            android:contentDescription="Repair work photo"
+            android:scaleType="centerInside" />
 
+        <Button
+            android:id="@+id/btnTakePhoto"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="10dp"
+            android:text="Take Repair Photo" />
 
         <Button
             android:id="@+id/btnSaveUpdate"
