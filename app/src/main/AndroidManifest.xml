@@ -17,7 +17,7 @@
         <!-- Admin Dashboard - TEMPORARY LAUNCHER FOR TESTING -->
 
         <activity
-            android:name=".admin.AdminDashboardActivity"
+            android:name=".admin.dashboard.AdminDashboardActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -34,62 +34,62 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".admin.ManageBranchesActivity"
+            android:name=".admin.spareparts.categories.ManageBranchesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".admin.BranchFormActivity"
+            android:name=".admin.branches.BranchFormActivity"
             android:exported="false" />
         <activity
-            android:name=".admin.ManageCategoriesActivity"
+            android:name=".admin.spareparts.categories.ManageCategoriesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".admin.CategoryFormActivity"
+            android:name=".admin.spareparts.categories.CategoryFormActivity"
             android:exported="false" />
         <activity
-            android:name=".admin.ManageServicesActivity"
+            android:name=".admin.services.ManageServicesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".admin.ServiceFormActivity"
+            android:name=".admin.services.ServiceFormActivity"
             android:exported="false" />
         <activity
-            android:name=".admin.ManageTechniciansActivity"
+            android:name=".admin.technicians.ManageTechniciansActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".admin.TechnicianFormActivity"
+            android:name=".admin.technicians.TechnicianFormActivity"
             android:exported="false" />
         <activity
-            android:name=".admin.ManageSparePartsActivity"
+            android:name=".admin.spareparts.ManageSparePartsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".admin.SparePartFormActivity"
+            android:name=".admin.spareparts.SparePartFormActivity"
             android:exported="false" />
         <activity
-            android:name=".admin.ManageAppointmentsActivity"
+            android:name=".admin.appoiments.ManageAppointmentsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".admin.ManageAppointmentActivity"
+            android:name=".admin.appoiments.ManageAppointmentActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".admin.ManagePaymentsActivity"
+            android:name=".admin.payments.ManagePaymentsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".admin.ManagePaymentActivity"
+            android:name=".admin.payments.ManagePaymentActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".admin.ManageRepairSamplesActivity"
+            android:name=".admin.repairsamples.ManageRepairSamplesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".admin.AddEditRepairSampleActivity"
+            android:name=".admin.repairsamples.AddEditRepairSampleActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>

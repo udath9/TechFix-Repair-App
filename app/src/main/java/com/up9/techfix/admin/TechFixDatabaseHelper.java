@@ -6,6 +6,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.up9.techfix.admin.branches.Branch;
+import com.up9.techfix.admin.repairsamples.RepairSample;
+import com.up9.techfix.admin.services.RepairService;
+import com.up9.techfix.admin.spareparts.SparePart;
+import com.up9.techfix.admin.spareparts.categories.DeviceCategory;
+
 import java.util.ArrayList;
 import java.util.List;
 
