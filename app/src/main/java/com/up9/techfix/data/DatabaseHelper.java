@@ -971,6 +971,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return branchId;
     }
+    public Cursor getAllBranches() {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        return db.rawQuery(
+                "SELECT id, name, address, phone, latitude, longitude " +
+                        "FROM branches",
+                null
+        );
+    }
 
 
     // =====================================================

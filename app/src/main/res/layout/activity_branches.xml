@@ -2,106 +2,45 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp"
-    tools:context=".map.BranchesActivity">
+    android:layout_height="match_parent">
 
     <TextView
         android:id="@+id/tvBranchesTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="20dp"
         android:text="TechFix Branches"
         android:textSize="28sp"
         android:textStyle="bold"
-        android:gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvBranchesSubtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Find a TechFix branch near you."
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="20dp"
+        android:text="Find our TechFix branches on the map."
         android:textSize="16sp"
-        android:gravity="center"
-        android:layout_marginTop="6dp"
-        app:layout_constraintTop_toBottomOf="@id/tvBranchesTitle"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/tvBranchesTitle" />
 
-    <ScrollView
+    <org.maplibre.android.maps.MapView
+        android:id="@+id/mapView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@id/tvBranchesSubtitle"
+        android:layout_marginTop="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <!-- Colombo Branch -->
-
-            <TextView
-                android:id="@+id/tvColomboBranch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TechFix Colombo"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:padding="12dp" />
-
-            <TextView
-                android:id="@+id/tvColomboDetails"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="📍 Colombo, Sri Lanka\n\n📞 011 XXX XXXX\n\n🕐 Monday - Saturday: 9:00 AM - 6:00 PM"
-                android:textSize="16sp"
-                android:padding="12dp" />
-
-            <Button
-                android:id="@+id/btnColomboMap"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="View Colombo Location"
-                android:layout_marginBottom="24dp" />
-
-
-            <!-- Galle Branch -->
-
-            <TextView
-                android:id="@+id/tvGalleBranch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TechFix Galle"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:padding="12dp" />
-
-            <TextView
-                android:id="@+id/tvGalleDetails"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="📍 Galle, Sri Lanka\n\n📞 091 XXX XXXX\n\n🕐 Monday - Saturday: 9:00 AM - 6:00 PM"
-                android:textSize="16sp"
-                android:padding="12dp" />
-
-            <Button
-                android:id="@+id/btnGalleMap"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="View Galle Location"
-                android:layout_marginBottom="20dp" />
-
-        </LinearLayout>
-
-    </ScrollView>
+        app:layout_constraintTop_toBottomOf="@id/tvBranchesSubtitle" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
