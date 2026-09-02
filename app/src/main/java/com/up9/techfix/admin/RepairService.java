@@ -4,7 +4,7 @@ public class RepairService {
 
     private int id;
     private String name;
-    private String category;
+    private String imageUri;
     private String description;
     private double price;
     private int estimatedDays;
@@ -12,14 +12,14 @@ public class RepairService {
     public RepairService(
             int id,
             String name,
-            String category,
+            String imageUri,
             String description,
             double price,
             int estimatedDays
     ) {
         this.id = id;
         this.name = name;
-        this.category = category;
+        this.imageUri = imageUri;
         this.description = description;
         this.price = price;
         this.estimatedDays = estimatedDays;
@@ -33,8 +33,8 @@ public class RepairService {
         return name;
     }
 
-    public String getCategory() {
-        return category;
+    public String getImageUri() {
+        return imageUri;
     }
 
     public String getDescription() {
@@ -53,8 +53,8 @@ public class RepairService {
         this.name = name;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setImageUri(String imageUri) {
+        this.imageUri = imageUri;
     }
 
     public void setDescription(String description) {

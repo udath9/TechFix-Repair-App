@@ -1,47 +1,104 @@
 package com.up9.techfix.admin;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
+import android.provider.MediaStore;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Locale;
 
 public class ServiceFormActivity extends AppCompatActivity {
 
     private TextView txtServiceFormTitle;
 
+    private ImageView imgServicePreview;
+
+    private Button btnTakePhoto;
+    private Button btnUploadImage;
+    private Button btnSaveService;
+    private Button btnCancelService;
+
     private EditText edtServiceName;
     private EditText edtServiceDescription;
     private EditText edtServicePrice;
-    private EditText edtEstimatedDays;
+    private EditText edtServiceEstimatedDays;
 
-    private Spinner spinnerCategory;
-
-    private Button btnSaveService;
-    private Button btnCancelService;
+    private TechFixDatabaseHelper databaseHelper;
 
     private boolean isEditMode = false;
 
     private int serviceId = -1;
 
-    private TechFixDatabaseHelper databaseHelper;
+    private String selectedImageUri = "";
 
-    private ArrayAdapter<String> categoryAdapter;
+    // ============================================================
+    // IMAGE PICKER
+    // ============================================================
 
-    private List<DeviceCategory> categoryList;
+    private final ActivityResultLauncher<String> imagePicker =
+            registerForActivityResult(
+                    new ActivityResultContracts.GetContent(),
+                    uri -> {
 
-    private List<String> categoryNames;
+                        if (uri != null) {
 
+                            selectedImageUri =
+                                    uri.toString();
+
+                            imgServicePreview.setImageURI(uri);
+                        }
+                    }
+            );
+
+    // ============================================================
+    // CAMERA
+    // ============================================================
+
+    private final ActivityResultLauncher<Void> cameraLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.TakePicturePreview(),
+                    bitmap -> {
+
+                        if (bitmap != null) {
+
+                            String savedUri =
+                                    saveBitmapToInternalStorage(bitmap);
+
+                            if (savedUri != null) {
+
+                                selectedImageUri =
+                                        savedUri;
+
+                                imgServicePreview.setImageBitmap(
+                                        bitmap
+                                );
+
+                            } else {
+
+                                Toast.makeText(
+                                        this,
+                                        "Failed to save camera image",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
+                        }
+                    }
+            );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +112,66 @@ public class ServiceFormActivity extends AppCompatActivity {
         databaseHelper =
                 new TechFixDatabaseHelper(this);
 
+        initializeViews();
+
+        checkEditMode();
+
+        btnUploadImage.setOnClickListener(
+                v -> openImagePicker()
+        );
+
+        btnTakePhoto.setOnClickListener(
+                v -> openCamera()
+        );
+
+        btnSaveService.setOnClickListener(
+                v -> saveService()
+        );
+
+        btnCancelService.setOnClickListener(v -> {
+
+            setResult(
+                    RESULT_CANCELED
+            );
+
+            finish();
+        });
+    }
+
+    // ============================================================
+    // INITIALIZE VIEWS
+    // ============================================================
+
+    private void initializeViews() {
+
         txtServiceFormTitle =
                 findViewById(
                         R.id.txtServiceFormTitle
+                );
+
+        imgServicePreview =
+                findViewById(
+                        R.id.imgServicePreview
+                );
+
+        btnTakePhoto =
+                findViewById(
+                        R.id.btnTakePhoto
+                );
+
+        btnUploadImage =
+                findViewById(
+                        R.id.btnUploadImage
+                );
+
+        btnSaveService =
+                findViewById(
+                        R.id.btnSaveService
+                );
+
+        btnCancelService =
+                findViewById(
+                        R.id.btnCancelService
                 );
 
         edtServiceName =
@@ -75,107 +189,92 @@ public class ServiceFormActivity extends AppCompatActivity {
                         R.id.edtServicePrice
                 );
 
-        edtEstimatedDays =
+        edtServiceEstimatedDays =
                 findViewById(
-                        R.id.edtEstimatedDays
+                        R.id.edtServiceEstimatedDays
                 );
-
-        spinnerCategory =
-                findViewById(
-                        R.id.spinnerCategory
-                );
-
-        btnSaveService =
-                findViewById(
-                        R.id.btnSaveService
-                );
-
-        btnCancelService =
-                findViewById(
-                        R.id.btnCancelService
-                );
-
-
-        // Load categories from SQLite
-
-        loadCategories();
-
-
-        // Check Add/Edit mode
-
-        checkEditMode();
-
-
-        // Save
-
-        btnSaveService.setOnClickListener(
-                v -> saveService()
-        );
-
-
-        // Cancel
-
-        btnCancelService.setOnClickListener(
-                v -> finish()
-        );
     }
 
+    // ============================================================
+    // IMAGE PICKER
+    // ============================================================
 
-    private void loadCategories() {
+    private void openImagePicker() {
 
-        categoryList =
-                databaseHelper.getAllCategories();
+        imagePicker.launch("image/*");
+    }
 
+    // ============================================================
+    // CAMERA
+    // ============================================================
 
-        categoryNames =
-                new ArrayList<>();
+    private void openCamera() {
 
+        cameraLauncher.launch(null);
+    }
 
-        for (DeviceCategory category :
-                categoryList) {
+    // ============================================================
+    // SAVE CAMERA IMAGE
+    // ============================================================
 
-            categoryNames.add(
-                    category.getName()
+    private String saveBitmapToInternalStorage(Bitmap bitmap) {
+
+        File directory =
+                new File(
+                        getFilesDir(),
+                        "service_images"
+                );
+
+        if (!directory.exists()) {
+
+            if (!directory.mkdirs()) {
+                return null;
+            }
+        }
+
+        String fileName =
+                "service_"
+                        + System.currentTimeMillis()
+                        + ".jpg";
+
+        File imageFile =
+                new File(
+                        directory,
+                        fileName
+                );
+
+        try {
+
+            FileOutputStream outputStream =
+                    new FileOutputStream(imageFile);
+
+            bitmap.compress(
+                    Bitmap.CompressFormat.JPEG,
+                    90,
+                    outputStream
             );
-        }
 
+            outputStream.flush();
+            outputStream.close();
 
-        categoryAdapter =
-                new ArrayAdapter<>(
-                        this,
-                        android.R.layout.simple_spinner_item,
-                        categoryNames
-                );
+            return Uri.fromFile(imageFile).toString();
 
+        } catch (IOException e) {
 
-        categoryAdapter.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item
-        );
+            e.printStackTrace();
 
-
-        spinnerCategory.setAdapter(
-                categoryAdapter
-        );
-
-
-        // If no categories exist
-
-        if (categoryNames.isEmpty()) {
-
-            Toast.makeText(
-                    this,
-                    "No device categories found. Please add a category first.",
-                    Toast.LENGTH_LONG
-            ).show();
+            return null;
         }
     }
 
+    // ============================================================
+    // EDIT MODE
+    // ============================================================
 
     private void checkEditMode() {
 
         Intent intent =
                 getIntent();
-
 
         isEditMode =
                 intent.getBooleanExtra(
@@ -183,102 +282,99 @@ public class ServiceFormActivity extends AppCompatActivity {
                         false
                 );
 
-
-        if (isEditMode) {
-
-            serviceId =
-                    intent.getIntExtra(
-                            "serviceId",
-                            -1
-                    );
-
-
-            txtServiceFormTitle.setText(
-                    "Edit Repair Service"
-            );
-
-
-            btnSaveService.setText(
-                    "Update Service"
-            );
-
-
-            edtServiceName.setText(
-                    intent.getStringExtra(
-                            "name"
-                    )
-            );
-
-
-            edtServiceDescription.setText(
-                    intent.getStringExtra(
-                            "description"
-                    )
-            );
-
-
-            edtServicePrice.setText(
-                    String.valueOf(
-                            intent.getDoubleExtra(
-                                    "price",
-                                    0
-                            )
-                    )
-            );
-
-
-            edtEstimatedDays.setText(
-                    String.valueOf(
-                            intent.getIntExtra(
-                                    "estimatedDays",
-                                    1
-                            )
-                    )
-            );
-
-
-            String selectedCategory =
-                    intent.getStringExtra(
-                            "category"
-                    );
-
-
-            if (selectedCategory != null) {
-
-                for (
-                        int i = 0;
-                        i < categoryNames.size();
-                        i++
-                ) {
-
-                    if (
-                            categoryNames
-                                    .get(i)
-                                    .equals(
-                                            selectedCategory
-                                    )
-                    ) {
-
-                        spinnerCategory.setSelection(i);
-
-                        break;
-                    }
-                }
-            }
-
-        } else {
+        if (!isEditMode) {
 
             txtServiceFormTitle.setText(
                     "Add Repair Service"
             );
 
-
             btnSaveService.setText(
                     "Save Service"
             );
+
+            return;
+        }
+
+        serviceId =
+                intent.getIntExtra(
+                        "serviceId",
+                        -1
+                );
+
+        txtServiceFormTitle.setText(
+                "Edit Repair Service"
+        );
+
+        btnSaveService.setText(
+                "Update Service"
+        );
+
+        edtServiceName.setText(
+                intent.getStringExtra(
+                        "name"
+                )
+        );
+
+        edtServiceDescription.setText(
+                intent.getStringExtra(
+                        "description"
+                )
+        );
+
+        double price =
+                intent.getDoubleExtra(
+                        "price",
+                        0.0
+                );
+
+        edtServicePrice.setText(
+                String.format(
+                        Locale.getDefault(),
+                        "%.2f",
+                        price
+                )
+        );
+
+        int estimatedDays =
+                intent.getIntExtra(
+                        "estimatedDays",
+                        0
+                );
+
+        edtServiceEstimatedDays.setText(
+                String.valueOf(
+                        estimatedDays
+                )
+        );
+
+        selectedImageUri =
+                intent.getStringExtra(
+                        "imageUri"
+                );
+
+        if (selectedImageUri != null
+                && !selectedImageUri.isEmpty()) {
+
+            try {
+
+                imgServicePreview.setImageURI(
+                        Uri.parse(
+                                selectedImageUri
+                        )
+                );
+
+            } catch (Exception e) {
+
+                imgServicePreview.setImageResource(
+                        android.R.drawable.ic_menu_gallery
+                );
+            }
         }
     }
 
+    // ============================================================
+    // SAVE SERVICE
+    // ============================================================
 
     private void saveService() {
 
@@ -288,13 +384,11 @@ public class ServiceFormActivity extends AppCompatActivity {
                         .toString()
                         .trim();
 
-
         String description =
                 edtServiceDescription
                         .getText()
                         .toString()
                         .trim();
-
 
         String priceText =
                 edtServicePrice
@@ -302,12 +396,13 @@ public class ServiceFormActivity extends AppCompatActivity {
                         .toString()
                         .trim();
 
-
         String daysText =
-                edtEstimatedDays
+                edtServiceEstimatedDays
                         .getText()
                         .toString()
                         .trim();
+
+        // Validate name
 
         if (name.isEmpty()) {
 
@@ -320,38 +415,12 @@ public class ServiceFormActivity extends AppCompatActivity {
             return;
         }
 
-        if (categoryNames.isEmpty()) {
-
-            Toast.makeText(
-                    this,
-                    "Please add a device category first.",
-                    Toast.LENGTH_LONG
-            ).show();
-
-            return;
-        }
-
-
-        String category =
-                spinnerCategory
-                        .getSelectedItem()
-                        .toString();
-
-        if (description.isEmpty()) {
-
-            edtServiceDescription.setError(
-                    "Enter description"
-            );
-
-            edtServiceDescription.requestFocus();
-
-            return;
-        }
+        // Validate price
 
         if (priceText.isEmpty()) {
 
             edtServicePrice.setError(
-                    "Enter repair price"
+                    "Enter service price"
             );
 
             edtServicePrice.requestFocus();
@@ -359,22 +428,22 @@ public class ServiceFormActivity extends AppCompatActivity {
             return;
         }
 
+        // Validate estimated days
+
         if (daysText.isEmpty()) {
 
-            edtEstimatedDays.setError(
-                    "Enter estimated repair days"
+            edtServiceEstimatedDays.setError(
+                    "Enter estimated days"
             );
 
-            edtEstimatedDays.requestFocus();
+            edtServiceEstimatedDays.requestFocus();
 
             return;
         }
 
-
         double price;
 
         int estimatedDays;
-
 
         try {
 
@@ -383,6 +452,18 @@ public class ServiceFormActivity extends AppCompatActivity {
                             priceText
                     );
 
+        } catch (NumberFormatException e) {
+
+            edtServicePrice.setError(
+                    "Enter a valid price"
+            );
+
+            edtServicePrice.requestFocus();
+
+            return;
+        }
+
+        try {
 
             estimatedDays =
                     Integer.parseInt(
@@ -391,92 +472,120 @@ public class ServiceFormActivity extends AppCompatActivity {
 
         } catch (NumberFormatException e) {
 
-            Toast.makeText(
-                    this,
-                    "Please enter valid numbers.",
-                    Toast.LENGTH_SHORT
-            ).show();
+            edtServiceEstimatedDays.setError(
+                    "Enter a valid number"
+            );
+
+            edtServiceEstimatedDays.requestFocus();
 
             return;
         }
 
-        if (price <= 0) {
+        if (price < 0) {
 
             edtServicePrice.setError(
-                    "Price must be greater than 0"
+                    "Price cannot be negative"
             );
-
-            edtServicePrice.requestFocus();
 
             return;
         }
 
         if (estimatedDays <= 0) {
 
-            edtEstimatedDays.setError(
-                    "Days must be greater than 0"
+            edtServiceEstimatedDays.setError(
+                    "Estimated days must be greater than 0"
             );
-
-            edtEstimatedDays.requestFocus();
 
             return;
         }
 
-        Intent resultIntent =
-                new Intent();
-
-
-        resultIntent.putExtra(
-                "name",
-                name
-        );
-
-
-        resultIntent.putExtra(
-                "category",
-                category
-        );
-
-
-        resultIntent.putExtra(
-                "description",
-                description
-        );
-
-
-        resultIntent.putExtra(
-                "price",
-                price
-        );
-
-
-        resultIntent.putExtra(
-                "estimatedDays",
-                estimatedDays
-        );
-
-
-        resultIntent.putExtra(
-                "editMode",
-                isEditMode
-        );
-
+        // ========================================================
+        // UPDATE
+        // ========================================================
 
         if (isEditMode) {
 
-            resultIntent.putExtra(
-                    "serviceId",
-                    serviceId
-            );
+            if (serviceId == -1) {
+
+                Toast.makeText(
+                        this,
+                        "Invalid service ID",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            int result =
+                    databaseHelper.updateService(
+                            serviceId,
+                            name,
+                            selectedImageUri,
+                            description,
+                            price,
+                            estimatedDays
+                    );
+
+            if (result > 0) {
+
+                Toast.makeText(
+                        this,
+                        "Service updated successfully",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                setResult(
+                        RESULT_OK
+                );
+
+                finish();
+
+            } else {
+
+                Toast.makeText(
+                        this,
+                        "Failed to update service",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+
+            return;
         }
 
+        // ========================================================
+        // INSERT
+        // ========================================================
 
-        setResult(
-                RESULT_OK,
-                resultIntent
-        );
+        long result =
+                databaseHelper.insertService(
+                        name,
+                        selectedImageUri,
+                        description,
+                        price,
+                        estimatedDays
+                );
 
+        if (result != -1) {
 
-        finish();
+            Toast.makeText(
+                    this,
+                    "Service added successfully",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            setResult(
+                    RESULT_OK
+            );
+
+            finish();
+
+        } else {
+
+            Toast.makeText(
+                    this,
+                    "Failed to add service",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
     }
 }

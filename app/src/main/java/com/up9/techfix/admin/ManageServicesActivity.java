@@ -3,6 +3,7 @@ package com.up9.techfix.admin;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -13,13 +14,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.up9.techfix.R;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ManageServicesActivity extends AppCompatActivity
         implements ServiceAdapter.OnServiceActionListener {
 
     private RecyclerView recyclerServices;
+
     private Button btnAddService;
 
     private ServiceAdapter serviceAdapter;
@@ -28,7 +29,6 @@ public class ManageServicesActivity extends AppCompatActivity
 
     private TechFixDatabaseHelper databaseHelper;
 
-    private int editingPosition = -1;
 
     private final ActivityResultLauncher<Intent> serviceFormLauncher =
             registerForActivityResult(
@@ -39,70 +39,10 @@ public class ManageServicesActivity extends AppCompatActivity
                             return;
                         }
 
-                        Intent data = result.getData();
-
-                        if (data == null) {
-                            return;
-                        }
-
-                        String name =
-                                data.getStringExtra("name");
-
-                        String category =
-                                data.getStringExtra("category");
-
-                        String description =
-                                data.getStringExtra("description");
-
-                        double price =
-                                data.getDoubleExtra("price", 0);
-
-                        int estimatedDays =
-                                data.getIntExtra("estimatedDays", 1);
-
-                        boolean isEditMode =
-                                data.getBooleanExtra(
-                                        "editMode",
-                                        false
-                                );
-
-                        if (isEditMode) {
-
-                            int serviceId =
-                                    data.getIntExtra(
-                                            "serviceId",
-                                            -1
-                                    );
-
-                            if (serviceId == -1) {
-                                return;
-                            }
-
-                            databaseHelper.updateService(
-                                    serviceId,
-                                    name,
-                                    category,
-                                    description,
-                                    price,
-                                    estimatedDays
-                            );
-
-                        } else {
-
-                            databaseHelper.insertService(
-                                    name,
-                                    category,
-                                    description,
-                                    price,
-                                    estimatedDays
-                            );
-                        }
-
                         loadServices();
-
-                        editingPosition = -1;
                     }
             );
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,41 +53,32 @@ public class ManageServicesActivity extends AppCompatActivity
                 R.layout.activity_manage_services
         );
 
+
         recyclerServices =
                 findViewById(
                         R.id.recyclerServices
                 );
+
 
         btnAddService =
                 findViewById(
                         R.id.btnAddService
                 );
 
+
         databaseHelper =
                 new TechFixDatabaseHelper(this);
 
-        serviceList =
-                new ArrayList<>();
 
         recyclerServices.setLayoutManager(
                 new LinearLayoutManager(this)
         );
 
-        serviceAdapter =
-                new ServiceAdapter(
-                        serviceList,
-                        this
-                );
-
-        recyclerServices.setAdapter(
-                serviceAdapter
-        );
 
         loadServices();
 
-        btnAddService.setOnClickListener(v -> {
 
-            editingPosition = -1;
+        btnAddService.setOnClickListener(v -> {
 
             Intent intent =
                     new Intent(
@@ -164,34 +95,30 @@ public class ManageServicesActivity extends AppCompatActivity
         });
     }
 
+
     private void loadServices() {
 
-        serviceList.clear();
+        serviceList =
+                databaseHelper.getAllServices();
 
-        serviceList.addAll(
-                databaseHelper.getAllServices()
+
+        serviceAdapter =
+                new ServiceAdapter(
+                        serviceList,
+                        this
+                );
+
+
+        recyclerServices.setAdapter(
+                serviceAdapter
         );
-
-        serviceAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    protected void onResume() {
-
-        super.onResume();
-
-        if (databaseHelper != null
-                && serviceAdapter != null) {
-
-            loadServices();
-        }
-    }
 
     @Override
-    public void onEdit(RepairService service) {
-
-        editingPosition =
-                serviceList.indexOf(service);
+    public void onEdit(
+            RepairService service
+    ) {
 
         Intent intent =
                 new Intent(
@@ -199,43 +126,52 @@ public class ManageServicesActivity extends AppCompatActivity
                         ServiceFormActivity.class
                 );
 
+
         intent.putExtra(
                 "editMode",
                 true
         );
+
 
         intent.putExtra(
                 "serviceId",
                 service.getId()
         );
 
+
         intent.putExtra(
                 "name",
                 service.getName()
         );
 
+
         intent.putExtra(
-                "category",
-                service.getCategory()
+                "imageUri",
+                service.getImageUri()
         );
+
 
         intent.putExtra(
                 "description",
                 service.getDescription()
         );
 
+
         intent.putExtra(
                 "price",
                 service.getPrice()
         );
+
 
         intent.putExtra(
                 "estimatedDays",
                 service.getEstimatedDays()
         );
 
+
         serviceFormLauncher.launch(intent);
     }
+
 
     @Override
     public void onDelete(
@@ -244,27 +180,62 @@ public class ManageServicesActivity extends AppCompatActivity
     ) {
 
         new AlertDialog.Builder(this)
-                .setTitle("Delete Repair Service")
+
+                .setTitle("Delete Service")
+
                 .setMessage(
                         "Are you sure you want to delete "
                                 + service.getName()
                                 + "?"
                 )
+
                 .setPositiveButton(
                         "Delete",
                         (dialog, which) -> {
 
-                            databaseHelper.deleteService(
-                                    service.getId()
-                            );
+                            int result =
+                                    databaseHelper.deleteService(
+                                            service.getId()
+                                    );
 
-                            loadServices();
+
+                            if (result > 0) {
+
+                                Toast.makeText(
+                                        this,
+                                        "Service deleted successfully",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+
+                                loadServices();
+
+                            } else {
+
+                                Toast.makeText(
+                                        this,
+                                        "Failed to delete service",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
                         }
                 )
+
                 .setNegativeButton(
                         "Cancel",
                         null
                 )
+
                 .show();
+    }
+
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+
+        if (databaseHelper != null) {
+            loadServices();
+        }
     }
 }

@@ -10,12 +10,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
 
+import java.util.Locale;
+
 public class CategoryFormActivity extends AppCompatActivity {
 
     private TextView txtCategoryFormTitle;
 
     private EditText edtCategoryName;
     private EditText edtCategoryDescription;
+    private EditText edtCategoryPriceModifier;
 
     private Button btnSaveCategory;
     private Button btnCancelCategory;
@@ -26,24 +29,42 @@ public class CategoryFormActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.category_form);
+        setContentView(
+                R.layout.category_form
+        );
 
         txtCategoryFormTitle =
-                findViewById(R.id.txtCategoryFormTitle);
+                findViewById(
+                        R.id.txtCategoryFormTitle
+                );
 
         edtCategoryName =
-                findViewById(R.id.edtCategoryName);
+                findViewById(
+                        R.id.edtCategoryName
+                );
 
         edtCategoryDescription =
-                findViewById(R.id.edtCategoryDescription);
+                findViewById(
+                        R.id.edtCategoryDescription
+                );
+
+        edtCategoryPriceModifier =
+                findViewById(
+                        R.id.edtCategoryPriceModifier
+                );
 
         btnSaveCategory =
-                findViewById(R.id.btnSaveCategory);
+                findViewById(
+                        R.id.btnSaveCategory
+                );
 
         btnCancelCategory =
-                findViewById(R.id.btnCancelCategory);
+                findViewById(
+                        R.id.btnCancelCategory
+                );
 
         checkEditMode();
 
@@ -52,26 +73,33 @@ public class CategoryFormActivity extends AppCompatActivity {
         );
 
         btnCancelCategory.setOnClickListener(v -> {
-            setResult(RESULT_CANCELED);
+
+            setResult(
+                    RESULT_CANCELED
+            );
+
             finish();
         });
     }
 
     private void checkEditMode() {
 
-        Intent intent = getIntent();
+        Intent intent =
+                getIntent();
 
-        isEditMode = intent.getBooleanExtra(
-                "editMode",
-                false
-        );
+        isEditMode =
+                intent.getBooleanExtra(
+                        "editMode",
+                        false
+                );
 
         if (isEditMode) {
 
-            categoryId = intent.getIntExtra(
-                    "categoryId",
-                    -1
-            );
+            categoryId =
+                    intent.getIntExtra(
+                            "categoryId",
+                            -1
+                    );
 
             txtCategoryFormTitle.setText(
                     "Edit Device Category"
@@ -82,11 +110,29 @@ public class CategoryFormActivity extends AppCompatActivity {
             );
 
             edtCategoryName.setText(
-                    intent.getStringExtra("name")
+                    intent.getStringExtra(
+                            "name"
+                    )
             );
 
             edtCategoryDescription.setText(
-                    intent.getStringExtra("description")
+                    intent.getStringExtra(
+                            "description"
+                    )
+            );
+
+            double priceModifier =
+                    intent.getDoubleExtra(
+                            "priceModifier",
+                            0.0
+                    );
+
+            edtCategoryPriceModifier.setText(
+                    String.format(
+                            Locale.getDefault(),
+                            "%.2f",
+                            priceModifier
+                    )
             );
 
         } else {
@@ -115,6 +161,12 @@ public class CategoryFormActivity extends AppCompatActivity {
                         .toString()
                         .trim();
 
+        String modifierText =
+                edtCategoryPriceModifier
+                        .getText()
+                        .toString()
+                        .trim();
+
         if (name.isEmpty()) {
 
             edtCategoryName.setError(
@@ -126,7 +178,39 @@ public class CategoryFormActivity extends AppCompatActivity {
             return;
         }
 
-        Intent resultIntent = new Intent();
+        if (modifierText.isEmpty()) {
+
+            edtCategoryPriceModifier.setError(
+                    "Enter price modifier"
+            );
+
+            edtCategoryPriceModifier.requestFocus();
+
+            return;
+        }
+
+        double priceModifier;
+
+        try {
+
+            priceModifier =
+                    Double.parseDouble(
+                            modifierText
+                    );
+
+        } catch (NumberFormatException e) {
+
+            edtCategoryPriceModifier.setError(
+                    "Enter a valid price modifier"
+            );
+
+            edtCategoryPriceModifier.requestFocus();
+
+            return;
+        }
+
+        Intent resultIntent =
+                new Intent();
 
         resultIntent.putExtra(
                 "name",
@@ -136,6 +220,11 @@ public class CategoryFormActivity extends AppCompatActivity {
         resultIntent.putExtra(
                 "description",
                 description
+        );
+
+        resultIntent.putExtra(
+                "priceModifier",
+                priceModifier
         );
 
         resultIntent.putExtra(

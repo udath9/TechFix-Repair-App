@@ -1,9 +1,11 @@
 package com.up9.techfix.admin;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,12 +14,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.up9.techfix.R;
 
 import java.util.List;
+import java.util.Locale;
 
 public class ServiceAdapter
         extends RecyclerView.Adapter<ServiceAdapter.ServiceViewHolder> {
 
     private final List<RepairService> serviceList;
-
     private final OnServiceActionListener listener;
 
     public interface OnServiceActionListener {
@@ -34,9 +36,7 @@ public class ServiceAdapter
             List<RepairService> serviceList,
             OnServiceActionListener listener
     ) {
-
         this.serviceList = serviceList;
-
         this.listener = listener;
     }
 
@@ -47,14 +47,13 @@ public class ServiceAdapter
             int viewType
     ) {
 
-        View view =
-                LayoutInflater
-                        .from(parent.getContext())
-                        .inflate(
-                                R.layout.item_service,
-                                parent,
-                                false
-                        );
+        View view = LayoutInflater
+                .from(parent.getContext())
+                .inflate(
+                        R.layout.item_service,
+                        parent,
+                        false
+                );
 
         return new ServiceViewHolder(view);
     }
@@ -65,15 +64,10 @@ public class ServiceAdapter
             int position
     ) {
 
-        RepairService service =
-                serviceList.get(position);
+        RepairService service = serviceList.get(position);
 
         holder.txtServiceName.setText(
                 service.getName()
-        );
-
-        holder.txtServiceCategory.setText(
-                service.getCategory()
         );
 
         holder.txtServiceDescription.setText(
@@ -82,26 +76,63 @@ public class ServiceAdapter
 
         holder.txtServicePrice.setText(
                 String.format(
+                        Locale.getDefault(),
                         "Price: Rs. %.2f",
                         service.getPrice()
                 )
         );
 
-        holder.txtEstimatedDays.setText(
-                "Estimated repair time: "
-                        + service.getEstimatedDays()
-                        + " day(s)"
+        holder.txtServiceDays.setText(
+                String.format(
+                        Locale.getDefault(),
+                        "Estimated Days: %d",
+                        service.getEstimatedDays()
+                )
         );
+
+        // Display service image
+        String imageUri = service.getImageUri();
+
+        if (imageUri != null && !imageUri.isEmpty()) {
+
+            try {
+
+                holder.imgService.setImageURI(
+                        Uri.parse(imageUri)
+                );
+
+            } catch (Exception e) {
+
+                holder.imgService.setImageResource(
+                        android.R.drawable.ic_menu_gallery
+                );
+            }
+
+        } else {
+
+            holder.imgService.setImageResource(
+                    android.R.drawable.ic_menu_gallery
+            );
+        }
 
         holder.btnEditService.setOnClickListener(
                 v -> listener.onEdit(service)
         );
 
         holder.btnDeleteService.setOnClickListener(
-                v -> listener.onDelete(
-                        service,
-                        holder.getAdapterPosition()
-                )
+                v -> {
+
+                    int adapterPosition =
+                            holder.getBindingAdapterPosition();
+
+                    if (adapterPosition != RecyclerView.NO_POSITION) {
+
+                        listener.onDelete(
+                                service,
+                                adapterPosition
+                        );
+                    }
+                }
         );
     }
 
@@ -114,11 +145,12 @@ public class ServiceAdapter
     public static class ServiceViewHolder
             extends RecyclerView.ViewHolder {
 
+        ImageView imgService;
+
         TextView txtServiceName;
-        TextView txtServiceCategory;
         TextView txtServiceDescription;
         TextView txtServicePrice;
-        TextView txtEstimatedDays;
+        TextView txtServiceDays;
 
         Button btnEditService;
         Button btnDeleteService;
@@ -129,14 +161,14 @@ public class ServiceAdapter
 
             super(itemView);
 
+            imgService =
+                    itemView.findViewById(
+                            R.id.imgService
+                    );
+
             txtServiceName =
                     itemView.findViewById(
                             R.id.txtServiceName
-                    );
-
-            txtServiceCategory =
-                    itemView.findViewById(
-                            R.id.txtServiceCategory
                     );
 
             txtServiceDescription =
@@ -149,9 +181,9 @@ public class ServiceAdapter
                             R.id.txtServicePrice
                     );
 
-            txtEstimatedDays =
+            txtServiceDays =
                     itemView.findViewById(
-                            R.id.txtEstimatedDays
+                            R.id.txtServiceDays
                     );
 
             btnEditService =

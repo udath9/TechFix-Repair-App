@@ -20,6 +20,7 @@ public class CategoryAdapter
 
     private final OnCategoryActionListener listener;
 
+
     public interface OnCategoryActionListener {
 
         void onEdit(DeviceCategory category);
@@ -30,6 +31,7 @@ public class CategoryAdapter
         );
     }
 
+
     public CategoryAdapter(
             List<DeviceCategory> categoryList,
             OnCategoryActionListener listener
@@ -39,6 +41,7 @@ public class CategoryAdapter
 
         this.listener = listener;
     }
+
 
     @NonNull
     @Override
@@ -59,6 +62,7 @@ public class CategoryAdapter
         return new CategoryViewHolder(view);
     }
 
+
     @Override
     public void onBindViewHolder(
             @NonNull CategoryViewHolder holder,
@@ -68,17 +72,28 @@ public class CategoryAdapter
         DeviceCategory category =
                 categoryList.get(position);
 
+
         holder.txtCategoryName.setText(
                 category.getName()
         );
+
 
         holder.txtCategoryDescription.setText(
                 category.getDescription()
         );
 
+
+        holder.txtCategoryPriceModifier.setText(
+                "Price Modifier: "
+                        + category.getPriceModifier()
+                        + "%"
+        );
+
+
         holder.btnEditCategory.setOnClickListener(
                 v -> listener.onEdit(category)
         );
+
 
         holder.btnDeleteCategory.setOnClickListener(
                 v -> listener.onDelete(
@@ -88,20 +103,24 @@ public class CategoryAdapter
         );
     }
 
+
     @Override
     public int getItemCount() {
 
         return categoryList.size();
     }
 
+
     public static class CategoryViewHolder
             extends RecyclerView.ViewHolder {
 
         TextView txtCategoryName;
         TextView txtCategoryDescription;
+        TextView txtCategoryPriceModifier;
 
         Button btnEditCategory;
         Button btnDeleteCategory;
+
 
         public CategoryViewHolder(
                 @NonNull View itemView
@@ -109,20 +128,30 @@ public class CategoryAdapter
 
             super(itemView);
 
+
             txtCategoryName =
                     itemView.findViewById(
                             R.id.txtCategoryName
                     );
+
 
             txtCategoryDescription =
                     itemView.findViewById(
                             R.id.txtCategoryDescription
                     );
 
+
+            txtCategoryPriceModifier =
+                    itemView.findViewById(
+                            R.id.txtCategoryPriceModifier
+                    );
+
+
             btnEditCategory =
                     itemView.findViewById(
                             R.id.btnEditCategory
                     );
+
 
             btnDeleteCategory =
                     itemView.findViewById(

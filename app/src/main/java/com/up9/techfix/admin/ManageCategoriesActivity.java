@@ -20,11 +20,9 @@ public class ManageCategoriesActivity extends AppCompatActivity
         implements CategoryAdapter.OnCategoryActionListener {
 
     private RecyclerView recyclerCategories;
-
     private Button btnAddCategory;
 
     private CategoryAdapter categoryAdapter;
-
     private List<DeviceCategory> categoryList;
 
     private TechFixDatabaseHelper databaseHelper;
@@ -51,6 +49,12 @@ public class ManageCategoriesActivity extends AppCompatActivity
                         String description =
                                 data.getStringExtra("description");
 
+                        double priceModifier =
+                                data.getDoubleExtra(
+                                        "priceModifier",
+                                        0.0
+                                );
+
                         boolean editMode =
                                 data.getBooleanExtra(
                                         "editMode",
@@ -63,13 +67,16 @@ public class ManageCategoriesActivity extends AppCompatActivity
                                         -1
                                 );
 
+
+                        // UPDATE
                         if (editMode && categoryId != -1) {
 
                             int updateResult =
                                     databaseHelper.updateCategory(
                                             categoryId,
                                             name,
-                                            description
+                                            description,
+                                            priceModifier
                                     );
 
                             if (updateResult > 0) {
@@ -89,12 +96,16 @@ public class ManageCategoriesActivity extends AppCompatActivity
                                 ).show();
                             }
 
-                        } else {
+                        }
+
+                        // INSERT
+                        else {
 
                             long newId =
                                     databaseHelper.insertCategory(
                                             name,
-                                            description
+                                            description,
+                                            priceModifier
                                     );
 
                             if (newId != -1) {
@@ -142,6 +153,7 @@ public class ManageCategoriesActivity extends AppCompatActivity
         databaseHelper =
                 new TechFixDatabaseHelper(this);
 
+
         recyclerCategories.setLayoutManager(
                 new LinearLayoutManager(this)
         );
@@ -165,6 +177,8 @@ public class ManageCategoriesActivity extends AppCompatActivity
             categoryFormLauncher.launch(intent);
         });
     }
+
+
     private void loadCategories() {
 
         categoryList =
@@ -180,6 +194,7 @@ public class ManageCategoriesActivity extends AppCompatActivity
                 categoryAdapter
         );
     }
+
 
     @Override
     public void onEdit(DeviceCategory category) {
@@ -210,8 +225,14 @@ public class ManageCategoriesActivity extends AppCompatActivity
                 category.getDescription()
         );
 
+        intent.putExtra(
+                "priceModifier",
+                category.getPriceModifier()
+        );
+
         categoryFormLauncher.launch(intent);
     }
+
 
     @Override
     public void onDelete(
