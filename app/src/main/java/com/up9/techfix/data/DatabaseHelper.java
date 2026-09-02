@@ -79,6 +79,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
         // =================================================
+        // CATEGORIES
+        // =================================================
+
+        db.execSQL(
+                "CREATE TABLE categories (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "name TEXT NOT NULL, " +
+                        "description TEXT, " +
+                        "price_modifier REAL NOT NULL DEFAULT 1.0)"
+        );
+
+
+        // =================================================
         // REPAIRS
         // =================================================
 
@@ -86,12 +99,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "CREATE TABLE repairs (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "customer_id INTEGER, " +
-                        "device_category TEXT NOT NULL, " +
+                        "category_id INTEGER, " +
                         "device_model TEXT NOT NULL, " +
                         "service_id INTEGER, " +
                         "problem_description TEXT, " +
                         "branch_id INTEGER, " +
                         "image_uri TEXT, " +
+                        "in_progress_photo_uri TEXT, " +
+                        "assigned_technician_id INTEGER, " +
                         "status TEXT, " +
                         "repair_date TEXT)"
         );
@@ -351,7 +366,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db =
                 this.getWritableDatabase();
 
-        // Prevent duplicate default services.
         Cursor cursor =
                 db.rawQuery(
                         "SELECT COUNT(*) FROM services",
@@ -361,6 +375,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         boolean hasServices = false;
 
         if (cursor.moveToFirst()) {
+
             hasServices =
                     cursor.getInt(0) > 0;
         }
@@ -371,6 +386,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return;
         }
 
+
         insertService(
                 db,
                 "Screen Replacement",
@@ -378,6 +394,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "Replacement of cracked, damaged or broken device screens.",
                 8000
         );
+
 
         insertService(
                 db,
@@ -387,6 +404,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 5000
         );
 
+
         insertService(
                 db,
                 "Operating System Repair",
@@ -394,6 +412,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "Repair and troubleshooting of operating system problems.",
                 3000
         );
+
 
         insertService(
                 db,
@@ -403,6 +422,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 3500
         );
 
+
         insertService(
                 db,
                 "Software Troubleshooting",
@@ -410,6 +430,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "Diagnosis and resolution of software-related problems.",
                 2500
         );
+
 
         insertService(
                 db,
@@ -425,14 +446,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // INSERT TEST SERVICES
     // =====================================================
     // Used by DatabaseViewerActivity.
-    // This method intentionally allows duplicates so that
-    // you can test the database viewer.
+    // This method intentionally allows duplicates.
     // =====================================================
 
     public void insertTestServices() {
 
         SQLiteDatabase db =
                 this.getWritableDatabase();
+
 
         insertService(
                 db,
@@ -442,6 +463,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 8000
         );
 
+
         insertService(
                 db,
                 "Battery Replacement",
@@ -449,6 +471,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "Replacement of damaged, weak or faulty device batteries.",
                 5000
         );
+
 
         insertService(
                 db,
@@ -458,6 +481,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 3000
         );
 
+
         insertService(
                 db,
                 "Hardware Repair",
@@ -465,6 +489,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "Diagnosis and repair of faulty internal hardware components.",
                 3500
         );
+
 
         insertService(
                 db,
@@ -474,6 +499,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 2500
         );
 
+
         insertService(
                 db,
                 "Virus / Malware Removal",
@@ -482,7 +508,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 3000
         );
 
-        // Test service
+
         insertService(
                 db,
                 "testing",
@@ -508,25 +534,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values =
                 new ContentValues();
 
+
         values.put(
                 "name",
                 name
         );
+
 
         values.put(
                 "image_uri",
                 imageUri
         );
 
+
         values.put(
                 "description",
                 description
         );
 
+
         values.put(
                 "price",
                 price
         );
+
 
         return db.insert(
                 "services",
@@ -537,12 +568,250 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     // =====================================================
+    // GET ALL CATEGORIES
+    // =====================================================
+    //
+    // Returns:
+    // id
+    // name
+    // description
+    // price_modifier
+    //
+    // BookRepairActivity can use this Cursor to populate
+    // the category spinner.
+    // =====================================================
+
+    public Cursor getAllCategories() {
+
+        SQLiteDatabase db =
+                this.getReadableDatabase();
+
+        return db.rawQuery(
+                "SELECT " +
+                        "id, " +
+                        "name, " +
+                        "description, " +
+                        "price_modifier " +
+                        "FROM categories " +
+                        "ORDER BY id ASC",
+                null
+        );
+    }
+
+
+    // =====================================================
+    // GET CATEGORY NAME BY ID
+    // =====================================================
+
+    public String getCategoryNameById(
+            int categoryId
+    ) {
+
+        SQLiteDatabase db =
+                this.getReadableDatabase();
+
+        Cursor cursor =
+                db.rawQuery(
+                        "SELECT name " +
+                                "FROM categories " +
+                                "WHERE id = ? " +
+                                "LIMIT 1",
+
+                        new String[]{
+                                String.valueOf(categoryId)
+                        }
+                );
+
+        String categoryName = null;
+
+        if (cursor.moveToFirst()) {
+
+            categoryName =
+                    cursor.getString(
+                            cursor.getColumnIndexOrThrow(
+                                    "name"
+                            )
+                    );
+        }
+
+        cursor.close();
+
+        return categoryName;
+    }
+
+
+    // =====================================================
+    // GET CATEGORY PRICE MODIFIER
+    // =====================================================
+
+    public double getCategoryPriceModifier(
+            int categoryId
+    ) {
+
+        SQLiteDatabase db =
+                this.getReadableDatabase();
+
+        Cursor cursor =
+                db.rawQuery(
+                        "SELECT price_modifier " +
+                                "FROM categories " +
+                                "WHERE id = ? " +
+                                "LIMIT 1",
+
+                        new String[]{
+                                String.valueOf(categoryId)
+                        }
+                );
+
+        double priceModifier = 1.0;
+
+        if (cursor.moveToFirst()) {
+
+            priceModifier =
+                    cursor.getDouble(
+                            cursor.getColumnIndexOrThrow(
+                                    "price_modifier"
+                            )
+                    );
+        }
+
+        cursor.close();
+
+        return priceModifier;
+    }
+
+
+    // =====================================================
+    // INSERT DEFAULT CATEGORIES
+    // =====================================================
+    //
+    // Default modifier = 1.0
+    //
+    // This means:
+    // Service price × 1.0 = Service price
+    //
+    // Your teammate/admin can later change the modifier.
+    // =====================================================
+
+    public void insertDefaultCategories() {
+
+        SQLiteDatabase db =
+                this.getWritableDatabase();
+
+        Cursor cursor =
+                db.rawQuery(
+                        "SELECT COUNT(*) FROM categories",
+                        null
+                );
+
+        boolean hasCategories = false;
+
+        if (cursor.moveToFirst()) {
+
+            hasCategories =
+                    cursor.getInt(0) > 0;
+        }
+
+        cursor.close();
+
+
+        if (hasCategories) {
+            return;
+        }
+
+
+        insertCategory(
+                db,
+                "Computer",
+                "Desktop computer repair services.",
+                1.0
+        );
+
+
+        insertCategory(
+                db,
+                "Laptop",
+                "Laptop repair services.",
+                1.0
+        );
+
+
+        insertCategory(
+                db,
+                "Mobile Phone",
+                "Mobile phone repair services.",
+                1.0
+        );
+
+
+        insertCategory(
+                db,
+                "Tablet",
+                "Tablet repair services.",
+                1.0
+        );
+    }
+
+
+    // =====================================================
+    // HELPER: INSERT CATEGORY
+    // =====================================================
+
+    private long insertCategory(
+            SQLiteDatabase db,
+            String name,
+            String description,
+            double priceModifier
+    ) {
+
+        ContentValues values =
+                new ContentValues();
+
+
+        values.put(
+                "name",
+                name
+        );
+
+
+        values.put(
+                "description",
+                description
+        );
+
+
+        values.put(
+                "price_modifier",
+                priceModifier
+        );
+
+
+        return db.insert(
+                "categories",
+                null,
+                values
+        );
+    }
+
+
+    // =====================================================
     // CREATE REPAIR
+    // =====================================================
+    //
+    // IMPORTANT:
+    //
+    // Customer creates the repair.
+    //
+    // assigned_technician_id = NULL
+    // in_progress_photo_uri = NULL
+    //
+    // Admin assigns the technician later.
+    // Technician adds the progress photo later.
     // =====================================================
 
     public long createRepair(
             int customerId,
-            String deviceCategory,
+            int categoryId,
             String deviceModel,
             int serviceId,
             String problemDescription,
@@ -558,36 +827,46 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values =
                 new ContentValues();
 
+
         values.put(
                 "customer_id",
                 customerId
         );
 
+
         values.put(
-                "device_category",
-                deviceCategory
+                "category_id",
+                categoryId
         );
+
 
         values.put(
                 "device_model",
                 deviceModel
         );
 
+
         values.put(
                 "service_id",
                 serviceId
         );
+
 
         values.put(
                 "problem_description",
                 problemDescription
         );
 
+
         values.put(
                 "branch_id",
                 branchId
         );
 
+
+        // =================================================
+        // CUSTOMER'S INITIAL IMAGE
+        // =================================================
 
         if (
                 imageUri != null &&
@@ -607,10 +886,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
 
+        // =================================================
+        // TECHNICIAN PROGRESS PHOTO
+        // =================================================
+        //
+        // This is added later by technician.
+        // Therefore it starts as NULL.
+        // =================================================
+
+        values.putNull(
+                "in_progress_photo_uri"
+        );
+
+
+        // =================================================
+        // ASSIGNED TECHNICIAN
+        // =================================================
+        //
+        // Admin assigns this later.
+        // Therefore it starts as NULL.
+        // =================================================
+
+        values.putNull(
+                "assigned_technician_id"
+        );
+
+
         values.put(
                 "status",
                 status
         );
+
 
         values.put(
                 "repair_date",
@@ -702,30 +1008,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ContentValues colombo =
                     new ContentValues();
 
+
             colombo.put(
                     "name",
                     "Colombo"
             );
+
 
             colombo.put(
                     "address",
                     "TechFix Colombo Branch"
             );
 
+
             colombo.put(
                     "phone",
                     "0112345678"
             );
+
 
             colombo.put(
                     "latitude",
                     6.9271
             );
 
+
             colombo.put(
                     "longitude",
                     79.8612
             );
+
 
             db.insert(
                     "branches",
@@ -741,30 +1053,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ContentValues galle =
                     new ContentValues();
 
+
             galle.put(
                     "name",
                     "Galle"
             );
+
 
             galle.put(
                     "address",
                     "TechFix Galle Branch"
             );
 
+
             galle.put(
                     "phone",
                     "0912345678"
             );
+
 
             galle.put(
                     "latitude",
                     6.0329
             );
 
+
             galle.put(
                     "longitude",
                     80.2168
             );
+
 
             db.insert(
                     "branches",
@@ -773,27 +1091,54 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             );
         }
     }
+
+
     // =====================================================
-// GET CUSTOMER ACTIVE REPAIRS
-// =====================================================
+    // GET CUSTOMER ACTIVE REPAIRS
+    // =====================================================
 
-    public Cursor getCustomerActiveRepairs(int customerId) {
+    public Cursor getCustomerActiveRepairs(
+            int customerId
+    ) {
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db =
+                this.getReadableDatabase();
 
         return db.rawQuery(
                 "SELECT " +
+
                         "r.id AS repair_id, " +
-                        "r.device_category, " +
+
+                        "r.category_id, " +
+
+                        "c.name AS category_name, " +
+
+                        "c.price_modifier AS price_modifier, " +
+
                         "r.device_model, " +
+
                         "r.problem_description, " +
+
                         "r.status, " +
+
                         "r.repair_date, " +
+
+                        "r.image_uri, " +
+
+                        "r.in_progress_photo_uri, " +
+
+                        "r.assigned_technician_id, " +
+
                         "s.name AS service_name, " +
+
                         "s.price AS service_price, " +
+
                         "b.name AS branch_name " +
 
                         "FROM repairs r " +
+
+                        "LEFT JOIN categories c " +
+                        "ON r.category_id = c.id " +
 
                         "LEFT JOIN services s " +
                         "ON r.service_id = s.id " +
@@ -804,6 +1149,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         "WHERE r.customer_id = ? " +
 
                         "AND r.status != 'Completed' " +
+
                         "AND r.status != 'Cancelled' " +
 
                         "ORDER BY r.id DESC",
@@ -815,12 +1161,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-// =====================================================
-// CANCEL REPAIR
-// Only Pending repairs can be cancelled.
-// =====================================================
+    // =====================================================
+    // CANCEL REPAIR
+    // Only Pending repairs can be cancelled.
+    // =====================================================
 
-    public boolean cancelRepair(int repairId, int customerId) {
+    public boolean cancelRepair(
+            int repairId,
+            int customerId
+    ) {
 
         SQLiteDatabase db =
                 this.getWritableDatabase();
@@ -828,10 +1177,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values =
                 new ContentValues();
 
+
         values.put(
                 "status",
                 "Cancelled"
         );
+
 
         int rowsUpdated =
                 db.update(
@@ -849,24 +1200,56 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         }
                 );
 
+
         return rowsUpdated > 0;
     }
-    public Cursor getRepairHistory(int customerId) {
 
-        SQLiteDatabase db = this.getReadableDatabase();
+
+    // =====================================================
+    // GET REPAIR HISTORY
+    // =====================================================
+
+    public Cursor getRepairHistory(
+            int customerId
+    ) {
+
+        SQLiteDatabase db =
+                this.getReadableDatabase();
 
         return db.rawQuery(
                 "SELECT " +
+
                         "repairs.id AS repair_id, " +
-                        "repairs.device_category, " +
+
+                        "repairs.category_id, " +
+
+                        "categories.name AS category_name, " +
+
+                        "categories.price_modifier AS price_modifier, " +
+
                         "repairs.device_model, " +
+
                         "services.name AS service_name, " +
+
                         "branches.name AS branch_name, " +
+
                         "repairs.repair_date, " +
+
                         "repairs.status, " +
-                        "services.price " +
+
+                        "repairs.image_uri, " +
+
+                        "repairs.in_progress_photo_uri, " +
+
+                        "services.price, " +
+
+                        "(services.price * categories.price_modifier) " +
+                        "AS final_price " +
 
                         "FROM repairs " +
+
+                        "LEFT JOIN categories " +
+                        "ON repairs.category_id = categories.id " +
 
                         "LEFT JOIN services " +
                         "ON repairs.service_id = services.id " +
@@ -883,25 +1266,47 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
+
+
     // =====================================================
-// GET UNPAID REPAIRS
-// =====================================================
+    // GET UNPAID REPAIRS
+    // =====================================================
 
-    public Cursor getUnpaidRepairs(int customerId) {
+    public Cursor getUnpaidRepairs(
+            int customerId
+    ) {
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db =
+                this.getReadableDatabase();
 
         return db.rawQuery(
                 "SELECT " +
+
                         "repairs.id AS repair_id, " +
-                        "repairs.device_category, " +
+
+                        "repairs.category_id, " +
+
+                        "categories.name AS category_name, " +
+
+                        "categories.price_modifier AS price_modifier, " +
+
                         "repairs.device_model, " +
+
                         "services.name AS service_name, " +
-                        "services.price AS amount, " +
+
+                        "services.price AS service_price, " +
+
+                        "(services.price * categories.price_modifier) " +
+                        "AS amount, " +
+
                         "branches.name AS branch_name, " +
+
                         "repairs.status " +
 
                         "FROM repairs " +
+
+                        "LEFT JOIN categories " +
+                        "ON repairs.category_id = categories.id " +
 
                         "LEFT JOIN services " +
                         "ON repairs.service_id = services.id " +
@@ -910,13 +1315,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         "ON repairs.branch_id = branches.id " +
 
                         "WHERE repairs.customer_id = ? " +
+
                         "AND repairs.status IN " +
                         "('Ready for Collection', 'Completed') " +
+
                         "AND repairs.id NOT IN " +
+
                         "(" +
+
                         "SELECT repair_id " +
+
                         "FROM payments " +
+
                         "WHERE status = 'Paid'" +
+
                         ") " +
 
                         "ORDER BY repairs.id DESC",
@@ -928,22 +1340,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-// =====================================================
-// GET PAYMENT HISTORY
-// =====================================================
+    // =====================================================
+    // GET PAYMENT HISTORY
+    // =====================================================
 
-    public Cursor getPaymentHistory(int customerId) {
+    public Cursor getPaymentHistory(
+            int customerId
+    ) {
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db =
+                this.getReadableDatabase();
 
         return db.rawQuery(
                 "SELECT " +
+
                         "payments.id AS payment_id, " +
+
                         "payments.repair_id, " +
+
                         "payments.amount, " +
+
                         "payments.payment_date, " +
+
                         "payments.status, " +
-                        "services.name AS service_name " +
+
+                        "services.name AS service_name, " +
+
+                        "categories.name AS category_name " +
 
                         "FROM payments " +
 
@@ -952,6 +1375,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                         "LEFT JOIN services " +
                         "ON repairs.service_id = services.id " +
+
+                        "LEFT JOIN categories " +
+                        "ON repairs.category_id = categories.id " +
 
                         "WHERE repairs.customer_id = ? " +
 
@@ -964,9 +1390,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-// =====================================================
-// CREATE PAYMENT
-// =====================================================
+    // =====================================================
+    // CREATE PAYMENT
+    // =====================================================
 
     public long createPayment(
             int repairId,
@@ -975,29 +1401,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String status
     ) {
 
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db =
+                this.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
+        ContentValues values =
+                new ContentValues();
+
 
         values.put(
                 "repair_id",
                 repairId
         );
 
+
         values.put(
                 "amount",
                 amount
         );
+
 
         values.put(
                 "payment_date",
                 paymentDate
         );
 
+
         values.put(
                 "status",
                 status
         );
+
 
         return db.insert(
                 "payments",
@@ -1005,42 +1438,101 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 values
         );
     }
+
+
     // =====================================================
-// TEST PAYMENT
-// DELETE WHEN COMBINING PROJECT
-// =====================================================
+    // TEST PAYMENT
+    // DELETE WHEN COMBINING PROJECT
+    // =====================================================
 
     public void insertTestPayment() {
 
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db =
+                this.getWritableDatabase();
 
-        Cursor cursor = db.rawQuery(
-                "SELECT id FROM repairs LIMIT 1",
-                null
-        );
+        Cursor cursor =
+                db.rawQuery(
+                        "SELECT id FROM repairs LIMIT 1",
+                        null
+                );
+
 
         if (!cursor.moveToFirst()) {
 
             cursor.close();
             db.close();
+
             return;
         }
 
-        int repairId = cursor.getInt(0);
+
+        int repairId =
+                cursor.getInt(0);
 
         cursor.close();
 
-        ContentValues values = new ContentValues();
+
+        // =================================================
+        // Calculate test payment amount using the service
+        // price and category price modifier.
+        // =================================================
+
+        Cursor priceCursor =
+                db.rawQuery(
+                        "SELECT " +
+                                "services.price * categories.price_modifier " +
+                                "AS final_price " +
+
+                                "FROM repairs " +
+
+                                "LEFT JOIN services " +
+                                "ON repairs.service_id = services.id " +
+
+                                "LEFT JOIN categories " +
+                                "ON repairs.category_id = categories.id " +
+
+                                "WHERE repairs.id = ? " +
+
+                                "LIMIT 1",
+
+                        new String[]{
+                                String.valueOf(repairId)
+                        }
+                );
+
+
+        double amount = 8000;
+
+
+        if (priceCursor.moveToFirst()) {
+
+            amount =
+                    priceCursor.getDouble(
+                            priceCursor.getColumnIndexOrThrow(
+                                    "final_price"
+                            )
+                    );
+        }
+
+
+        priceCursor.close();
+
+
+        ContentValues values =
+                new ContentValues();
+
 
         values.put(
                 "repair_id",
                 repairId
         );
 
+
         values.put(
                 "amount",
-                8000
+                amount
         );
+
 
         values.put(
                 "payment_date",
@@ -1049,16 +1541,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 )
         );
 
+
         values.put(
                 "status",
                 "Paid"
         );
+
 
         db.insert(
                 "payments",
                 null,
                 values
         );
+
 
         db.close();
     }

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
@@ -84,6 +85,19 @@ public class BookRepairActivity extends AppCompatActivity {
 
 
     // =====================================================
+    // CATEGORIES
+    // =====================================================
+
+    // Category names displayed in the Spinner.
+    private List<String> categoryNames =
+            new ArrayList<>();
+
+    // Category IDs corresponding to categoryNames.
+    private List<Integer> categoryIds =
+            new ArrayList<>();
+
+
+    // =====================================================
     // SERVICES
     // =====================================================
 
@@ -136,9 +150,15 @@ public class BookRepairActivity extends AppCompatActivity {
                 new DatabaseHelper(this);
 
 
-        // IMPORTANT:
+        // =================================================
+        // DEFAULT DATABASE DATA
+        // =================================================
+
         // Make sure Colombo and Galle exist.
         databaseHelper.insertDefaultBranches();
+
+        // Make sure categories exist.
+        databaseHelper.insertDefaultCategories();
 
 
         // =================================================
@@ -262,6 +282,8 @@ public class BookRepairActivity extends AppCompatActivity {
                                 selectedServiceId
                 ) {
 
+                    // +1 because position 0 is
+                    // "Select Repair Service".
                     spinnerService.setSelection(
                             i + 1
                     );
@@ -409,8 +431,14 @@ public class BookRepairActivity extends AppCompatActivity {
 
                             if (bitmap != null) {
 
-                                // TakePicturePreview does not
-                                // provide a permanent URI.
+                                /*
+                                 * TakePicturePreview returns
+                                 * a Bitmap rather than a permanent
+                                 * content URI.
+                                 *
+                                 * Therefore this photo is displayed
+                                 * but selectedImageUri remains null.
+                                 */
 
                                 selectedImageUri =
                                         null;
@@ -459,7 +487,9 @@ public class BookRepairActivity extends AppCompatActivity {
 
                                         if (which == 0) {
 
+                                            // =================================================
                                             // CAMERA
+                                            // =================================================
 
                                             if (
                                                     ContextCompat
@@ -484,7 +514,9 @@ public class BookRepairActivity extends AppCompatActivity {
 
                                         } else {
 
+                                            // =================================================
                                             // GALLERY
+                                            // =================================================
 
                                             imagePickerLauncher.launch(
                                                     "image/*"
@@ -501,28 +533,85 @@ public class BookRepairActivity extends AppCompatActivity {
     // =====================================================
     // DEVICE CATEGORIES
     // =====================================================
+    //
+    // Categories are now loaded from the database.
+    //
+    // Spinner displays:
+    //
+    // Select Device Category
+    // Computer
+    // Laptop
+    // Mobile Phone
+    // Tablet
+    //
+    // But internally we store:
+    //
+    // category ID
+    //
+    // instead of the category name.
+    // =====================================================
 
     private void setupDeviceCategories() {
 
-        String[] deviceCategories = {
+        categoryNames.clear();
 
-                "Select Device Category",
+        categoryIds.clear();
 
-                "Computer",
 
-                "Laptop",
+        // First spinner item.
+        categoryNames.add(
+                "Select Device Category"
+        );
 
-                "Mobile Phone",
+        // Placeholder ID.
+        categoryIds.add(-1);
 
-                "Tablet"
-        };
+
+        Cursor cursor =
+                databaseHelper.getAllCategories();
+
+
+        if (cursor.moveToFirst()) {
+
+            do {
+
+                int categoryId =
+                        cursor.getInt(
+                                cursor.getColumnIndexOrThrow(
+                                        "id"
+                                )
+                        );
+
+
+                String categoryName =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        "name"
+                                )
+                        );
+
+
+                categoryIds.add(
+                        categoryId
+                );
+
+
+                categoryNames.add(
+                        categoryName
+                );
+
+            } while (cursor.moveToNext());
+        }
+
+
+        cursor.close();
 
 
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(
                         this,
                         android.R.layout.simple_spinner_item,
-                        deviceCategories
+                        categoryNames
                 );
 
 
@@ -534,6 +623,16 @@ public class BookRepairActivity extends AppCompatActivity {
         spinnerDeviceCategory.setAdapter(
                 adapter
         );
+
+
+        if (categoryNames.size() == 1) {
+
+            Toast.makeText(
+                    this,
+                    "No device categories found in database.",
+                    Toast.LENGTH_LONG
+            ).show();
+        }
     }
 
 
@@ -633,10 +732,14 @@ public class BookRepairActivity extends AppCompatActivity {
         // DEVICE CATEGORY
         // =================================================
 
-        if (
+        int categoryPosition =
                 spinnerDeviceCategory
-                        .getSelectedItemPosition()
-                        == 0
+                        .getSelectedItemPosition();
+
+
+        if (
+                categoryPosition <= 0 ||
+                        categoryPosition >= categoryIds.size()
         ) {
 
             Toast.makeText(
@@ -650,13 +753,39 @@ public class BookRepairActivity extends AppCompatActivity {
 
 
         // =================================================
+        // GET CATEGORY ID
+        // =================================================
+
+        int selectedCategoryId =
+                categoryIds.get(
+                        categoryPosition
+                );
+
+
+        if (selectedCategoryId == -1) {
+
+            Toast.makeText(
+                    this,
+                    "Invalid device category selected.",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            return;
+        }
+
+
+        // =================================================
         // SERVICE
         // =================================================
 
-        if (
+        int selectedPosition =
                 spinnerService
-                        .getSelectedItemPosition()
-                        == 0
+                        .getSelectedItemPosition();
+
+
+        if (
+                selectedPosition <= 0 ||
+                        selectedPosition > serviceList.size()
         ) {
 
             Toast.makeText(
@@ -718,38 +847,8 @@ public class BookRepairActivity extends AppCompatActivity {
 
 
         // =================================================
-        // GET CATEGORY
-        // =================================================
-
-        String selectedCategory =
-                spinnerDeviceCategory
-                        .getSelectedItem()
-                        .toString();
-
-
-        // =================================================
         // GET SERVICE
         // =================================================
-
-        int selectedPosition =
-                spinnerService
-                        .getSelectedItemPosition();
-
-
-        if (
-                selectedPosition <= 0 ||
-                        selectedPosition > serviceList.size()
-        ) {
-
-            Toast.makeText(
-                    this,
-                    "Invalid repair service selected.",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-            return;
-        }
-
 
         Service selectedService =
                 serviceList.get(
@@ -764,13 +863,25 @@ public class BookRepairActivity extends AppCompatActivity {
         // =================================================
         // CREATE REPAIR
         // =================================================
+        //
+        // Notice:
+        //
+        // selectedCategoryId is passed instead of the
+        // category name.
+        //
+        // assigned_technician_id is NOT passed.
+        //
+        // in_progress_photo_uri is NOT passed.
+        //
+        // DatabaseHelper automatically stores both as NULL.
+        // =================================================
 
         long repairId =
                 databaseHelper.createRepair(
 
                         customerId,
 
-                        selectedCategory,
+                        selectedCategoryId,
 
                         deviceModel,
 
