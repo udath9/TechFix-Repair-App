@@ -46,10 +46,6 @@ public class ServiceFormActivity extends AppCompatActivity {
 
     private String selectedImageUri = "";
 
-    // ============================================================
-    // IMAGE PICKER
-    // ============================================================
-
     private final ActivityResultLauncher<String> imagePicker =
             registerForActivityResult(
                     new ActivityResultContracts.GetContent(),
@@ -64,10 +60,6 @@ public class ServiceFormActivity extends AppCompatActivity {
                         }
                     }
             );
-
-    // ============================================================
-    // CAMERA
-    // ============================================================
 
     private final ActivityResultLauncher<Void> cameraLauncher =
             registerForActivityResult(
@@ -138,10 +130,6 @@ public class ServiceFormActivity extends AppCompatActivity {
         });
     }
 
-    // ============================================================
-    // INITIALIZE VIEWS
-    // ============================================================
-
     private void initializeViews() {
 
         txtServiceFormTitle =
@@ -195,27 +183,15 @@ public class ServiceFormActivity extends AppCompatActivity {
                 );
     }
 
-    // ============================================================
-    // IMAGE PICKER
-    // ============================================================
-
     private void openImagePicker() {
 
         imagePicker.launch("image/*");
     }
 
-    // ============================================================
-    // CAMERA
-    // ============================================================
-
     private void openCamera() {
 
         cameraLauncher.launch(null);
     }
-
-    // ============================================================
-    // SAVE CAMERA IMAGE
-    // ============================================================
 
     private String saveBitmapToInternalStorage(Bitmap bitmap) {
 
@@ -266,10 +242,6 @@ public class ServiceFormActivity extends AppCompatActivity {
             return null;
         }
     }
-
-    // ============================================================
-    // EDIT MODE
-    // ============================================================
 
     private void checkEditMode() {
 
@@ -372,10 +344,6 @@ public class ServiceFormActivity extends AppCompatActivity {
         }
     }
 
-    // ============================================================
-    // SAVE SERVICE
-    // ============================================================
-
     private void saveService() {
 
         String name =
@@ -402,7 +370,6 @@ public class ServiceFormActivity extends AppCompatActivity {
                         .toString()
                         .trim();
 
-        // Validate name
 
         if (name.isEmpty()) {
 
@@ -415,7 +382,6 @@ public class ServiceFormActivity extends AppCompatActivity {
             return;
         }
 
-        // Validate price
 
         if (priceText.isEmpty()) {
 
@@ -428,7 +394,6 @@ public class ServiceFormActivity extends AppCompatActivity {
             return;
         }
 
-        // Validate estimated days
 
         if (daysText.isEmpty()) {
 
@@ -499,10 +464,6 @@ public class ServiceFormActivity extends AppCompatActivity {
             return;
         }
 
-        // ========================================================
-        // UPDATE
-        // ========================================================
-
         if (isEditMode) {
 
             if (serviceId == -1) {
@@ -551,10 +512,6 @@ public class ServiceFormActivity extends AppCompatActivity {
 
             return;
         }
-
-        // ========================================================
-        // INSERT
-        // ========================================================
 
         long result =
                 databaseHelper.insertService(
