@@ -18,7 +18,9 @@ public class TechnicianDashboardActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_technician_dashboard);
 
+
         btnViewRepairs = findViewById(R.id.btnViewRepairs);
+
 
         btnViewRepairs.setOnClickListener(v -> {
 

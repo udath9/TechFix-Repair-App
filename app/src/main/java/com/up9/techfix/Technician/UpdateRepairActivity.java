@@ -32,7 +32,7 @@ public class UpdateRepairActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_update_repair);
 
-        // Find views
+
         spinnerStatus = findViewById(R.id.spinnerStatus);
         etNotes = findViewById(R.id.etNotes);
         etSparePart = findViewById(R.id.etSparePart);
@@ -43,7 +43,7 @@ public class UpdateRepairActivity extends AppCompatActivity {
         btnTakePhoto = findViewById(R.id.btnTakePhoto);
 
 
-        // Camera button
+
         btnTakePhoto.setOnClickListener(v -> {
 
             Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -60,7 +60,7 @@ public class UpdateRepairActivity extends AppCompatActivity {
         });
 
 
-        // Repair status list
+
         String[] statuses = {
                 "Assigned",
                 "Diagnosing",
@@ -84,7 +84,7 @@ public class UpdateRepairActivity extends AppCompatActivity {
         spinnerStatus.setAdapter(adapter);
 
 
-        // Save repair update
+
         btnSaveUpdate.setOnClickListener(v -> {
 
             String status = spinnerStatus.getSelectedItem().toString();
@@ -107,7 +107,7 @@ public class UpdateRepairActivity extends AppCompatActivity {
     }
 
 
-    // Receive photo from camera
+
     @Override
     protected void onActivityResult(
             int requestCode,
