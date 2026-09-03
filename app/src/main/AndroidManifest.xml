@@ -25,11 +25,11 @@
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".auth.RegisterActivity"
+            android:name=".ActorCustomer.auth.RegisterActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".auth.LoginActivity"
+            android:name=".ActorCustomer.auth.LoginActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -39,35 +39,35 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".customer.CustomerHomeActivity"
+            android:name=".ActorCustomer.customer.CustomerHomeActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".service.ServicesActivity"
+            android:name=".ActorCustomer.service.ServicesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".service.ServiceDetailsActivity"
+            android:name=".ActorCustomer.service.ServiceDetailsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".customer.RepairTrackingActivity"
+            android:name=".ActorCustomer.customer.RepairTrackingActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".payment.PaymentActivity"
+            android:name=".ActorCustomer.payment.PaymentActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".customer.RepairHistoryActivity"
+            android:name=".ActorCustomer.customer.RepairHistoryActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".map.BranchesActivity"
+            android:name=".ActorCustomer.map.BranchesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".booking.BookRepairActivity"
+            android:name=".ActorCustomer.booking.BookRepairActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity

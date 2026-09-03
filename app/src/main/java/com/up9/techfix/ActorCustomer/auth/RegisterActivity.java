@@ -1,4 +1,4 @@
-package com.up9.techfix.auth;
+package com.up9.techfix.ActorCustomer.auth;
 
 import android.content.Intent;
 import android.os.Bundle;

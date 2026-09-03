@@ -1,4 +1,4 @@
-package com.up9.techfix.service;
+package com.up9.techfix.ActorCustomer.service;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -15,7 +15,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.up9.techfix.R;
-import com.up9.techfix.booking.BookRepairActivity;
+import com.up9.techfix.ActorCustomer.booking.BookRepairActivity;
 
 import java.util.Locale;
 

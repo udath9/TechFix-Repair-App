@@ -1,4 +1,4 @@
-package com.up9.techfix.auth;
+package com.up9.techfix.ActorCustomer.auth;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,7 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
-import com.up9.techfix.customer.CustomerHomeActivity;
+import com.up9.techfix.ActorCustomer.customer.CustomerHomeActivity;
 import com.up9.techfix.data.DatabaseHelper;
 
 public class LoginActivity extends AppCompatActivity {

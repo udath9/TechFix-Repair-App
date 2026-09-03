@@ -1,10 +1,9 @@
-package com.up9.techfix.service;
+package com.up9.techfix.ActorCustomer.service;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;

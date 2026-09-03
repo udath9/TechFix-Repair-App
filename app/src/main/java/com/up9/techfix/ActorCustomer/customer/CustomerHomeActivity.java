@@ -1,4 +1,4 @@
-package com.up9.techfix.customer;
+package com.up9.techfix.ActorCustomer.customer;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,10 +7,10 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
-import com.up9.techfix.map.BranchesActivity;
-import com.up9.techfix.payment.PaymentActivity;
-import com.up9.techfix.service.ServicesActivity;
-import com.up9.techfix.booking.BookRepairActivity;
+import com.up9.techfix.ActorCustomer.map.BranchesActivity;
+import com.up9.techfix.ActorCustomer.payment.PaymentActivity;
+import com.up9.techfix.ActorCustomer.service.ServicesActivity;
+import com.up9.techfix.ActorCustomer.booking.BookRepairActivity;
 
 
 import com.up9.techfix.data.DatabaseViewerActivity;

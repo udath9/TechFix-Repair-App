@@ -12,7 +12,7 @@
 
     android:padding="20dp"
 
-    tools:context=".customer.RepairTrackingActivity">
+    tools:context=".ActorCustomer.customer.RepairTrackingActivity">
 
 
     <!-- ================================================= -->

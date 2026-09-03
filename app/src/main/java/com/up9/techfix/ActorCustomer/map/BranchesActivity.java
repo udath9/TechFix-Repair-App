@@ -1,4 +1,4 @@
-package com.up9.techfix.map;
+package com.up9.techfix.ActorCustomer.map;
 
 import android.database.Cursor;
 import android.os.Bundle;

@@ -11,7 +11,7 @@
 
     android:padding="16dp"
 
-    tools:context=".payment.PaymentActivity">
+    tools:context=".ActorCustomer.payment.PaymentActivity">
 
 
     <!-- ================================================= -->

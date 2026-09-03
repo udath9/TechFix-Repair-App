@@ -1,4 +1,4 @@
-package com.up9.techfix.customer;
+package com.up9.techfix.ActorCustomer.customer;
 
 import android.database.Cursor;
 import android.os.Bundle;
