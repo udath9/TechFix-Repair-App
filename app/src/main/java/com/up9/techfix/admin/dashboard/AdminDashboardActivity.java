@@ -1,9 +1,8 @@
 package com.up9.techfix.admin.dashboard;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,17 +18,16 @@ import com.up9.techfix.admin.technicians.ManageTechniciansActivity;
 
 public class AdminDashboardActivity extends AppCompatActivity {
 
-    private Button btnBranches;
-    private Button btnCategories;
-    private Button btnServices;
-    private Button btnTechnicians;
-    private Button btnSpareParts;
-    private Button btnRepairs;
-    private Button btnPayments;
-    private Button btnLogout;
-    private Button btnRepairSamples;
+    private View btnBranches;
+    private View btnCategories;
+    private View btnServices;
+    private View btnTechnicians;
+    private View btnSpareParts;
+    private View btnRepairs;
+    private View btnPayments;
+    private View btnLogout;
+    private View btnRepairSamples;
 
-    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,102 +41,75 @@ public class AdminDashboardActivity extends AppCompatActivity {
         btnSpareParts = findViewById(R.id.btnSpareParts);
         btnRepairs = findViewById(R.id.btnRepairs);
         btnPayments = findViewById(R.id.btnPayments);
-        btnRepairSamples=findViewById(R.id.btnRepairSamples);
+        btnRepairSamples = findViewById(R.id.btnRepairSamples);
         btnLogout = findViewById(R.id.btnLogout);
 
         btnBranches.setOnClickListener(v -> {
-            Intent intent =
-                    new Intent(
-                            AdminDashboardActivity.this,
-                            ManageBranchesActivity.class
-                    );
-
+            Intent intent = new Intent(
+                    AdminDashboardActivity.this,
+                    ManageBranchesActivity.class
+            );
             startActivity(intent);
         });
 
         btnCategories.setOnClickListener(v -> {
-
-            Intent intent =
-                    new Intent(
-                            AdminDashboardActivity.this,
-                            ManageCategoriesActivity.class
-                    );
-
+            Intent intent = new Intent(
+                    AdminDashboardActivity.this,
+                    ManageCategoriesActivity.class
+            );
             startActivity(intent);
-
         });
 
         btnServices.setOnClickListener(v -> {
-
-            Intent intent =
-                    new Intent(
-                            AdminDashboardActivity.this,
-                            ManageServicesActivity.class
-                    );
-
+            Intent intent = new Intent(
+                    AdminDashboardActivity.this,
+                    ManageServicesActivity.class
+            );
             startActivity(intent);
-
         });
 
         btnTechnicians.setOnClickListener(v -> {
-
-            Intent intent =
-                    new Intent(
-                            AdminDashboardActivity.this,
-                            ManageTechniciansActivity.class
-                    );
-
+            Intent intent = new Intent(
+                    AdminDashboardActivity.this,
+                    ManageTechniciansActivity.class
+            );
             startActivity(intent);
         });
 
         btnSpareParts.setOnClickListener(v -> {
-
-            Intent intent =
-                    new Intent(
-                            AdminDashboardActivity.this,
-                            ManageSparePartsActivity.class
-                    );
-
+            Intent intent = new Intent(
+                    AdminDashboardActivity.this,
+                    ManageSparePartsActivity.class
+            );
             startActivity(intent);
         });
 
         btnRepairs.setOnClickListener(v -> {
-
-            Intent intent =
-                    new Intent(
-                            AdminDashboardActivity.this,
-                            ManageAppointmentsActivity.class
-                    );
-
+            Intent intent = new Intent(
+                    AdminDashboardActivity.this,
+                    ManageAppointmentsActivity.class
+            );
             startActivity(intent);
+        });
 
+        btnRepairSamples.setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    AdminDashboardActivity.this,
+                    ManageRepairSamplesActivity.class
+            );
+            startActivity(intent);
         });
 
         btnPayments.setOnClickListener(v -> {
-            Intent intent =
-                    new Intent(
-                            AdminDashboardActivity.this,
-                            ManagePaymentsActivity.class
-                    );
-
-            startActivity(intent);
-
-        });
-        btnRepairSamples.setOnClickListener(v -> {
-
-            Intent intent =
-                    new Intent(
-                            AdminDashboardActivity.this,
-                            ManageRepairSamplesActivity.class
-                    );
-
+            Intent intent = new Intent(
+                    AdminDashboardActivity.this,
+                    ManagePaymentsActivity.class
+            );
             startActivity(intent);
         });
 
         btnLogout.setOnClickListener(v -> {
-
             finish();
-
         });
     }
 }
