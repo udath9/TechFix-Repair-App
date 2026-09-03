@@ -1,10 +1,13 @@
-package com.up9.techfix.ActorCustomer.customer;
+package com.up9.techfix.ActorCustomer.RepairBooking;
 
 import android.database.Cursor;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,7 +46,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
                 R.layout.activity_repair_tracking
         );
 
-
         // =================================================
         // WINDOW INSETS
         // =================================================
@@ -71,14 +73,12 @@ public class RepairTrackingActivity extends AppCompatActivity {
                 }
         );
 
-
         // =================================================
         // DATABASE
         // =================================================
 
         databaseHelper =
                 new DatabaseHelper(this);
-
 
         // =================================================
         // GET VIEWS
@@ -93,7 +93,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
                 findViewById(
                         R.id.tvNoRepairs
                 );
-
 
         // =================================================
         // GET LOGGED-IN CUSTOMER
@@ -111,14 +110,12 @@ public class RepairTrackingActivity extends AppCompatActivity {
                         -1
                 );
 
-
         // =================================================
         // LOAD REPAIRS
         // =================================================
 
         loadRepairs();
     }
-
 
     // =====================================================
     // LOAD CUSTOMER REPAIRS
@@ -142,12 +139,10 @@ public class RepairTrackingActivity extends AppCompatActivity {
             return;
         }
 
-
         Cursor cursor =
                 databaseHelper.getCustomerActiveRepairs(
                         customerId
                 );
-
 
         if (cursor == null ||
                 !cursor.moveToFirst()) {
@@ -167,11 +162,9 @@ public class RepairTrackingActivity extends AppCompatActivity {
             return;
         }
 
-
         tvNoRepairs.setVisibility(
                 View.GONE
         );
-
 
         do {
 
@@ -179,10 +172,8 @@ public class RepairTrackingActivity extends AppCompatActivity {
 
         } while (cursor.moveToNext());
 
-
         cursor.close();
     }
-
 
     // =====================================================
     // CREATE REPAIR CARD
@@ -197,14 +188,12 @@ public class RepairTrackingActivity extends AppCompatActivity {
                         )
                 );
 
-
-        String deviceCategory =
+        String categoryName =
                 cursor.getString(
                         cursor.getColumnIndexOrThrow(
-                                "device_category"
+                                "category_name"
                         )
                 );
-
 
         String deviceModel =
                 cursor.getString(
@@ -213,14 +202,12 @@ public class RepairTrackingActivity extends AppCompatActivity {
                         )
                 );
 
-
         String serviceName =
                 cursor.getString(
                         cursor.getColumnIndexOrThrow(
                                 "service_name"
                         )
                 );
-
 
         String status =
                 cursor.getString(
@@ -229,14 +216,12 @@ public class RepairTrackingActivity extends AppCompatActivity {
                         )
                 );
 
-
         String branchName =
                 cursor.getString(
                         cursor.getColumnIndexOrThrow(
                                 "branch_name"
                         )
                 );
-
 
         String repairDate =
                 cursor.getString(
@@ -245,6 +230,23 @@ public class RepairTrackingActivity extends AppCompatActivity {
                         )
                 );
 
+        // =================================================
+        // IMAGE URIs
+        // =================================================
+
+        String customerImageUri =
+                cursor.getString(
+                        cursor.getColumnIndexOrThrow(
+                                "image_uri"
+                        )
+                );
+
+        String progressImageUri =
+                cursor.getString(
+                        cursor.getColumnIndexOrThrow(
+                                "in_progress_photo_uri"
+                        )
+                );
 
         // =================================================
         // CARD
@@ -268,7 +270,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
                 android.R.drawable.dialog_holo_light_frame
         );
 
-
         LinearLayout.LayoutParams cardParams =
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
@@ -286,7 +287,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
                 cardParams
         );
 
-
         // =================================================
         // REPAIR ID
         // =================================================
@@ -302,7 +302,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
                 tvRepairId
         );
 
-
         // =================================================
         // DEVICE
         // =================================================
@@ -310,9 +309,9 @@ public class RepairTrackingActivity extends AppCompatActivity {
         TextView tvDevice =
                 createTextView(
                         "Device: "
-                                + deviceCategory
+                                + safeString(categoryName)
                                 + " - "
-                                + deviceModel,
+                                + safeString(deviceModel),
                         17,
                         false
                 );
@@ -320,7 +319,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
         card.addView(
                 tvDevice
         );
-
 
         // =================================================
         // SERVICE
@@ -338,7 +336,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
                 tvService
         );
 
-
         // =================================================
         // BRANCH
         // =================================================
@@ -354,7 +351,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
         card.addView(
                 tvBranch
         );
-
 
         // =================================================
         // DATE
@@ -374,6 +370,15 @@ public class RepairTrackingActivity extends AppCompatActivity {
                 tvDate
         );
 
+        // =================================================
+        // REPAIR PHOTOS
+        // =================================================
+
+        addRepairImages(
+                card,
+                customerImageUri,
+                progressImageUri
+        );
 
         // =================================================
         // STATUS
@@ -382,7 +387,7 @@ public class RepairTrackingActivity extends AppCompatActivity {
         TextView tvStatus =
                 createTextView(
                         "Status: "
-                                + status,
+                                + safeString(status),
                         18,
                         true
                 );
@@ -398,9 +403,8 @@ public class RepairTrackingActivity extends AppCompatActivity {
                 tvStatus
         );
 
-
         // =================================================
-        // PROGRESS INFORMATION
+        // PROGRESS
         // =================================================
 
         TextView tvProgress =
@@ -413,7 +417,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
         card.addView(
                 tvProgress
         );
-
 
         // =================================================
         // CANCEL BUTTON
@@ -456,12 +459,212 @@ public class RepairTrackingActivity extends AppCompatActivity {
             );
         }
 
-
         repairsContainer.addView(
                 card
         );
     }
 
+    // =====================================================
+    // ADD TWO SIMPLE IMAGES
+    // =====================================================
+
+    private void addRepairImages(
+            LinearLayout card,
+            String customerImageUri,
+            String progressImageUri
+    ) {
+
+        TextView title =
+                createTextView(
+                        "Repair Photos",
+                        17,
+                        true
+                );
+
+        title.setPadding(
+                0,
+                15,
+                0,
+                10
+        );
+
+        card.addView(
+                title
+        );
+
+        // =================================================
+        // HORIZONTAL CONTAINER
+        // =================================================
+
+        LinearLayout imageContainer =
+                new LinearLayout(this);
+
+        imageContainer.setOrientation(
+                LinearLayout.HORIZONTAL
+        );
+
+        imageContainer.setGravity(
+                Gravity.CENTER
+        );
+
+        LinearLayout.LayoutParams containerParams =
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        150
+                );
+
+        imageContainer.setLayoutParams(
+                containerParams
+        );
+
+        // =================================================
+        // CUSTOMER PHOTO
+        // =================================================
+
+        LinearLayout customerBox =
+                createImageBox(
+                        "Customer Photo",
+                        customerImageUri
+                );
+
+        imageContainer.addView(
+                customerBox
+        );
+
+        // =================================================
+        // PROGRESS PHOTO
+        // =================================================
+
+        LinearLayout progressBox =
+                createImageBox(
+                        "Progress Photo",
+                        progressImageUri
+                );
+
+        imageContainer.addView(
+                progressBox
+        );
+
+        card.addView(
+                imageContainer
+        );
+    }
+
+    // =====================================================
+    // CREATE SIMPLE IMAGE BOX
+    // =====================================================
+
+    private LinearLayout createImageBox(
+            String label,
+            String imageUri
+    ) {
+
+        LinearLayout box =
+                new LinearLayout(this);
+
+        box.setOrientation(
+                LinearLayout.VERTICAL
+        );
+
+        box.setGravity(
+                Gravity.CENTER
+        );
+
+        LinearLayout.LayoutParams boxParams =
+                new LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        1
+                );
+
+        boxParams.setMargins(
+                5,
+                5,
+                5,
+                5
+        );
+
+        box.setLayoutParams(
+                boxParams
+        );
+
+        // =================================================
+        // IMAGE
+        // =================================================
+
+        ImageView imageView =
+                new ImageView(this);
+
+        LinearLayout.LayoutParams imageParams =
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        110
+                );
+
+        imageView.setLayoutParams(
+                imageParams
+        );
+
+        imageView.setScaleType(
+                ImageView.ScaleType.CENTER_CROP
+        );
+
+        imageView.setBackgroundResource(
+                android.R.drawable.dialog_holo_light_frame
+        );
+
+        // =================================================
+        // LOAD IMAGE
+        // =================================================
+
+        if (imageUri != null &&
+                !imageUri.trim().isEmpty()) {
+
+            try {
+
+                imageView.setImageURI(
+                        Uri.parse(imageUri)
+                );
+
+            } catch (Exception e) {
+
+                imageView.setImageResource(
+                        android.R.drawable.ic_menu_report_image
+                );
+            }
+
+        } else {
+
+            imageView.setImageResource(
+                    android.R.drawable.ic_menu_gallery
+            );
+        }
+
+        box.addView(
+                imageView
+        );
+
+        // =================================================
+        // LABEL
+        // =================================================
+
+        TextView labelView =
+                createTextView(
+                        label,
+                        13,
+                        false
+                );
+
+        labelView.setGravity(
+                Gravity.CENTER
+        );
+
+        box.addView(
+                labelView
+        );
+
+        return box;
+    }
 
     // =====================================================
     // CANCEL CONFIRMATION
@@ -502,7 +705,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
                 .show();
     }
 
-
     // =====================================================
     // CANCEL REPAIR
     // =====================================================
@@ -517,7 +719,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
                         customerId
                 );
 
-
         if (cancelled) {
 
             Toast.makeText(
@@ -525,7 +726,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
                     "Repair booking cancelled.",
                     Toast.LENGTH_LONG
             ).show();
-
 
             loadRepairs();
 
@@ -538,11 +738,9 @@ public class RepairTrackingActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG
             ).show();
 
-
             loadRepairs();
         }
     }
-
 
     // =====================================================
     // PROGRESS TEXT
@@ -556,7 +754,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
             return "";
         }
 
-
         switch (status) {
 
             case "Pending":
@@ -566,14 +763,12 @@ public class RepairTrackingActivity extends AppCompatActivity {
                         + "○ Ready for Collection\n"
                         + "○ Completed";
 
-
             case "In Progress":
 
                 return "● Appointment Received\n"
                         + "● Repair In Progress\n"
                         + "○ Ready for Collection\n"
                         + "○ Completed";
-
 
             case "Ready for Collection":
 
@@ -582,7 +777,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
                         + "● Ready for Collection\n"
                         + "○ Completed";
 
-
             case "Completed":
 
                 return "● Appointment Received\n"
@@ -590,14 +784,12 @@ public class RepairTrackingActivity extends AppCompatActivity {
                         + "● Ready for Collection\n"
                         + "● Completed";
 
-
             default:
 
                 return "Current Status: "
                         + status;
         }
     }
-
 
     // =====================================================
     // CREATE TEXT VIEW
@@ -631,7 +823,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
                 Gravity.START
         );
 
-
         if (bold) {
 
             textView.setTypeface(
@@ -640,10 +831,8 @@ public class RepairTrackingActivity extends AppCompatActivity {
             );
         }
 
-
         return textView;
     }
-
 
     // =====================================================
     // SAFE STRING
@@ -661,7 +850,6 @@ public class RepairTrackingActivity extends AppCompatActivity {
 
         return value;
     }
-
 
     // =====================================================
     // FORMAT DATE

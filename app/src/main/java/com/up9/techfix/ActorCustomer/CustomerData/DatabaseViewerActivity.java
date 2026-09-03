@@ -1,4 +1,4 @@
-package com.up9.techfix.data;
+package com.up9.techfix.ActorCustomer.CustomerData;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
+import com.up9.techfix.data.DatabaseHelper;
 
 public class DatabaseViewerActivity extends AppCompatActivity {
 

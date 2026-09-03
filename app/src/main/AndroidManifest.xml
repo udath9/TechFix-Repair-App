@@ -51,7 +51,7 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ActorCustomer.customer.RepairTrackingActivity"
+            android:name=".ActorCustomer.RepairBooking.RepairTrackingActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
@@ -59,7 +59,7 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ActorCustomer.customer.RepairHistoryActivity"
+            android:name=".ActorCustomer.RepairBooking.RepairHistoryActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
@@ -67,11 +67,11 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ActorCustomer.booking.BookRepairActivity"
+            android:name=".ActorCustomer.RepairBooking.BookRepairActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".data.DatabaseViewerActivity"
+            android:name=".ActorCustomer.CustomerData.DatabaseViewerActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>

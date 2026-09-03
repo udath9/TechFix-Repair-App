@@ -4,35 +4,41 @@ public class Repair {
 
     private int id;
     private int customerId;
-    private String deviceCategory;
+    private int categoryId;
     private String deviceModel;
     private int serviceId;
     private String problemDescription;
     private int branchId;
     private String imageUri;
+    private String inProgressPhotoUri;
+    private Integer assignedTechnicianId;
     private String status;
     private String repairDate;
 
     public Repair(
             int id,
             int customerId,
-            String deviceCategory,
+            int categoryId,
             String deviceModel,
             int serviceId,
             String problemDescription,
             int branchId,
             String imageUri,
+            String inProgressPhotoUri,
+            Integer assignedTechnicianId,
             String status,
             String repairDate
     ) {
         this.id = id;
         this.customerId = customerId;
-        this.deviceCategory = deviceCategory;
+        this.categoryId = categoryId;
         this.deviceModel = deviceModel;
         this.serviceId = serviceId;
         this.problemDescription = problemDescription;
         this.branchId = branchId;
         this.imageUri = imageUri;
+        this.inProgressPhotoUri = inProgressPhotoUri;
+        this.assignedTechnicianId = assignedTechnicianId;
         this.status = status;
         this.repairDate = repairDate;
     }
@@ -45,8 +51,8 @@ public class Repair {
         return customerId;
     }
 
-    public String getDeviceCategory() {
-        return deviceCategory;
+    public int getCategoryId() {
+        return categoryId;
     }
 
     public String getDeviceModel() {
@@ -67,6 +73,14 @@ public class Repair {
 
     public String getImageUri() {
         return imageUri;
+    }
+
+    public String getInProgressPhotoUri() {
+        return inProgressPhotoUri;
+    }
+
+    public Integer getAssignedTechnicianId() {
+        return assignedTechnicianId;
     }
 
     public String getStatus() {

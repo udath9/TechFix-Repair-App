@@ -1,11 +1,12 @@
-package com.up9.techfix.ActorCustomer.booking;
+package com.up9.techfix.ActorCustomer.RepairBooking;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -28,7 +29,12 @@ import com.up9.techfix.R;
 import com.up9.techfix.data.DatabaseHelper;
 import com.up9.techfix.data.Service;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -88,11 +94,9 @@ public class BookRepairActivity extends AppCompatActivity {
     // CATEGORIES
     // =====================================================
 
-    // Category names displayed in the Spinner.
     private List<String> categoryNames =
             new ArrayList<>();
 
-    // Category IDs corresponding to categoryNames.
     private List<Integer> categoryIds =
             new ArrayList<>();
 
@@ -118,6 +122,14 @@ public class BookRepairActivity extends AppCompatActivity {
     // IMAGE
     // =====================================================
 
+    /*
+     * This will contain a permanent file URI such as:
+     *
+     * file:///data/user/0/com.up9.techfix/files/
+     * repair_image_123456789.jpg
+     *
+     * The image is stored inside the app itself.
+     */
     private String selectedImageUri = null;
 
 
@@ -154,10 +166,8 @@ public class BookRepairActivity extends AppCompatActivity {
         // DEFAULT DATABASE DATA
         // =================================================
 
-        // Make sure Colombo and Galle exist.
         databaseHelper.insertDefaultBranches();
 
-        // Make sure categories exist.
         databaseHelper.insertDefaultCategories();
 
 
@@ -282,8 +292,6 @@ public class BookRepairActivity extends AppCompatActivity {
                                 selectedServiceId
                 ) {
 
-                    // +1 because position 0 is
-                    // "Select Repair Service".
                     spinnerService.setSelection(
                             i + 1
                     );
@@ -359,7 +367,7 @@ public class BookRepairActivity extends AppCompatActivity {
 
 
         // =================================================
-        // IMAGE PICKER
+        // GALLERY IMAGE PICKER
         // =================================================
 
         imagePickerLauncher =
@@ -369,25 +377,53 @@ public class BookRepairActivity extends AppCompatActivity {
 
                             if (uri != null) {
 
-                                selectedImageUri =
-                                        uri.toString();
+                                /*
+                                 * IMPORTANT:
+                                 *
+                                 * Do NOT save the original content:// URI.
+                                 *
+                                 * Instead, copy the image into our
+                                 * application's private storage.
+                                 */
+
+                                String permanentUri =
+                                        copyImageToInternalStorage(
+                                                uri
+                                        );
 
 
-                                ivDeviceImage.setImageURI(
-                                        uri
-                                );
+                                if (permanentUri != null) {
+
+                                    selectedImageUri =
+                                            permanentUri;
 
 
-                                ivDeviceImage.setVisibility(
-                                        View.VISIBLE
-                                );
+                                    ivDeviceImage.setImageURI(
+                                            Uri.parse(
+                                                    permanentUri
+                                            )
+                                    );
 
 
-                                Toast.makeText(
-                                        this,
-                                        "Device image selected!",
-                                        Toast.LENGTH_SHORT
-                                ).show();
+                                    ivDeviceImage.setVisibility(
+                                            View.VISIBLE
+                                    );
+
+
+                                    Toast.makeText(
+                                            this,
+                                            "Device image selected!",
+                                            Toast.LENGTH_SHORT
+                                    ).show();
+
+                                } else {
+
+                                    Toast.makeText(
+                                            this,
+                                            "Unable to save the selected image.",
+                                            Toast.LENGTH_LONG
+                                    ).show();
+                                }
                             }
                         }
                 );
@@ -432,33 +468,51 @@ public class BookRepairActivity extends AppCompatActivity {
                             if (bitmap != null) {
 
                                 /*
-                                 * TakePicturePreview returns
-                                 * a Bitmap rather than a permanent
-                                 * content URI.
+                                 * TakePicturePreview gives us a Bitmap.
                                  *
-                                 * Therefore this photo is displayed
-                                 * but selectedImageUri remains null.
+                                 * We now save that Bitmap permanently
+                                 * inside the application's private
+                                 * storage.
                                  */
 
-                                selectedImageUri =
-                                        null;
+                                String permanentUri =
+                                        saveCameraImage(
+                                                bitmap
+                                        );
 
 
-                                ivDeviceImage.setImageBitmap(
-                                        bitmap
-                                );
+                                if (permanentUri != null) {
+
+                                    selectedImageUri =
+                                            permanentUri;
 
 
-                                ivDeviceImage.setVisibility(
-                                        View.VISIBLE
-                                );
+                                    ivDeviceImage.setImageURI(
+                                            Uri.parse(
+                                                    permanentUri
+                                            )
+                                    );
 
 
-                                Toast.makeText(
-                                        this,
-                                        "Photo captured!",
-                                        Toast.LENGTH_SHORT
-                                ).show();
+                                    ivDeviceImage.setVisibility(
+                                            View.VISIBLE
+                                    );
+
+
+                                    Toast.makeText(
+                                            this,
+                                            "Photo captured!",
+                                            Toast.LENGTH_SHORT
+                                    ).show();
+
+                                } else {
+
+                                    Toast.makeText(
+                                            this,
+                                            "Unable to save camera photo.",
+                                            Toast.LENGTH_LONG
+                                    ).show();
+                                }
                             }
                         }
                 );
@@ -478,18 +532,20 @@ public class BookRepairActivity extends AppCompatActivity {
 
 
                     new AlertDialog.Builder(this)
+
                             .setTitle(
                                     "Upload Device Image"
                             )
+
                             .setItems(
                                     options,
                                     (dialog, which) -> {
 
-                                        if (which == 0) {
+                                        // =================================================
+                                        // CAMERA
+                                        // =================================================
 
-                                            // =================================================
-                                            // CAMERA
-                                            // =================================================
+                                        if (which == 0) {
 
                                             if (
                                                     ContextCompat
@@ -512,11 +568,14 @@ public class BookRepairActivity extends AppCompatActivity {
                                                 );
                                             }
 
-                                        } else {
 
-                                            // =================================================
-                                            // GALLERY
-                                            // =================================================
+                                        }
+
+                                        // =================================================
+                                        // GALLERY
+                                        // =================================================
+
+                                        else {
 
                                             imagePickerLauncher.launch(
                                                     "image/*"
@@ -524,6 +583,7 @@ public class BookRepairActivity extends AppCompatActivity {
                                         }
                                     }
                             )
+
                             .show();
                 }
         );
@@ -531,24 +591,218 @@ public class BookRepairActivity extends AppCompatActivity {
 
 
     // =====================================================
-    // DEVICE CATEGORIES
+    // COPY GALLERY IMAGE TO INTERNAL STORAGE
     // =====================================================
-    //
-    // Categories are now loaded from the database.
-    //
-    // Spinner displays:
-    //
-    // Select Device Category
-    // Computer
-    // Laptop
-    // Mobile Phone
-    // Tablet
-    //
-    // But internally we store:
-    //
-    // category ID
-    //
-    // instead of the category name.
+
+    private String copyImageToInternalStorage(
+            Uri sourceUri
+    ) {
+
+        InputStream inputStream = null;
+
+        FileOutputStream outputStream = null;
+
+        try {
+
+            /*
+             * Open the selected Gallery image.
+             */
+
+            inputStream =
+                    getContentResolver()
+                            .openInputStream(
+                                    sourceUri
+                            );
+
+
+            if (inputStream == null) {
+
+                return null;
+            }
+
+
+            /*
+             * Create a unique filename.
+             */
+
+            String fileName =
+                    "repair_image_"
+                            + System.currentTimeMillis()
+                            + ".jpg";
+
+
+            /*
+             * Store it in the application's private files directory.
+             */
+
+            File imageFile =
+                    new File(
+                            getFilesDir(),
+                            fileName
+                    );
+
+
+            outputStream =
+                    new FileOutputStream(
+                            imageFile
+                    );
+
+
+            /*
+             * Copy the image.
+             */
+
+            byte[] buffer =
+                    new byte[4096];
+
+            int bytesRead;
+
+
+            while (
+                    (bytesRead =
+                            inputStream.read(buffer))
+                            != -1
+            ) {
+
+                outputStream.write(
+                        buffer,
+                        0,
+                        bytesRead
+                );
+            }
+
+
+            outputStream.flush();
+
+
+            /*
+             * Return a permanent file URI.
+             */
+
+            return Uri.fromFile(
+                    imageFile
+            ).toString();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return null;
+
+        } finally {
+
+            try {
+
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+
+            } catch (Exception ignored) {
+            }
+
+
+            try {
+
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+
+    // =====================================================
+    // SAVE CAMERA IMAGE TO INTERNAL STORAGE
+    // =====================================================
+
+    private String saveCameraImage(
+            Bitmap bitmap
+    ) {
+
+        FileOutputStream outputStream = null;
+
+        try {
+
+            /*
+             * Create a unique filename.
+             */
+
+            String fileName =
+                    "repair_camera_"
+                            + System.currentTimeMillis()
+                            + ".jpg";
+
+
+            /*
+             * Create the file inside the app's private storage.
+             */
+
+            File imageFile =
+                    new File(
+                            getFilesDir(),
+                            fileName
+                    );
+
+
+            outputStream =
+                    new FileOutputStream(
+                            imageFile
+                    );
+
+
+            /*
+             * Compress Bitmap into JPEG.
+             */
+
+            boolean success =
+                    bitmap.compress(
+                            Bitmap.CompressFormat.JPEG,
+                            90,
+                            outputStream
+                    );
+
+
+            outputStream.flush();
+
+
+            if (!success) {
+
+                return null;
+            }
+
+
+            /*
+             * Return a permanent file URI.
+             */
+
+            return Uri.fromFile(
+                    imageFile
+            ).toString();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return null;
+
+        } finally {
+
+            try {
+
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+
+    // =====================================================
+    // DEVICE CATEGORIES
     // =====================================================
 
     private void setupDeviceCategories() {
@@ -558,12 +812,10 @@ public class BookRepairActivity extends AppCompatActivity {
         categoryIds.clear();
 
 
-        // First spinner item.
         categoryNames.add(
                 "Select Device Category"
         );
 
-        // Placeholder ID.
         categoryIds.add(-1);
 
 
@@ -752,10 +1004,6 @@ public class BookRepairActivity extends AppCompatActivity {
         }
 
 
-        // =================================================
-        // GET CATEGORY ID
-        // =================================================
-
         int selectedCategoryId =
                 categoryIds.get(
                         categoryPosition
@@ -862,18 +1110,6 @@ public class BookRepairActivity extends AppCompatActivity {
 
         // =================================================
         // CREATE REPAIR
-        // =================================================
-        //
-        // Notice:
-        //
-        // selectedCategoryId is passed instead of the
-        // category name.
-        //
-        // assigned_technician_id is NOT passed.
-        //
-        // in_progress_photo_uri is NOT passed.
-        //
-        // DatabaseHelper automatically stores both as NULL.
         // =================================================
 
         long repairId =

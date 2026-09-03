@@ -164,7 +164,7 @@ public class PaymentActivity extends AppCompatActivity {
             String deviceCategory =
                     cursor.getString(
                             cursor.getColumnIndexOrThrow(
-                                    "device_category"
+                                    "category_name"
                             )
                     );
 

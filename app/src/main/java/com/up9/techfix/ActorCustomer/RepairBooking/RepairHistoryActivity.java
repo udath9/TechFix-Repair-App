@@ -1,8 +1,7 @@
-package com.up9.techfix.ActorCustomer.customer;
+package com.up9.techfix.ActorCustomer.RepairBooking;
 
 import android.database.Cursor;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -29,11 +28,15 @@ public class RepairHistoryActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         EdgeToEdge.enable(this);
 
-        setContentView(R.layout.activity_repair_history);
+        setContentView(
+                R.layout.activity_repair_history
+        );
+
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main),
@@ -55,6 +58,7 @@ public class RepairHistoryActivity extends AppCompatActivity {
                 }
         );
 
+
         databaseHelper =
                 new DatabaseHelper(this);
 
@@ -68,6 +72,7 @@ public class RepairHistoryActivity extends AppCompatActivity {
                         "TechFixSession",
                         MODE_PRIVATE
                 );
+
 
         customerId =
                 preferences.getInt(
@@ -104,18 +109,23 @@ public class RepairHistoryActivity extends AppCompatActivity {
 
 
         // -------------------------------------------------
-        // Check customer
+        // CHECK CUSTOMER
         // -------------------------------------------------
 
         if (customerId == -1) {
 
             showMessage(
-                    "Customer information not found.\nPlease log in again."
+                    "Customer information not found.\n"
+                            + "Please log in again."
             );
 
             return;
         }
 
+
+        // -------------------------------------------------
+        // GET HISTORY
+        // -------------------------------------------------
 
         Cursor cursor =
                 databaseHelper.getRepairHistory(
@@ -124,7 +134,7 @@ public class RepairHistoryActivity extends AppCompatActivity {
 
 
         // -------------------------------------------------
-        // No repairs
+        // NO REPAIRS
         // -------------------------------------------------
 
         if (!cursor.moveToFirst()) {
@@ -140,10 +150,14 @@ public class RepairHistoryActivity extends AppCompatActivity {
 
 
         // -------------------------------------------------
-        // Read repairs
+        // READ REPAIRS
         // -------------------------------------------------
 
         do {
+
+            // =================================================
+            // REPAIR ID
+            // =================================================
 
             int repairId =
                     cursor.getInt(
@@ -153,13 +167,28 @@ public class RepairHistoryActivity extends AppCompatActivity {
                     );
 
 
+            // =================================================
+            // CATEGORY
+            // =================================================
+            //
+            // Database now returns:
+            // category_name
+            //
+            // NOT:
+            // device_category
+            // =================================================
+
             String deviceCategory =
                     cursor.getString(
                             cursor.getColumnIndexOrThrow(
-                                    "device_category"
+                                    "category_name"
                             )
                     );
 
+
+            // =================================================
+            // DEVICE MODEL
+            // =================================================
 
             String deviceModel =
                     cursor.getString(
@@ -169,6 +198,10 @@ public class RepairHistoryActivity extends AppCompatActivity {
                     );
 
 
+            // =================================================
+            // SERVICE
+            // =================================================
+
             String serviceName =
                     cursor.getString(
                             cursor.getColumnIndexOrThrow(
@@ -176,6 +209,10 @@ public class RepairHistoryActivity extends AppCompatActivity {
                             )
                     );
 
+
+            // =================================================
+            // BRANCH
+            // =================================================
 
             String branchName =
                     cursor.getString(
@@ -185,6 +222,10 @@ public class RepairHistoryActivity extends AppCompatActivity {
                     );
 
 
+            // =================================================
+            // DATE
+            // =================================================
+
             String repairDate =
                     cursor.getString(
                             cursor.getColumnIndexOrThrow(
@@ -192,6 +233,10 @@ public class RepairHistoryActivity extends AppCompatActivity {
                             )
                     );
 
+
+            // =================================================
+            // STATUS
+            // =================================================
 
             String status =
                     cursor.getString(
@@ -201,17 +246,29 @@ public class RepairHistoryActivity extends AppCompatActivity {
                     );
 
 
+            // =================================================
+            // FINAL PRICE
+            // =================================================
+            //
+            // Database calculates:
+            //
+            // service price × category price modifier
+            //
+            // and returns it as:
+            // final_price
+            // =================================================
+
             double price =
                     cursor.getDouble(
                             cursor.getColumnIndexOrThrow(
-                                    "price"
+                                    "final_price"
                             )
                     );
 
 
-            // -------------------------------------------------
-            // Format date
-            // -------------------------------------------------
+            // =================================================
+            // FORMAT DATE
+            // =================================================
 
             String formattedDate =
                     formatRepairDate(
@@ -219,30 +276,36 @@ public class RepairHistoryActivity extends AppCompatActivity {
                     );
 
 
-            // -------------------------------------------------
-            // Create repair card
-            // -------------------------------------------------
+            // =================================================
+            // CREATE REPAIR CARD
+            // =================================================
 
             LinearLayout repairCard =
                     createRepairCard();
 
 
-            // Repair ID
+            // =================================================
+            // REPAIR ID
+            // =================================================
 
             TextView repairIdText =
                     createTitle(
                             "Repair #" + repairId
                     );
 
+
             repairCard.addView(
                     repairIdText
             );
 
 
-            // Repair information
+            // =================================================
+            // REPAIR INFORMATION
+            // =================================================
 
             TextView repairInfo =
                     createInformation(
+
                             "Device: "
                                     + safeText(deviceCategory)
                                     + " - "
@@ -279,6 +342,10 @@ public class RepairHistoryActivity extends AppCompatActivity {
             );
 
 
+            // =================================================
+            // ADD CARD TO HISTORY
+            // =================================================
+
             historyContainer.addView(
                     repairCard
             );
@@ -300,9 +367,11 @@ public class RepairHistoryActivity extends AppCompatActivity {
         LinearLayout card =
                 new LinearLayout(this);
 
+
         card.setOrientation(
                 LinearLayout.VERTICAL
         );
+
 
         card.setPadding(
                 16,
@@ -352,13 +421,16 @@ public class RepairHistoryActivity extends AppCompatActivity {
         TextView textView =
                 new TextView(this);
 
+
         textView.setText(
                 text
         );
 
+
         textView.setTextSize(
                 20
         );
+
 
         textView.setTextColor(
                 getResources().getColor(
@@ -366,10 +438,12 @@ public class RepairHistoryActivity extends AppCompatActivity {
                 )
         );
 
+
         textView.setTypeface(
                 null,
                 android.graphics.Typeface.BOLD
         );
+
 
         textView.setPadding(
                 0,
@@ -377,6 +451,7 @@ public class RepairHistoryActivity extends AppCompatActivity {
                 0,
                 12
         );
+
 
         return textView;
     }
@@ -393,13 +468,16 @@ public class RepairHistoryActivity extends AppCompatActivity {
         TextView textView =
                 new TextView(this);
 
+
         textView.setText(
                 text
         );
 
+
         textView.setTextSize(
                 16
         );
+
 
         return textView;
     }
@@ -416,17 +494,21 @@ public class RepairHistoryActivity extends AppCompatActivity {
         TextView messageText =
                 new TextView(this);
 
+
         messageText.setText(
                 message
         );
+
 
         messageText.setTextSize(
                 18
         );
 
+
         messageText.setGravity(
                 android.view.Gravity.CENTER
         );
+
 
         messageText.setPadding(
                 20,
@@ -502,6 +584,7 @@ public class RepairHistoryActivity extends AppCompatActivity {
 
             return "Unknown";
         }
+
 
         return text;
     }

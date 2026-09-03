@@ -6,14 +6,16 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.up9.techfix.ActorCustomer.RepairBooking.RepairHistoryActivity;
+import com.up9.techfix.ActorCustomer.RepairBooking.RepairTrackingActivity;
 import com.up9.techfix.R;
 import com.up9.techfix.ActorCustomer.map.BranchesActivity;
 import com.up9.techfix.ActorCustomer.payment.PaymentActivity;
 import com.up9.techfix.ActorCustomer.service.ServicesActivity;
-import com.up9.techfix.ActorCustomer.booking.BookRepairActivity;
+import com.up9.techfix.ActorCustomer.RepairBooking.BookRepairActivity;
 
 
-import com.up9.techfix.data.DatabaseViewerActivity;
+import com.up9.techfix.ActorCustomer.CustomerData.DatabaseViewerActivity;
 
 public class CustomerHomeActivity extends AppCompatActivity {
 

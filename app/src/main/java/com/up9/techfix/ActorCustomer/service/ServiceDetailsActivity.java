@@ -15,7 +15,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.up9.techfix.R;
-import com.up9.techfix.ActorCustomer.booking.BookRepairActivity;
+import com.up9.techfix.ActorCustomer.RepairBooking.BookRepairActivity;
 
 import java.util.Locale;
 
