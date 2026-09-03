@@ -12,8 +12,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
-import com.up9.techfix.admin.TechFixDatabaseHelper;
-import com.up9.techfix.admin.spareparts.categories.DeviceCategory;
+import com.up9.techfix.admin.categories.DeviceCategory;
+import com.up9.techfix.data.DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class SparePartFormActivity extends AppCompatActivity {
 
     private boolean isEditMode = false;
 
-    private TechFixDatabaseHelper databaseHelper;
+    private DatabaseHelper databaseHelper;
 
     private ArrayAdapter<String> categoryAdapter;
 
@@ -52,12 +52,9 @@ public class SparePartFormActivity extends AppCompatActivity {
                 R.layout.spare_part_form
         );
 
-        // Database
         databaseHelper =
-                new TechFixDatabaseHelper(this);
+                new DatabaseHelper(this);
 
-
-        // Find views
         edtPartName =
                 findViewById(
                         R.id.edtPartName
@@ -104,36 +101,26 @@ public class SparePartFormActivity extends AppCompatActivity {
                 );
 
 
-        // Setup category spinner
         setupCategorySpinner();
 
-
-        // Check whether this is Add or Edit
         checkEditMode();
 
-
-        // Save button
         btnSaveSparePart.setOnClickListener(
                 v -> saveSparePart()
         );
 
-
-        // Cancel button
         btnCancelSparePart.setOnClickListener(
                 v -> finish()
         );
     }
 
 
-    /**
-     * Load categories from SQLite database
-     */
     private void setupCategorySpinner() {
 
         categoryNames.clear();
 
         List<DeviceCategory> categories =
-                databaseHelper.getAllCategories();
+                databaseHelper.getAllCategoryModels();
 
 
         for (DeviceCategory category : categories) {
@@ -162,7 +149,6 @@ public class SparePartFormActivity extends AppCompatActivity {
         );
 
 
-        // If there are no categories
         if (categoryNames.isEmpty()) {
 
             Toast.makeText(
@@ -173,10 +159,6 @@ public class SparePartFormActivity extends AppCompatActivity {
         }
     }
 
-
-    /**
-     * Check whether the form is in edit mode
-     */
     private void checkEditMode() {
 
         Intent intent =
@@ -267,10 +249,6 @@ public class SparePartFormActivity extends AppCompatActivity {
         );
     }
 
-
-    /**
-     * Select the existing category when editing
-     */
     private void setSpinnerValue(
             String value
     ) {
@@ -302,9 +280,6 @@ public class SparePartFormActivity extends AppCompatActivity {
     }
 
 
-    /**
-     * Save spare part
-     */
     private void saveSparePart() {
 
         String partName =
@@ -350,7 +325,6 @@ public class SparePartFormActivity extends AppCompatActivity {
                         .trim();
 
 
-        // Check category
         if (
                 spinnerPartCategory
                         .getSelectedItem() == null
@@ -372,7 +346,6 @@ public class SparePartFormActivity extends AppCompatActivity {
                         .toString();
 
 
-        // Validate part name
         if (partName.isEmpty()) {
 
             edtPartName.setError(
@@ -384,8 +357,6 @@ public class SparePartFormActivity extends AppCompatActivity {
             return;
         }
 
-
-        // Validate part code
         if (partCode.isEmpty()) {
 
             edtPartCode.setError(
@@ -398,7 +369,6 @@ public class SparePartFormActivity extends AppCompatActivity {
         }
 
 
-        // Validate quantity
         if (quantityText.isEmpty()) {
 
             edtPartQuantity.setError(
@@ -410,8 +380,6 @@ public class SparePartFormActivity extends AppCompatActivity {
             return;
         }
 
-
-        // Validate minimum stock
         if (minimumStockText.isEmpty()) {
 
             edtMinimumStock.setError(
@@ -424,7 +392,6 @@ public class SparePartFormActivity extends AppCompatActivity {
         }
 
 
-        // Validate price
         if (priceText.isEmpty()) {
 
             edtPartPrice.setError(
@@ -436,8 +403,6 @@ public class SparePartFormActivity extends AppCompatActivity {
             return;
         }
 
-
-        // Validate supplier
         if (supplier.isEmpty()) {
 
             edtPartSupplier.setError(
@@ -487,8 +452,6 @@ public class SparePartFormActivity extends AppCompatActivity {
             return;
         }
 
-
-        // Quantity validation
         if (quantity < 0) {
 
             edtPartQuantity.setError(
@@ -501,7 +464,6 @@ public class SparePartFormActivity extends AppCompatActivity {
         }
 
 
-        // Minimum stock validation
         if (minimumStock < 0) {
 
             edtMinimumStock.setError(
@@ -513,8 +475,6 @@ public class SparePartFormActivity extends AppCompatActivity {
             return;
         }
 
-
-        // Price validation
         if (price <= 0) {
 
             edtPartPrice.setError(
@@ -526,8 +486,6 @@ public class SparePartFormActivity extends AppCompatActivity {
             return;
         }
 
-
-        // Create result intent
         Intent resultIntent =
                 new Intent();
 
@@ -573,8 +531,6 @@ public class SparePartFormActivity extends AppCompatActivity {
                 supplier
         );
 
-
-        // If editing, return ID
         if (isEditMode) {
 
             resultIntent.putExtra(
@@ -587,7 +543,6 @@ public class SparePartFormActivity extends AppCompatActivity {
         }
 
 
-        // Return result
         setResult(
                 RESULT_OK,
                 resultIntent

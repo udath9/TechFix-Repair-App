@@ -1,4 +1,4 @@
-package com.up9.techfix.admin.spareparts.categories;
+package com.up9.techfix.admin.categories;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.up9.techfix.R;
-import com.up9.techfix.admin.TechFixDatabaseHelper;
+import com.up9.techfix.data.DatabaseHelper;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class ManageCategoriesActivity extends AppCompatActivity
     private CategoryAdapter categoryAdapter;
     private List<DeviceCategory> categoryList;
 
-    private TechFixDatabaseHelper databaseHelper;
+    private DatabaseHelper databaseHelper;
 
 
     private final ActivityResultLauncher<Intent> categoryFormLauncher =
@@ -152,7 +152,7 @@ public class ManageCategoriesActivity extends AppCompatActivity
                 );
 
         databaseHelper =
-                new TechFixDatabaseHelper(this);
+                new DatabaseHelper(this);
 
 
         recyclerCategories.setLayoutManager(
@@ -183,7 +183,7 @@ public class ManageCategoriesActivity extends AppCompatActivity
     private void loadCategories() {
 
         categoryList =
-                databaseHelper.getAllCategories();
+                (List<DeviceCategory>) databaseHelper.getAllCategories();
 
         categoryAdapter =
                 new CategoryAdapter(

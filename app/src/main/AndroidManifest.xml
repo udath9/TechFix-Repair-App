@@ -85,18 +85,18 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".admin.spareparts.categories.ManageBranchesActivity"
+            android:name=".admin.branches.ManageBranchesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".admin.branches.BranchFormActivity"
             android:exported="false" />
         <activity
-            android:name=".admin.spareparts.categories.ManageCategoriesActivity"
+            android:name=".admin.categories.ManageCategoriesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".admin.spareparts.categories.CategoryFormActivity"
+            android:name=".admin.categories.CategoryFormActivity"
             android:exported="false" />
         <activity
             android:name=".admin.services.ManageServicesActivity"

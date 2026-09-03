@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.up9.techfix.R;
-import com.up9.techfix.admin.TechFixDatabaseHelper;
+import com.up9.techfix.data.DatabaseHelper;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class ManageServicesActivity extends AppCompatActivity
 
     private List<RepairService> serviceList;
 
-    private TechFixDatabaseHelper databaseHelper;
+    private DatabaseHelper databaseHelper;
 
 
     private final ActivityResultLauncher<Intent> serviceFormLauncher =
@@ -68,7 +68,7 @@ public class ManageServicesActivity extends AppCompatActivity
 
 
         databaseHelper =
-                new TechFixDatabaseHelper(this);
+                new DatabaseHelper(this);
 
 
         recyclerServices.setLayoutManager(
@@ -99,8 +99,7 @@ public class ManageServicesActivity extends AppCompatActivity
 
     private void loadServices() {
 
-        serviceList =
-                databaseHelper.getAllServices();
+        serviceList.addAll(databaseHelper.getAllServiceModels());
 
 
         serviceAdapter =

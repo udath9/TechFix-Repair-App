@@ -8,8 +8,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
 import com.up9.techfix.admin.appoiments.ManageAppointmentsActivity;
-import com.up9.techfix.admin.spareparts.categories.ManageBranchesActivity;
-import com.up9.techfix.admin.spareparts.categories.ManageCategoriesActivity;
+import com.up9.techfix.admin.branches.ManageBranchesActivity;
+import com.up9.techfix.admin.categories.ManageCategoriesActivity;
 import com.up9.techfix.admin.payments.ManagePaymentsActivity;
 import com.up9.techfix.admin.repairsamples.ManageRepairSamplesActivity;
 import com.up9.techfix.admin.services.ManageServicesActivity;

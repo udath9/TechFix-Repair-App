@@ -1,4 +1,4 @@
-package com.up9.techfix.admin.spareparts.categories;
+package com.up9.techfix.admin.branches;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,10 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.up9.techfix.R;
-import com.up9.techfix.admin.TechFixDatabaseHelper;
-import com.up9.techfix.admin.branches.Branch;
-import com.up9.techfix.admin.branches.BranchAdapter;
-import com.up9.techfix.admin.branches.BranchFormActivity;
+import com.up9.techfix.data.DatabaseHelper;
 
 import java.util.List;
 
@@ -31,7 +28,7 @@ public class ManageBranchesActivity extends AppCompatActivity
 
     private List<Branch> branchList;
 
-    private TechFixDatabaseHelper databaseHelper;
+    private DatabaseHelper databaseHelper;
 
     private final ActivityResultLauncher<Intent> branchFormLauncher =
             registerForActivityResult(
@@ -163,7 +160,7 @@ public class ManageBranchesActivity extends AppCompatActivity
                 );
 
         databaseHelper =
-                new TechFixDatabaseHelper(this);
+                new DatabaseHelper(this);
 
         recyclerBranches.setLayoutManager(
                 new LinearLayoutManager(this)
@@ -191,7 +188,7 @@ public class ManageBranchesActivity extends AppCompatActivity
     private void loadBranches() {
 
         branchList =
-                databaseHelper.getAllBranches();
+                (List<Branch>) databaseHelper.getAllBranches();
 
         branchAdapter =
                 new BranchAdapter(

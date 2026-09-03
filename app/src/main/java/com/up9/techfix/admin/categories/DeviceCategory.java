@@ -1,4 +1,4 @@
-package com.up9.techfix.admin.spareparts.categories;
+package com.up9.techfix.admin.categories;
 
 
 

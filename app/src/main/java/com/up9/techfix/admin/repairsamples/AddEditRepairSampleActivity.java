@@ -17,8 +17,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
 import com.up9.techfix.admin.services.RepairService;
-import com.up9.techfix.admin.TechFixDatabaseHelper;
-import com.up9.techfix.admin.spareparts.categories.DeviceCategory;
+import com.up9.techfix.admin.categories.DeviceCategory;
+import com.up9.techfix.data.DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
     private Spinner spinnerCategory;
     private Spinner spinnerService;
 
-    private TechFixDatabaseHelper databaseHelper;
+    private DatabaseHelper databaseHelper;
 
     private boolean isEditMode = false;
 
@@ -98,7 +98,7 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
         );
 
         databaseHelper =
-                new TechFixDatabaseHelper(this);
+                new DatabaseHelper(this);
 
         initializeViews();
 
@@ -183,10 +183,7 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
 
         categoryList.clear();
 
-        categoryList.addAll(
-                databaseHelper.getAllCategories()
-        );
-
+        categoryList.addAll(databaseHelper.getAllCategoryModels());
         List<String> categoryNames =
                 new ArrayList<>();
 
@@ -226,9 +223,7 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
 
         serviceList.clear();
 
-        serviceList.addAll(
-                databaseHelper.getAllServices()
-        );
+        serviceList.addAll(databaseHelper.getAllServiceModels());
 
         List<String> serviceNames =
                 new ArrayList<>();

@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.up9.techfix.R;
-import com.up9.techfix.admin.TechFixDatabaseHelper;
+import com.up9.techfix.data.DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class ManageRepairSamplesActivity
 
     private List<RepairSample> sampleList;
 
-    private TechFixDatabaseHelper databaseHelper;
+    private DatabaseHelper databaseHelper;
 
     private final ActivityResultLauncher<Intent>
             repairSampleFormLauncher =
@@ -68,7 +68,7 @@ public class ManageRepairSamplesActivity
                 );
 
         databaseHelper =
-                new TechFixDatabaseHelper(this);
+                new DatabaseHelper(this);
 
         sampleList =
                 new ArrayList<>();

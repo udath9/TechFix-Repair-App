@@ -24,106 +24,218 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText etConfirmPassword;
 
     private Button btnRegister;
+
     private TextView tvLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_register);
 
-        databaseHelper = new DatabaseHelper(this);
+        databaseHelper =
+                new DatabaseHelper(this);
 
-        etFullName = findViewById(R.id.etFullName);
-        etEmail = findViewById(R.id.etEmail);
-        etPhone = findViewById(R.id.etPhone);
-        etPassword = findViewById(R.id.etPassword);
-        etConfirmPassword = findViewById(R.id.etConfirmPassword);
+        etFullName =
+                findViewById(R.id.etFullName);
 
-        btnRegister = findViewById(R.id.btnRegister);
-        tvLogin = findViewById(R.id.tvLogin);
+        etEmail =
+                findViewById(R.id.etEmail);
+
+        etPhone =
+                findViewById(R.id.etPhone);
+
+        etPassword =
+                findViewById(R.id.etPassword);
+
+        etConfirmPassword =
+                findViewById(R.id.etConfirmPassword);
+
+        btnRegister =
+                findViewById(R.id.btnRegister);
+
+        tvLogin =
+                findViewById(R.id.tvLogin);
+
+        // ----------------------------------------------------
+        // REGISTER
+        // ----------------------------------------------------
 
         btnRegister.setOnClickListener(v -> {
+
             validateRegistration();
+
         });
 
+        // ----------------------------------------------------
+        // GO TO LOGIN
+        // ----------------------------------------------------
+
         tvLogin.setOnClickListener(v -> {
+
             Intent intent = new Intent(
                     RegisterActivity.this,
                     LoginActivity.class
             );
 
             startActivity(intent);
+
+            finish();
+
         });
     }
 
+    // ========================================================
+    // VALIDATE REGISTRATION
+    // ========================================================
+
     private void validateRegistration() {
 
-        String fullName = etFullName.getText().toString().trim();
-        String email = etEmail.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim();
-        String password = etPassword.getText().toString();
-        String confirmPassword = etConfirmPassword.getText().toString();
+        String fullName =
+                etFullName.getText()
+                        .toString()
+                        .trim();
+
+        String email =
+                etEmail.getText()
+                        .toString()
+                        .trim();
+
+        String phone =
+                etPhone.getText()
+                        .toString()
+                        .trim();
+
+        String password =
+                etPassword.getText()
+                        .toString();
+
+        String confirmPassword =
+                etConfirmPassword.getText()
+                        .toString();
+
+        // ----------------------------------------------------
+        // Full name
+        // ----------------------------------------------------
 
         if (fullName.isEmpty()) {
-            etFullName.setError("Please enter your full name");
+
+            etFullName.setError(
+                    "Please enter your full name"
+            );
+
             etFullName.requestFocus();
+
             return;
         }
+
+        // ----------------------------------------------------
+        // Email
+        // ----------------------------------------------------
 
         if (email.isEmpty()) {
-            etEmail.setError("Please enter your email");
+
+            etEmail.setError(
+                    "Please enter your email"
+            );
+
             etEmail.requestFocus();
+
             return;
         }
 
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            etEmail.setError("Please enter a valid email");
+        if (!Patterns.EMAIL_ADDRESS
+                .matcher(email)
+                .matches()) {
+
+            etEmail.setError(
+                    "Please enter a valid email"
+            );
+
             etEmail.requestFocus();
+
             return;
         }
+
+        // ----------------------------------------------------
+        // Phone
+        // ----------------------------------------------------
 
         if (phone.isEmpty()) {
-            etPhone.setError("Please enter your phone number");
+
+            etPhone.setError(
+                    "Please enter your phone number"
+            );
+
             etPhone.requestFocus();
+
             return;
         }
 
+        // ----------------------------------------------------
+        // Password
+        // ----------------------------------------------------
+
         if (password.isEmpty()) {
-            etPassword.setError("Please enter a password");
+
+            etPassword.setError(
+                    "Please enter a password"
+            );
+
             etPassword.requestFocus();
+
             return;
         }
 
         if (password.length() < 6) {
+
             etPassword.setError(
                     "Password must be at least 6 characters"
             );
+
             etPassword.requestFocus();
+
             return;
         }
 
+        // ----------------------------------------------------
+        // Confirm password
+        // ----------------------------------------------------
+
         if (confirmPassword.isEmpty()) {
+
             etConfirmPassword.setError(
                     "Please confirm your password"
             );
+
             etConfirmPassword.requestFocus();
+
             return;
         }
 
         if (!password.equals(confirmPassword)) {
+
             etConfirmPassword.setError(
                     "Passwords do not match"
             );
+
             etConfirmPassword.requestFocus();
+
             return;
         }
 
-        long result = databaseHelper.registerCustomer(
-                fullName,
-                email,
-                phone,
-                password
-        );
+        // ----------------------------------------------------
+        // Register customer
+        // ----------------------------------------------------
+
+        long result =
+                databaseHelper.registerCustomer(
+                        fullName,
+                        email,
+                        phone,
+                        password
+                );
 
         if (result != -1) {
 
@@ -133,13 +245,13 @@ public class RegisterActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT
             ).show();
 
-            // Go to Login after successful registration
             Intent intent = new Intent(
                     RegisterActivity.this,
                     LoginActivity.class
             );
 
             startActivity(intent);
+
             finish();
 
         } else {
@@ -147,8 +259,18 @@ public class RegisterActivity extends AppCompatActivity {
             Toast.makeText(
                     this,
                     "Registration failed. Email may already exist.",
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_LONG
             ).show();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        if (databaseHelper != null) {
+            databaseHelper.close();
+        }
+
+        super.onDestroy();
     }
 }

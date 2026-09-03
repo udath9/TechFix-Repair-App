@@ -13,6 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
 import com.up9.techfix.ActorCustomer.customer.CustomerHomeActivity;
+import com.up9.techfix.admin.dashboard.AdminDashboardActivity;
+import com.up9.techfix.admin.technicians.ManageTechniciansActivity;
+import com.up9.techfix.admin.technicians.ManageTechniciansActivity;
 import com.up9.techfix.data.DatabaseHelper;
 
 public class LoginActivity extends AppCompatActivity {
@@ -21,24 +24,41 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText etEmail;
     private EditText etPassword;
+
     private Button btnLogin;
+
     private TextView tvRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_login);
 
         databaseHelper = new DatabaseHelper(this);
 
         etEmail = findViewById(R.id.etEmail);
+
         etPassword = findViewById(R.id.etPassword);
+
         btnLogin = findViewById(R.id.btnLogin);
+
         tvRegister = findViewById(R.id.tvRegister);
 
+        // ----------------------------------------------------
+        // LOGIN BUTTON
+        // ----------------------------------------------------
+
         btnLogin.setOnClickListener(v -> {
+
             validateLogin();
+
         });
+
+        // ----------------------------------------------------
+        // REGISTER
+        // ----------------------------------------------------
 
         tvRegister.setOnClickListener(v -> {
 
@@ -48,16 +68,28 @@ public class LoginActivity extends AppCompatActivity {
             );
 
             startActivity(intent);
+
         });
     }
+
+    // ========================================================
+    // VALIDATE LOGIN
+    // ========================================================
 
     private void validateLogin() {
 
         String email =
-                etEmail.getText().toString().trim();
+                etEmail.getText()
+                        .toString()
+                        .trim();
 
         String password =
-                etPassword.getText().toString();
+                etPassword.getText()
+                        .toString();
+
+        // ----------------------------------------------------
+        // Email validation
+        // ----------------------------------------------------
 
         if (email.isEmpty()) {
 
@@ -70,7 +102,9 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (!Patterns.EMAIL_ADDRESS
+                .matcher(email)
+                .matches()) {
 
             etEmail.setError(
                     "Please enter a valid email"
@@ -80,6 +114,10 @@ public class LoginActivity extends AppCompatActivity {
 
             return;
         }
+
+        // ----------------------------------------------------
+        // Password validation
+        // ----------------------------------------------------
 
         if (password.isEmpty()) {
 
@@ -92,71 +130,164 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        // ----------------------------------------------------
+        // LOGIN
+        // ----------------------------------------------------
 
-        boolean loginSuccessful =
-                databaseHelper.checkCustomerLogin(
+        DatabaseHelper.LoginUser user =
+                databaseHelper.loginUser(
                         email,
                         password
                 );
 
-
-        if (loginSuccessful) {
-
-            int customerId =
-                    databaseHelper.getCustomerId(
-                            email,
-                            password
-                    );
-
-
-            if (customerId != -1) {
-
-                // Save logged-in customer ID
-
-                SharedPreferences preferences =
-                        getSharedPreferences(
-                                "TechFixSession",
-                                MODE_PRIVATE
-                        );
-
-                preferences.edit()
-                        .putInt("customerId", customerId)
-                        .apply();
-
-
-                Toast.makeText(
-                        this,
-                        "Login successful!",
-                        Toast.LENGTH_SHORT
-                ).show();
-
-
-                Intent intent =
-                        new Intent(
-                                LoginActivity.this,
-                                CustomerHomeActivity.class
-                        );
-
-                startActivity(intent);
-
-                finish();
-
-            } else {
-
-                Toast.makeText(
-                        this,
-                        "Customer information not found.",
-                        Toast.LENGTH_SHORT
-                ).show();
-            }
-
-        } else {
+        if (user == null) {
 
             Toast.makeText(
                     this,
                     "Invalid email or password",
                     Toast.LENGTH_SHORT
             ).show();
+
+            return;
         }
+
+        // ----------------------------------------------------
+        // Save session
+        // ----------------------------------------------------
+
+        SharedPreferences preferences =
+                getSharedPreferences(
+                        "TechFixSession",
+                        MODE_PRIVATE
+                );
+
+        preferences.edit()
+                .putInt(
+                        "userId",
+                        user.getId()
+                )
+                .putString(
+                        "userName",
+                        user.getFullName()
+                )
+                .putString(
+                        "userEmail",
+                        user.getEmail()
+                )
+                .putString(
+                        "userRole",
+                        user.getRole()
+                )
+                .apply();
+
+        // ----------------------------------------------------
+        // Customer
+        // ----------------------------------------------------
+
+        if ("CUSTOMER".equalsIgnoreCase(
+                user.getRole()
+        )) {
+
+            int customerId =
+                    databaseHelper.getCustomerId(
+                            email
+                    );
+
+            preferences.edit()
+                    .putInt(
+                            "customerId",
+                            customerId
+                    )
+                    .apply();
+
+            Toast.makeText(
+                    this,
+                    "Customer login successful!",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            Intent intent = new Intent(
+                    LoginActivity.this,
+                    CustomerHomeActivity.class
+            );
+
+            startActivity(intent);
+
+            finish();
+
+            return;
+        }
+
+        // ----------------------------------------------------
+        // Admin
+        // ----------------------------------------------------
+
+        if ("ADMIN".equalsIgnoreCase(
+                user.getRole()
+        )) {
+
+            Toast.makeText(
+                    this,
+                    "Admin login successful!",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            Intent intent = new Intent(
+                    LoginActivity.this,
+                    AdminDashboardActivity.class
+            );
+
+            startActivity(intent);
+
+            finish();
+
+            return;
+        }
+
+        // ----------------------------------------------------
+        // Technician
+        // ----------------------------------------------------
+
+        if ("TECHNICIAN".equalsIgnoreCase(
+                user.getRole()
+        )) {
+
+            Toast.makeText(
+                    this,
+                    "Technician login successful!",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            Intent intent = new Intent(
+                    LoginActivity.this,
+                    ManageTechniciansActivity.class
+            );
+
+            startActivity(intent);
+
+            finish();
+
+            return;
+        }
+
+        // ----------------------------------------------------
+        // Unknown role
+        // ----------------------------------------------------
+
+        Toast.makeText(
+                this,
+                "Unknown user role.",
+                Toast.LENGTH_SHORT
+        ).show();
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        if (databaseHelper != null) {
+            databaseHelper.close();
+        }
+
+        super.onDestroy();
     }
 }

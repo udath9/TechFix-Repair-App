@@ -15,7 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
-import com.up9.techfix.admin.TechFixDatabaseHelper;
+import com.up9.techfix.data.DatabaseHelper;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,7 +38,7 @@ public class ServiceFormActivity extends AppCompatActivity {
     private EditText edtServicePrice;
     private EditText edtServiceEstimatedDays;
 
-    private TechFixDatabaseHelper databaseHelper;
+    private DatabaseHelper databaseHelper;
 
     private boolean isEditMode = false;
 
@@ -102,7 +102,7 @@ public class ServiceFormActivity extends AppCompatActivity {
         );
 
         databaseHelper =
-                new TechFixDatabaseHelper(this);
+                new DatabaseHelper(this);
 
         initializeViews();
 

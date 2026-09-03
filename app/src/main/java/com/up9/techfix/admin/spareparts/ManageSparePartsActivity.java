@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.up9.techfix.R;
-import com.up9.techfix.admin.TechFixDatabaseHelper;
+import com.up9.techfix.data.DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class ManageSparePartsActivity
 
     private List<SparePart> sparePartList;
 
-    private TechFixDatabaseHelper databaseHelper;
+    private DatabaseHelper databaseHelper;
 
     private int editingPosition = -1;
 
@@ -79,7 +79,7 @@ public class ManageSparePartsActivity
                 );
 
         databaseHelper =
-                new TechFixDatabaseHelper(this);
+                new DatabaseHelper(this);
 
         recyclerSpareParts.setLayoutManager(
                 new LinearLayoutManager(this)
