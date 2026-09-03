@@ -2,6 +2,7 @@ package com.up9.techfix.ActorCustomer.RepairBooking;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -32,298 +33,90 @@ import com.up9.techfix.data.Service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 public class BookRepairActivity extends AppCompatActivity {
 
-    // =====================================================
-    // LOCATION
-    // =====================================================
-
+    // Location
     private FusedLocationProviderClient fusedLocationClient;
-
     private ActivityResultLauncher<String[]> locationPermissionLauncher;
 
-
-    // =====================================================
-    // IMAGE
-    // =====================================================
-
+    // Image
     private ActivityResultLauncher<String> imagePickerLauncher;
-
     private ActivityResultLauncher<String> cameraPermissionLauncher;
-
     private ActivityResultLauncher<Void> cameraLauncher;
+    private String selectedImageUri;
 
-
-    // =====================================================
-    // DATABASE
-    // =====================================================
-
+    // Database
     private DatabaseHelper databaseHelper;
 
-
-    // =====================================================
     // UI
-    // =====================================================
-
     private TextView tvNearestBranch;
-
     private Spinner spinnerDeviceCategory;
-
     private Spinner spinnerService;
-
     private EditText etDeviceModel;
-
     private EditText etProblemDescription;
-
     private Button btnLocation;
-
     private Button btnUploadImage;
-
     private ImageView ivDeviceImage;
-
     private Button btnSubmitRepair;
 
+    // Categories
+    private final List<String> categoryNames = new ArrayList<>();
+    private final List<Integer> categoryIds = new ArrayList<>();
 
-    // =====================================================
-    // CATEGORIES
-    // =====================================================
+    // Services
+    private List<Service> serviceList = new ArrayList<>();
 
-    private List<String> categoryNames =
-            new ArrayList<>();
-
-    private List<Integer> categoryIds =
-            new ArrayList<>();
-
-
-    // =====================================================
-    // SERVICES
-    // =====================================================
-
-    private List<Service> serviceList =
-            new ArrayList<>();
-
-
-    // =====================================================
-    // SELECTED BRANCH
-    // =====================================================
-
-    private String selectedBranchName = null;
-
+    // Selected branch
+    private String selectedBranchName;
     private int selectedBranchId = -1;
 
-
-    // =====================================================
-    // IMAGE
-    // =====================================================
-
-    /*
-     * This will contain a permanent file URI such as:
-     *
-     * file:///data/user/0/com.up9.techfix/files/
-     * repair_image_123456789.jpg
-     *
-     * The image is stored inside the app itself.
-     */
-    private String selectedImageUri = null;
-
-
-    // =====================================================
-    // CUSTOMER
-    // =====================================================
-
+    // Customer
     private int customerId = -1;
-
-
-    // =====================================================
-    // ON CREATE
-    // =====================================================
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_book_repair);
 
-        setContentView(
-                R.layout.activity_book_repair
-        );
-
-
-        // =================================================
-        // DATABASE
-        // =================================================
-
-        databaseHelper =
-                new DatabaseHelper(this);
-
-
-        // =================================================
-        // DEFAULT DATABASE DATA
-        // =================================================
+        databaseHelper = new DatabaseHelper(this);
 
         databaseHelper.insertDefaultBranches();
-
         databaseHelper.insertDefaultCategories();
 
-
-        // =================================================
-        // LOCATION CLIENT
-        // =================================================
-
         fusedLocationClient =
-                LocationServices
-                        .getFusedLocationProviderClient(this);
+                LocationServices.getFusedLocationProviderClient(this);
 
+        SharedPreferences preferences =
+                getSharedPreferences("TechFixSession", MODE_PRIVATE);
 
-        // =================================================
-        // GET CUSTOMER ID FROM SESSION
-        // =================================================
+        customerId = preferences.getInt("customerId", -1);
 
-        android.content.SharedPreferences preferences =
-                getSharedPreferences(
-                        "TechFixSession",
-                        MODE_PRIVATE
-                );
-
-
-        customerId =
-                preferences.getInt(
-                        "customerId",
-                        -1
-                );
-
-
-        // =================================================
-        // FIND UI ELEMENTS
-        // =================================================
-
-        spinnerDeviceCategory =
-                findViewById(
-                        R.id.spinnerDeviceCategory
-                );
-
-
-        spinnerService =
-                findViewById(
-                        R.id.spinnerService
-                );
-
-
-        etDeviceModel =
-                findViewById(
-                        R.id.etDeviceModel
-                );
-
-
-        etProblemDescription =
-                findViewById(
-                        R.id.etProblemDescription
-                );
-
-
-        btnLocation =
-                findViewById(
-                        R.id.btnLocation
-                );
-
-
-        btnUploadImage =
-                findViewById(
-                        R.id.btnUploadImage
-                );
-
-
-        btnSubmitRepair =
-                findViewById(
-                        R.id.btnSubmitRepair
-                );
-
-
-        tvNearestBranch =
-                findViewById(
-                        R.id.tvNearestBranch
-                );
-
-
-        ivDeviceImage =
-                findViewById(
-                        R.id.ivDeviceImage
-                );
-
-
-        // =================================================
-        // SETUP DROPDOWNS
-        // =================================================
-
+        initializeViews();
         setupDeviceCategories();
-
         setupServices();
+        setupLocation();
+        setupImagePickers();
+        setupButtons();
+        selectServiceFromIntent();
+    }
 
+    private void initializeViews() {
+        spinnerDeviceCategory = findViewById(R.id.spinnerDeviceCategory);
+        spinnerService = findViewById(R.id.spinnerService);
+        etDeviceModel = findViewById(R.id.etDeviceModel);
+        etProblemDescription = findViewById(R.id.etProblemDescription);
+        btnLocation = findViewById(R.id.btnLocation);
+        btnUploadImage = findViewById(R.id.btnUploadImage);
+        btnSubmitRepair = findViewById(R.id.btnSubmitRepair);
+        tvNearestBranch = findViewById(R.id.tvNearestBranch);
+        ivDeviceImage = findViewById(R.id.ivDeviceImage);
+    }
 
-        // =================================================
-        // SERVICE PASSED FROM SERVICE DETAILS
-        // =================================================
-
-        int selectedServiceId =
-                getIntent().getIntExtra(
-                        "serviceId",
-                        -1
-                );
-
-
-        if (selectedServiceId != -1) {
-
-            for (
-                    int i = 0;
-                    i < serviceList.size();
-                    i++
-            ) {
-
-                if (
-                        serviceList
-                                .get(i)
-                                .getId()
-                                ==
-                                selectedServiceId
-                ) {
-
-                    spinnerService.setSelection(
-                            i + 1
-                    );
-
-                    break;
-                }
-            }
-        }
-
-
-        // =================================================
-        // SUBMIT REPAIR
-        // =================================================
-
-        btnSubmitRepair.setOnClickListener(
-                v -> submitRepairRequest()
-        );
-
-
-        // =================================================
-        // LOCATION BUTTON
-        // =================================================
-
-        btnLocation.setOnClickListener(
-                v -> getCurrentLocation()
-        );
-
-
-        // =================================================
-        // LOCATION PERMISSION
-        // =================================================
-
+    private void setupLocation() {
         locationPermissionLauncher =
                 registerForActivityResult(
                         new ActivityResultContracts.RequestMultiplePermissions(),
@@ -331,26 +124,16 @@ public class BookRepairActivity extends AppCompatActivity {
 
                             Boolean fineLocation =
                                     result.get(
-                                            Manifest.permission
-                                                    .ACCESS_FINE_LOCATION
+                                            Manifest.permission.ACCESS_FINE_LOCATION
                                     );
 
                             Boolean coarseLocation =
                                     result.get(
-                                            Manifest.permission
-                                                    .ACCESS_COARSE_LOCATION
+                                            Manifest.permission.ACCESS_COARSE_LOCATION
                                     );
 
-
-                            if (
-                                    Boolean.TRUE.equals(
-                                            fineLocation
-                                    )
-                                            ||
-                                            Boolean.TRUE.equals(
-                                                    coarseLocation
-                                            )
-                            ) {
+                            if (Boolean.TRUE.equals(fineLocation)
+                                    || Boolean.TRUE.equals(coarseLocation)) {
 
                                 getCurrentLocation();
 
@@ -364,74 +147,47 @@ public class BookRepairActivity extends AppCompatActivity {
                             }
                         }
                 );
+    }
 
-
-        // =================================================
-        // GALLERY IMAGE PICKER
-        // =================================================
-
+    private void setupImagePickers() {
         imagePickerLauncher =
                 registerForActivityResult(
                         new ActivityResultContracts.GetContent(),
                         uri -> {
 
-                            if (uri != null) {
+                            if (uri == null) {
+                                return;
+                            }
 
-                                /*
-                                 * IMPORTANT:
-                                 *
-                                 * Do NOT save the original content:// URI.
-                                 *
-                                 * Instead, copy the image into our
-                                 * application's private storage.
-                                 */
+                            String permanentUri =
+                                    copyImageToInternalStorage(uri);
 
-                                String permanentUri =
-                                        copyImageToInternalStorage(
-                                                uri
-                                        );
+                            if (permanentUri != null) {
 
+                                selectedImageUri = permanentUri;
 
-                                if (permanentUri != null) {
+                                ivDeviceImage.setImageURI(
+                                        Uri.parse(permanentUri)
+                                );
 
-                                    selectedImageUri =
-                                            permanentUri;
+                                ivDeviceImage.setVisibility(View.VISIBLE);
 
+                                Toast.makeText(
+                                        this,
+                                        "Device image selected!",
+                                        Toast.LENGTH_SHORT
+                                ).show();
 
-                                    ivDeviceImage.setImageURI(
-                                            Uri.parse(
-                                                    permanentUri
-                                            )
-                                    );
+                            } else {
 
-
-                                    ivDeviceImage.setVisibility(
-                                            View.VISIBLE
-                                    );
-
-
-                                    Toast.makeText(
-                                            this,
-                                            "Device image selected!",
-                                            Toast.LENGTH_SHORT
-                                    ).show();
-
-                                } else {
-
-                                    Toast.makeText(
-                                            this,
-                                            "Unable to save the selected image.",
-                                            Toast.LENGTH_LONG
-                                    ).show();
-                                }
+                                Toast.makeText(
+                                        this,
+                                        "Unable to save the selected image.",
+                                        Toast.LENGTH_LONG
+                                ).show();
                             }
                         }
                 );
-
-
-        // =================================================
-        // CAMERA PERMISSION
-        // =================================================
 
         cameraPermissionLauncher =
                 registerForActivityResult(
@@ -439,13 +195,8 @@ public class BookRepairActivity extends AppCompatActivity {
                         isGranted -> {
 
                             if (isGranted) {
-
-                                cameraLauncher.launch(
-                                        null
-                                );
-
+                                cameraLauncher.launch(null);
                             } else {
-
                                 Toast.makeText(
                                         this,
                                         "Camera permission is required to take a photo.",
@@ -455,306 +206,169 @@ public class BookRepairActivity extends AppCompatActivity {
                         }
                 );
 
-
-        // =================================================
-        // CAMERA
-        // =================================================
-
         cameraLauncher =
                 registerForActivityResult(
                         new ActivityResultContracts.TakePicturePreview(),
                         bitmap -> {
 
-                            if (bitmap != null) {
+                            if (bitmap == null) {
+                                return;
+                            }
 
-                                /*
-                                 * TakePicturePreview gives us a Bitmap.
-                                 *
-                                 * We now save that Bitmap permanently
-                                 * inside the application's private
-                                 * storage.
-                                 */
+                            String permanentUri =
+                                    saveCameraImage(bitmap);
 
-                                String permanentUri =
-                                        saveCameraImage(
-                                                bitmap
-                                        );
+                            if (permanentUri != null) {
 
+                                selectedImageUri = permanentUri;
 
-                                if (permanentUri != null) {
+                                ivDeviceImage.setImageURI(
+                                        Uri.parse(permanentUri)
+                                );
 
-                                    selectedImageUri =
-                                            permanentUri;
+                                ivDeviceImage.setVisibility(View.VISIBLE);
 
+                                Toast.makeText(
+                                        this,
+                                        "Photo captured!",
+                                        Toast.LENGTH_SHORT
+                                ).show();
 
-                                    ivDeviceImage.setImageURI(
-                                            Uri.parse(
-                                                    permanentUri
-                                            )
-                                    );
+                            } else {
 
-
-                                    ivDeviceImage.setVisibility(
-                                            View.VISIBLE
-                                    );
-
-
-                                    Toast.makeText(
-                                            this,
-                                            "Photo captured!",
-                                            Toast.LENGTH_SHORT
-                                    ).show();
-
-                                } else {
-
-                                    Toast.makeText(
-                                            this,
-                                            "Unable to save camera photo.",
-                                            Toast.LENGTH_LONG
-                                    ).show();
-                                }
+                                Toast.makeText(
+                                        this,
+                                        "Unable to save camera photo.",
+                                        Toast.LENGTH_LONG
+                                ).show();
                             }
                         }
                 );
+    }
 
+    private void setupButtons() {
+        btnSubmitRepair.setOnClickListener(
+                v -> submitRepairRequest()
+        );
 
-        // =================================================
-        // UPLOAD IMAGE BUTTON
-        // =================================================
+        btnLocation.setOnClickListener(
+                v -> getCurrentLocation()
+        );
 
         btnUploadImage.setOnClickListener(
-                v -> {
-
-                    String[] options = {
-                            "Take Photo",
-                            "Choose from Gallery"
-                    };
-
-
-                    new AlertDialog.Builder(this)
-
-                            .setTitle(
-                                    "Upload Device Image"
-                            )
-
-                            .setItems(
-                                    options,
-                                    (dialog, which) -> {
-
-                                        // =================================================
-                                        // CAMERA
-                                        // =================================================
-
-                                        if (which == 0) {
-
-                                            if (
-                                                    ContextCompat
-                                                            .checkSelfPermission(
-                                                                    this,
-                                                                    Manifest.permission.CAMERA
-                                                            )
-                                                            ==
-                                                            PackageManager.PERMISSION_GRANTED
-                                            ) {
-
-                                                cameraLauncher.launch(
-                                                        null
-                                                );
-
-                                            } else {
-
-                                                cameraPermissionLauncher.launch(
-                                                        Manifest.permission.CAMERA
-                                                );
-                                            }
-
-
-                                        }
-
-                                        // =================================================
-                                        // GALLERY
-                                        // =================================================
-
-                                        else {
-
-                                            imagePickerLauncher.launch(
-                                                    "image/*"
-                                            );
-                                        }
-                                    }
-                            )
-
-                            .show();
-                }
+                v -> showImageOptions()
         );
     }
 
+    private void showImageOptions() {
+        String[] options = {
+                "Take Photo",
+                "Choose from Gallery"
+        };
 
-    // =====================================================
-    // COPY GALLERY IMAGE TO INTERNAL STORAGE
-    // =====================================================
+        new AlertDialog.Builder(this)
+                .setTitle("Upload Device Image")
+                .setItems(
+                        options,
+                        (dialog, which) -> {
 
-    private String copyImageToInternalStorage(
-            Uri sourceUri
-    ) {
+                            if (which == 0) {
 
-        InputStream inputStream = null;
+                                if (ContextCompat.checkSelfPermission(
+                                        this,
+                                        Manifest.permission.CAMERA
+                                ) == PackageManager.PERMISSION_GRANTED) {
 
-        FileOutputStream outputStream = null;
+                                    cameraLauncher.launch(null);
 
-        try {
+                                } else {
 
-            /*
-             * Open the selected Gallery image.
-             */
+                                    cameraPermissionLauncher.launch(
+                                            Manifest.permission.CAMERA
+                                    );
+                                }
 
-            inputStream =
-                    getContentResolver()
-                            .openInputStream(
-                                    sourceUri
-                            );
+                            } else {
 
+                                imagePickerLauncher.launch("image/*");
+                            }
+                        }
+                )
+                .show();
+    }
+
+    // Service can be pre-selected when opened from Service Details.
+    private void selectServiceFromIntent() {
+        int selectedServiceId =
+                getIntent().getIntExtra("serviceId", -1);
+
+        if (selectedServiceId == -1) {
+            return;
+        }
+
+        for (int i = 0; i < serviceList.size(); i++) {
+
+            if (serviceList.get(i).getId() == selectedServiceId) {
+
+                spinnerService.setSelection(i + 1);
+                break;
+            }
+        }
+    }
+
+    // Save gallery image to app-private storage.
+    private String copyImageToInternalStorage(Uri sourceUri) {
+        try (
+                InputStream inputStream =
+                        getContentResolver().openInputStream(sourceUri)
+        ) {
 
             if (inputStream == null) {
-
                 return null;
             }
-
-
-            /*
-             * Create a unique filename.
-             */
 
             String fileName =
                     "repair_image_"
                             + System.currentTimeMillis()
                             + ".jpg";
 
-
-            /*
-             * Store it in the application's private files directory.
-             */
-
             File imageFile =
-                    new File(
-                            getFilesDir(),
-                            fileName
-                    );
+                    new File(getFilesDir(), fileName);
 
+            try (FileOutputStream outputStream =
+                         new FileOutputStream(imageFile)) {
 
-            outputStream =
-                    new FileOutputStream(
-                            imageFile
-                    );
+                byte[] buffer = new byte[4096];
+                int bytesRead;
 
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
 
-            /*
-             * Copy the image.
-             */
-
-            byte[] buffer =
-                    new byte[4096];
-
-            int bytesRead;
-
-
-            while (
-                    (bytesRead =
-                            inputStream.read(buffer))
-                            != -1
-            ) {
-
-                outputStream.write(
-                        buffer,
-                        0,
-                        bytesRead
-                );
+                outputStream.flush();
             }
 
-
-            outputStream.flush();
-
-
-            /*
-             * Return a permanent file URI.
-             */
-
-            return Uri.fromFile(
-                    imageFile
-            ).toString();
+            return Uri.fromFile(imageFile).toString();
 
         } catch (Exception e) {
 
             e.printStackTrace();
-
             return null;
-
-        } finally {
-
-            try {
-
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-
-            } catch (Exception ignored) {
-            }
-
-
-            try {
-
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-
-            } catch (Exception ignored) {
-            }
         }
     }
 
+    // Save camera image to app-private storage.
+    private String saveCameraImage(Bitmap bitmap) {
+        String fileName =
+                "repair_camera_"
+                        + System.currentTimeMillis()
+                        + ".jpg";
 
-    // =====================================================
-    // SAVE CAMERA IMAGE TO INTERNAL STORAGE
-    // =====================================================
+        File imageFile =
+                new File(getFilesDir(), fileName);
 
-    private String saveCameraImage(
-            Bitmap bitmap
-    ) {
-
-        FileOutputStream outputStream = null;
-
-        try {
-
-            /*
-             * Create a unique filename.
-             */
-
-            String fileName =
-                    "repair_camera_"
-                            + System.currentTimeMillis()
-                            + ".jpg";
-
-
-            /*
-             * Create the file inside the app's private storage.
-             */
-
-            File imageFile =
-                    new File(
-                            getFilesDir(),
-                            fileName
-                    );
-
-
-            outputStream =
-                    new FileOutputStream(
-                            imageFile
-                    );
-
-
-            /*
-             * Compress Bitmap into JPEG.
-             */
+        try (FileOutputStream outputStream =
+                     new FileOutputStream(imageFile)) {
 
             boolean success =
                     bitmap.compress(
@@ -763,65 +377,29 @@ public class BookRepairActivity extends AppCompatActivity {
                             outputStream
                     );
 
-
             outputStream.flush();
 
-
             if (!success) {
-
                 return null;
             }
 
-
-            /*
-             * Return a permanent file URI.
-             */
-
-            return Uri.fromFile(
-                    imageFile
-            ).toString();
+            return Uri.fromFile(imageFile).toString();
 
         } catch (Exception e) {
 
             e.printStackTrace();
-
             return null;
-
-        } finally {
-
-            try {
-
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-
-            } catch (Exception ignored) {
-            }
         }
     }
 
-
-    // =====================================================
-    // DEVICE CATEGORIES
-    // =====================================================
-
     private void setupDeviceCategories() {
-
         categoryNames.clear();
-
         categoryIds.clear();
 
-
-        categoryNames.add(
-                "Select Device Category"
-        );
-
+        categoryNames.add("Select Device Category");
         categoryIds.add(-1);
 
-
-        Cursor cursor =
-                databaseHelper.getAllCategories();
-
+        Cursor cursor = databaseHelper.getAllCategories();
 
         if (cursor.moveToFirst()) {
 
@@ -829,35 +407,21 @@ public class BookRepairActivity extends AppCompatActivity {
 
                 int categoryId =
                         cursor.getInt(
-                                cursor.getColumnIndexOrThrow(
-                                        "id"
-                                )
+                                cursor.getColumnIndexOrThrow("id")
                         );
-
 
                 String categoryName =
                         cursor.getString(
-                                cursor.getColumnIndexOrThrow(
-                                        "name"
-                                )
+                                cursor.getColumnIndexOrThrow("name")
                         );
 
-
-                categoryIds.add(
-                        categoryId
-                );
-
-
-                categoryNames.add(
-                        categoryName
-                );
+                categoryIds.add(categoryId);
+                categoryNames.add(categoryName);
 
             } while (cursor.moveToNext());
         }
 
-
         cursor.close();
-
 
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(
@@ -866,16 +430,11 @@ public class BookRepairActivity extends AppCompatActivity {
                         categoryNames
                 );
 
-
         adapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item
         );
 
-
-        spinnerDeviceCategory.setAdapter(
-                adapter
-        );
-
+        spinnerDeviceCategory.setAdapter(adapter);
 
         if (categoryNames.size() == 1) {
 
@@ -887,33 +446,16 @@ public class BookRepairActivity extends AppCompatActivity {
         }
     }
 
-
-    // =====================================================
-    // SERVICES
-    // =====================================================
-
     private void setupServices() {
+        serviceList = databaseHelper.getAllServices();
 
-        serviceList =
-                databaseHelper.getAllServices();
+        List<String> serviceNames = new ArrayList<>();
 
-
-        List<String> serviceNames =
-                new ArrayList<>();
-
-
-        serviceNames.add(
-                "Select Repair Service"
-        );
-
+        serviceNames.add("Select Repair Service");
 
         for (Service service : serviceList) {
-
-            serviceNames.add(
-                    service.getName()
-            );
+            serviceNames.add(service.getName());
         }
-
 
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(
@@ -922,16 +464,11 @@ public class BookRepairActivity extends AppCompatActivity {
                         serviceNames
                 );
 
-
         adapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item
         );
 
-
-        spinnerService.setAdapter(
-                adapter
-        );
-
+        spinnerService.setAdapter(adapter);
 
         if (serviceList.isEmpty()) {
 
@@ -943,30 +480,12 @@ public class BookRepairActivity extends AppCompatActivity {
         }
     }
 
-
-    // =====================================================
-    // SUBMIT REPAIR
-    // =====================================================
-
     private void submitRepairRequest() {
-
         String deviceModel =
-                etDeviceModel
-                        .getText()
-                        .toString()
-                        .trim();
-
+                etDeviceModel.getText().toString().trim();
 
         String problemDescription =
-                etProblemDescription
-                        .getText()
-                        .toString()
-                        .trim();
-
-
-        // =================================================
-        // CUSTOMER
-        // =================================================
+                etProblemDescription.getText().toString().trim();
 
         if (customerId == -1) {
 
@@ -979,20 +498,11 @@ public class BookRepairActivity extends AppCompatActivity {
             return;
         }
 
-
-        // =================================================
-        // DEVICE CATEGORY
-        // =================================================
-
         int categoryPosition =
-                spinnerDeviceCategory
-                        .getSelectedItemPosition();
+                spinnerDeviceCategory.getSelectedItemPosition();
 
-
-        if (
-                categoryPosition <= 0 ||
-                        categoryPosition >= categoryIds.size()
-        ) {
+        if (categoryPosition <= 0
+                || categoryPosition >= categoryIds.size()) {
 
             Toast.makeText(
                     this,
@@ -1003,12 +513,8 @@ public class BookRepairActivity extends AppCompatActivity {
             return;
         }
 
-
         int selectedCategoryId =
-                categoryIds.get(
-                        categoryPosition
-                );
-
+                categoryIds.get(categoryPosition);
 
         if (selectedCategoryId == -1) {
 
@@ -1021,20 +527,11 @@ public class BookRepairActivity extends AppCompatActivity {
             return;
         }
 
-
-        // =================================================
-        // SERVICE
-        // =================================================
-
         int selectedPosition =
-                spinnerService
-                        .getSelectedItemPosition();
+                spinnerService.getSelectedItemPosition();
 
-
-        if (
-                selectedPosition <= 0 ||
-                        selectedPosition > serviceList.size()
-        ) {
+        if (selectedPosition <= 0
+                || selectedPosition > serviceList.size()) {
 
             Toast.makeText(
                     this,
@@ -1045,11 +542,6 @@ public class BookRepairActivity extends AppCompatActivity {
             return;
         }
 
-
-        // =================================================
-        // DEVICE MODEL
-        // =================================================
-
         if (deviceModel.isEmpty()) {
 
             etDeviceModel.setError(
@@ -1057,14 +549,8 @@ public class BookRepairActivity extends AppCompatActivity {
             );
 
             etDeviceModel.requestFocus();
-
             return;
         }
-
-
-        // =================================================
-        // PROBLEM
-        // =================================================
 
         if (problemDescription.isEmpty()) {
 
@@ -1073,14 +559,8 @@ public class BookRepairActivity extends AppCompatActivity {
             );
 
             etProblemDescription.requestFocus();
-
             return;
         }
-
-
-        // =================================================
-        // BRANCH
-        // =================================================
 
         if (selectedBranchId == -1) {
 
@@ -1093,53 +573,24 @@ public class BookRepairActivity extends AppCompatActivity {
             return;
         }
 
-
-        // =================================================
-        // GET SERVICE
-        // =================================================
-
         Service selectedService =
-                serviceList.get(
-                        selectedPosition - 1
-                );
-
+                serviceList.get(selectedPosition - 1);
 
         int selectedServiceId =
                 selectedService.getId();
 
-
-        // =================================================
-        // CREATE REPAIR
-        // =================================================
-
         long repairId =
                 databaseHelper.createRepair(
-
                         customerId,
-
                         selectedCategoryId,
-
                         deviceModel,
-
                         selectedServiceId,
-
                         problemDescription,
-
                         selectedBranchId,
-
                         selectedImageUri,
-
                         "Pending",
-
-                        String.valueOf(
-                                System.currentTimeMillis()
-                        )
+                        String.valueOf(System.currentTimeMillis())
                 );
-
-
-        // =================================================
-        // SUCCESS
-        // =================================================
 
         if (repairId != -1) {
 
@@ -1150,7 +601,6 @@ public class BookRepairActivity extends AppCompatActivity {
                             + repairId,
                     Toast.LENGTH_LONG
             ).show();
-
 
             finish();
 
@@ -1164,34 +614,19 @@ public class BookRepairActivity extends AppCompatActivity {
         }
     }
 
-
-    // =====================================================
-    // GET CURRENT LOCATION
-    // =====================================================
-
+    // Find the nearest TechFix branch using the customer's location.
     private void getCurrentLocation() {
-
-        // =================================================
-        // CHECK PERMISSION
-        // =================================================
-
         boolean fineGranted =
                 ContextCompat.checkSelfPermission(
                         this,
                         Manifest.permission.ACCESS_FINE_LOCATION
-                )
-                        ==
-                        PackageManager.PERMISSION_GRANTED;
-
+                ) == PackageManager.PERMISSION_GRANTED;
 
         boolean coarseGranted =
                 ContextCompat.checkSelfPermission(
                         this,
                         Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-                        ==
-                        PackageManager.PERMISSION_GRANTED;
-
+                ) == PackageManager.PERMISSION_GRANTED;
 
         if (!fineGranted && !coarseGranted) {
 
@@ -1204,11 +639,6 @@ public class BookRepairActivity extends AppCompatActivity {
 
             return;
         }
-
-
-        // =================================================
-        // GET LAST LOCATION
-        // =================================================
 
         fusedLocationClient
                 .getLastLocation()
@@ -1227,149 +657,64 @@ public class BookRepairActivity extends AppCompatActivity {
                                 return;
                             }
 
-
-                            // =================================================
-                            // CUSTOMER LOCATION
-                            // =================================================
-
                             double customerLatitude =
                                     location.getLatitude();
-
 
                             double customerLongitude =
                                     location.getLongitude();
 
+                            double colomboLatitude = 6.9271;
+                            double colomboLongitude = 79.8612;
 
-                            // =================================================
-                            // TECHFIX COLOMBO
-                            // =================================================
+                            double galleLatitude = 6.0329;
+                            double galleLongitude = 80.2168;
 
-                            double colomboLatitude =
-                                    6.9271;
-
-
-                            double colomboLongitude =
-                                    79.8612;
-
-
-                            // =================================================
-                            // TECHFIX GALLE
-                            // =================================================
-
-                            double galleLatitude =
-                                    6.0329;
-
-
-                            double galleLongitude =
-                                    80.2168;
-
-
-                            // =================================================
-                            // CALCULATE DISTANCE
-                            // =================================================
-
-                            float[] colomboDistance =
-                                    new float[1];
-
-
-                            float[] galleDistance =
-                                    new float[1];
-
+                            float[] colomboDistance = new float[1];
+                            float[] galleDistance = new float[1];
 
                             Location.distanceBetween(
-
                                     customerLatitude,
-
                                     customerLongitude,
-
                                     colomboLatitude,
-
                                     colomboLongitude,
-
                                     colomboDistance
                             );
 
-
                             Location.distanceBetween(
-
                                     customerLatitude,
-
                                     customerLongitude,
-
                                     galleLatitude,
-
                                     galleLongitude,
-
                                     galleDistance
                             );
 
-
-                            // =================================================
-                            // FIND NEAREST BRANCH
-                            // =================================================
-
                             String nearestBranch;
-
                             float nearestDistance;
 
+                            if (colomboDistance[0] < galleDistance[0]) {
 
-                            if (
-                                    colomboDistance[0]
-                                            <
-                                            galleDistance[0]
-                            ) {
-
-                                nearestBranch =
-                                        "Colombo";
-
-
-                                nearestDistance =
-                                        colomboDistance[0];
+                                nearestBranch = "Colombo";
+                                nearestDistance = colomboDistance[0];
 
                             } else {
 
-                                nearestBranch =
-                                        "Galle";
-
-
-                                nearestDistance =
-                                        galleDistance[0];
+                                nearestBranch = "Galle";
+                                nearestDistance = galleDistance[0];
                             }
-
-
-                            // =================================================
-                            // DISTANCE IN KM
-                            // =================================================
 
                             double distanceInKm =
                                     nearestDistance / 1000.0;
 
-
-                            // =================================================
-                            // GET BRANCH ID
-                            // =================================================
-
                             selectedBranchId =
-                                    databaseHelper
-                                            .getBranchIdByName(
-                                                    nearestBranch
-                                            );
+                                    databaseHelper.getBranchIdByName(
+                                            nearestBranch
+                                    );
 
+                            selectedBranchName = nearestBranch;
 
-                            selectedBranchName =
-                                    nearestBranch;
-
-
-                            // =================================================
-                            // BRANCH FOUND
-                            // =================================================
-
-                            if (
-                                    selectedBranchId != -1
-                            ) {
+                            if (selectedBranchId != -1) {
 
                                 tvNearestBranch.setText(
-
                                         "Nearest TechFix Branch: "
                                                 + nearestBranch
                                                 + "\n"
@@ -1382,7 +727,6 @@ public class BookRepairActivity extends AppCompatActivity {
                                                 + " km"
                                 );
 
-
                                 Toast.makeText(
                                         this,
                                         "Nearest branch found: "
@@ -1390,16 +734,9 @@ public class BookRepairActivity extends AppCompatActivity {
                                         Toast.LENGTH_SHORT
                                 ).show();
 
-                            }
-
-                            // =================================================
-                            // BRANCH NOT FOUND
-                            // =================================================
-
-                            else {
+                            } else {
 
                                 tvNearestBranch.setText(
-
                                         "Nearest branch: "
                                                 + nearestBranch
                                                 + "\n"
@@ -1414,18 +751,12 @@ public class BookRepairActivity extends AppCompatActivity {
                                                 + "Branch ID not found."
                                 );
 
-
                                 Toast.makeText(
                                         this,
                                         "Branch information could not be found in the database.",
                                         Toast.LENGTH_LONG
                                 ).show();
                             }
-
-
-                            // =================================================
-                            // SHOW BRANCH TEXT
-                            // =================================================
 
                             tvNearestBranch.setVisibility(
                                     View.VISIBLE

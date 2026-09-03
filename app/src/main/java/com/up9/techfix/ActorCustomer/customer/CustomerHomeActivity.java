@@ -6,16 +6,13 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.up9.techfix.ActorCustomer.RepairBooking.BookRepairActivity;
 import com.up9.techfix.ActorCustomer.RepairBooking.RepairHistoryActivity;
 import com.up9.techfix.ActorCustomer.RepairBooking.RepairTrackingActivity;
-import com.up9.techfix.R;
 import com.up9.techfix.ActorCustomer.map.BranchesActivity;
 import com.up9.techfix.ActorCustomer.payment.PaymentActivity;
 import com.up9.techfix.ActorCustomer.service.ServicesActivity;
-import com.up9.techfix.ActorCustomer.RepairBooking.BookRepairActivity;
-
-
-import com.up9.techfix.ActorCustomer.CustomerData.DatabaseViewerActivity;
+import com.up9.techfix.R;
 
 public class CustomerHomeActivity extends AppCompatActivity {
 
@@ -29,58 +26,82 @@ public class CustomerHomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_customer_home);
 
-        btnServices = findViewById(R.id.btnServices);
-        btnBookRepair = findViewById(R.id.btnBookRepair);
-        btnTrackRepair = findViewById(R.id.btnTrackRepair);
-        btnHistory = findViewById(R.id.btnHistory);
-        btnPayment = findViewById(R.id.btnPayment);
-        btnBranches = findViewById(R.id.btnBranches);
+        initializeViews();
+        setupButtons();
+    }
 
-        btnServices.setOnClickListener(v -> {
-            Intent intent = new Intent(CustomerHomeActivity.this, ServicesActivity.class);
-            startActivity(intent);
-        });
+    private void initializeViews() {
+        btnServices =
+                findViewById(R.id.btnServices);
 
-        btnBookRepair.setOnClickListener(v -> {
-            Intent intent = new Intent(
-                    CustomerHomeActivity.this,
-                    BookRepairActivity.class
-            );
-            startActivity(intent);
-        });
+        btnBookRepair =
+                findViewById(R.id.btnBookRepair);
 
-        btnTrackRepair.setOnClickListener(v -> {
-            Intent intent = new Intent(CustomerHomeActivity.this, RepairTrackingActivity.class);
-            startActivity(intent);
-        });
+        btnTrackRepair =
+                findViewById(R.id.btnTrackRepair);
 
-        btnHistory.setOnClickListener(v -> {
-            Intent intent = new Intent(CustomerHomeActivity.this, RepairHistoryActivity.class);
-            startActivity(intent);
-        });
+        btnHistory =
+                findViewById(R.id.btnHistory);
 
-        btnPayment.setOnClickListener(v -> {
-            Intent intent = new Intent(CustomerHomeActivity.this, PaymentActivity.class);
-            startActivity(intent);
-        });
+        btnPayment =
+                findViewById(R.id.btnPayment);
 
-        btnBranches.setOnClickListener(v -> {
-            Intent intent = new Intent(CustomerHomeActivity.this, BranchesActivity.class);
-            startActivity(intent);
-        });
+        btnBranches =
+                findViewById(R.id.btnBranches);
+    }
 
-        //delete later
-        Button btnDatabaseViewer = findViewById(R.id.btnDatabaseViewer);
+    private void setupButtons() {
 
-        btnDatabaseViewer.setOnClickListener(v -> {
-            Intent intent = new Intent(
-                    CustomerHomeActivity.this,
-                    DatabaseViewerActivity.class
-            );
+        btnServices.setOnClickListener(v ->
+                openActivity(
+                        ServicesActivity.class
+                )
+        );
 
-            startActivity(intent);
-        });
+        btnBookRepair.setOnClickListener(v ->
+                openActivity(
+                        BookRepairActivity.class
+                )
+        );
+
+        btnTrackRepair.setOnClickListener(v ->
+                openActivity(
+                        RepairTrackingActivity.class
+                )
+        );
+
+        btnHistory.setOnClickListener(v ->
+                openActivity(
+                        RepairHistoryActivity.class
+                )
+        );
+
+        btnPayment.setOnClickListener(v ->
+                openActivity(
+                        PaymentActivity.class
+                )
+        );
+
+        btnBranches.setOnClickListener(v ->
+                openActivity(
+                        BranchesActivity.class
+                )
+        );
+    }
+
+    private void openActivity(
+            Class<?> activityClass
+    ) {
+
+        Intent intent =
+                new Intent(
+                        CustomerHomeActivity.this,
+                        activityClass
+                );
+
+        startActivity(intent);
     }
 }

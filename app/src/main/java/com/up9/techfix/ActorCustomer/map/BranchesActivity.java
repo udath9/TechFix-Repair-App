@@ -17,6 +17,7 @@ import org.maplibre.android.MapLibre;
 import org.maplibre.android.annotations.MarkerOptions;
 import org.maplibre.android.camera.CameraPosition;
 import org.maplibre.android.geometry.LatLng;
+import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.MapView;
 
 public class BranchesActivity extends AppCompatActivity {
@@ -28,45 +29,23 @@ public class BranchesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Initialize MapLibre
         MapLibre.getInstance(this);
 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_branches);
 
-        ViewCompat.setOnApplyWindowInsetsListener(
-                findViewById(R.id.main),
-                (v, insets) -> {
+        setupWindowInsets();
 
-                    Insets systemBars = insets.getInsets(
-                            WindowInsetsCompat.Type.systemBars()
-                    );
-
-                    v.setPadding(
-                            systemBars.left,
-                            systemBars.top,
-                            systemBars.right,
-                            systemBars.bottom
-                    );
-
-                    return insets;
-                }
-        );
-
-        // Database
         databaseHelper = new DatabaseHelper(this);
 
-        // Map
         mapView = findViewById(R.id.mapView);
 
         mapView.getMapAsync(map -> {
 
-            // Load OpenFreeMap style
             map.setStyle(
                     "https://tiles.openfreemap.org/styles/liberty",
                     style -> {
 
-                        // Start camera around Sri Lanka
                         map.setCameraPosition(
                                 new CameraPosition.Builder()
                                         .target(new LatLng(7.5, 80.7))
@@ -74,7 +53,6 @@ public class BranchesActivity extends AppCompatActivity {
                                         .build()
                         );
 
-                        // Load all branches from SQLite
                         loadBranches(map);
 
                         Toast.makeText(
@@ -87,10 +65,33 @@ public class BranchesActivity extends AppCompatActivity {
         });
     }
 
-    private void loadBranches(
-            org.maplibre.android.maps.MapLibreMap map) {
+    private void setupWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(
+                findViewById(R.id.main),
+                (v, insets) -> {
 
-        Cursor cursor = databaseHelper.getAllBranches();
+                    Insets systemBars =
+                            insets.getInsets(
+                                    WindowInsetsCompat.Type.systemBars()
+                            );
+
+                    v.setPadding(
+                            systemBars.left,
+                            systemBars.top,
+                            systemBars.right,
+                            systemBars.bottom
+                    );
+
+                    return insets;
+                }
+        );
+    }
+
+    // Load all branches from the database and add them to the map.
+    private void loadBranches(MapLibreMap map) {
+
+        Cursor cursor =
+                databaseHelper.getAllBranches();
 
         if (cursor == null) {
             return;
@@ -102,30 +103,39 @@ public class BranchesActivity extends AppCompatActivity {
 
                 String branchName =
                         cursor.getString(
-                                cursor.getColumnIndexOrThrow("name")
+                                cursor.getColumnIndexOrThrow(
+                                        "name"
+                                )
                         );
 
                 String address =
                         cursor.getString(
-                                cursor.getColumnIndexOrThrow("address")
+                                cursor.getColumnIndexOrThrow(
+                                        "address"
+                                )
                         );
 
                 String phone =
                         cursor.getString(
-                                cursor.getColumnIndexOrThrow("phone")
+                                cursor.getColumnIndexOrThrow(
+                                        "phone"
+                                )
                         );
 
                 double latitude =
                         cursor.getDouble(
-                                cursor.getColumnIndexOrThrow("latitude")
+                                cursor.getColumnIndexOrThrow(
+                                        "latitude"
+                                )
                         );
 
                 double longitude =
                         cursor.getDouble(
-                                cursor.getColumnIndexOrThrow("longitude")
+                                cursor.getColumnIndexOrThrow(
+                                        "longitude"
+                                )
                         );
 
-                // Create marker for this branch
                 map.addMarker(
                         new MarkerOptions()
                                 .position(
@@ -136,9 +146,9 @@ public class BranchesActivity extends AppCompatActivity {
                                 )
                                 .title(branchName)
                                 .snippet(
-                                        address +
-                                                "\nPhone: " +
-                                                phone
+                                        address
+                                                + "\nPhone: "
+                                                + phone
                                 )
                 );
             }

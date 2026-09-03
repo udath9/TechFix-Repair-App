@@ -15,8 +15,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- TITLE -->
-
             <TextView
                 android:id="@+id/tvTitle"
                 android:layout_width="match_parent"
@@ -27,35 +25,12 @@
                 android:gravity="center"
                 android:layout_marginBottom="16dp" />
 
-
-            <!-- REFRESH BUTTON -->
-
             <Button
                 android:id="@+id/btnRefresh"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Refresh Database"
-                android:layout_marginBottom="8dp" />
-
-
-            <!-- TEST BUTTONS -->
-
-            <Button
-                android:id="@+id/btnAddTestServices"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Add Test Services"
-                android:layout_marginBottom="8dp" />
-
-            <Button
-                android:id="@+id/btnAddTestPayment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Add Test Payment"
                 android:layout_marginBottom="24dp" />
-
-
-            <!-- CUSTOMERS -->
 
             <TextView
                 android:layout_width="match_parent"
@@ -73,9 +48,6 @@
                 android:shrinkColumns="*"
                 android:layout_marginBottom="30dp" />
 
-
-            <!-- SERVICES -->
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -91,9 +63,6 @@
                 android:stretchColumns="*"
                 android:shrinkColumns="*"
                 android:layout_marginBottom="30dp" />
-
-
-            <!-- CATEGORIES -->
 
             <TextView
                 android:layout_width="match_parent"
@@ -111,9 +80,6 @@
                 android:shrinkColumns="*"
                 android:layout_marginBottom="30dp" />
 
-
-            <!-- BRANCHES -->
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -130,9 +96,6 @@
                 android:shrinkColumns="*"
                 android:layout_marginBottom="30dp" />
 
-
-            <!-- REPAIRS -->
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -148,9 +111,6 @@
                 android:stretchColumns="*"
                 android:shrinkColumns="*"
                 android:layout_marginBottom="30dp" />
-
-
-            <!-- PAYMENTS -->
 
             <TextView
                 android:layout_width="match_parent"

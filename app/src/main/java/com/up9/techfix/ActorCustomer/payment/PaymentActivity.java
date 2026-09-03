@@ -1,10 +1,11 @@
 package com.up9.techfix.ActorCustomer.payment;
 
 import android.app.AlertDialog;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -32,19 +33,40 @@ public class PaymentActivity extends AppCompatActivity {
 
     private int customerId = -1;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
 
         EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_payment);
 
-        setContentView(
-                R.layout.activity_payment
-        );
+        setupWindowInsets();
 
+        databaseHelper = new DatabaseHelper(this);
 
+        currentPaymentContainer =
+                findViewById(R.id.currentPaymentContainer);
+
+        paymentHistoryContainer =
+                findViewById(R.id.paymentHistoryContainer);
+
+        SharedPreferences preferences =
+                getSharedPreferences(
+                        "TechFixSession",
+                        MODE_PRIVATE
+                );
+
+        customerId =
+                preferences.getInt(
+                        "customerId",
+                        -1
+                );
+
+        loadCurrentPayments();
+        loadPaymentHistory();
+    }
+
+    private void setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main),
                 (v, insets) -> {
@@ -64,83 +86,34 @@ public class PaymentActivity extends AppCompatActivity {
                     return insets;
                 }
         );
-
-
-        databaseHelper =
-                new DatabaseHelper(this);
-
-
-        // =================================================
-        // GET LOGGED-IN CUSTOMER
-        // =================================================
-
-        android.content.SharedPreferences preferences =
-                getSharedPreferences(
-                        "TechFixSession",
-                        MODE_PRIVATE
-                );
-
-        customerId =
-                preferences.getInt(
-                        "customerId",
-                        -1
-                );
-
-
-        // =================================================
-        // GET CONTAINERS
-        // =================================================
-
-        currentPaymentContainer =
-                findViewById(
-                        R.id.currentPaymentContainer
-                );
-
-        paymentHistoryContainer =
-                findViewById(
-                        R.id.paymentHistoryContainer
-                );
-
-
-        // =================================================
-        // LOAD DATA
-        // =================================================
-
-        loadCurrentPayments();
-
-        loadPaymentHistory();
     }
 
-
-    // =====================================================
-    // CURRENT / UNPAID PAYMENTS
-    // =====================================================
-
+    // Load repairs that currently require payment.
     private void loadCurrentPayments() {
-
         currentPaymentContainer.removeAllViews();
-
 
         if (customerId == -1) {
 
             showMessage(
                     currentPaymentContainer,
-                    "Customer information not found.\nPlease log in again."
+                    "Customer information not found.\n"
+                            + "Please log in again."
             );
 
             return;
         }
-
 
         Cursor cursor =
                 databaseHelper.getUnpaidRepairs(
                         customerId
                 );
 
+        if (cursor == null ||
+                !cursor.moveToFirst()) {
 
-        if (!cursor.moveToFirst()) {
-
-            cursor.close();
+            if (cursor != null) {
+                cursor.close();
+            }
 
             showMessage(
                     currentPaymentContainer,
@@ -150,16 +123,13 @@ public class PaymentActivity extends AppCompatActivity {
             return;
         }
 
-
         do {
-
             int repairId =
                     cursor.getInt(
                             cursor.getColumnIndexOrThrow(
                                     "repair_id"
                             )
                     );
-
 
             String deviceCategory =
                     cursor.getString(
@@ -168,14 +138,12 @@ public class PaymentActivity extends AppCompatActivity {
                             )
                     );
 
-
             String deviceModel =
                     cursor.getString(
                             cursor.getColumnIndexOrThrow(
                                     "device_model"
                             )
                     );
-
 
             String serviceName =
                     cursor.getString(
@@ -184,14 +152,12 @@ public class PaymentActivity extends AppCompatActivity {
                             )
                     );
 
-
             String branchName =
                     cursor.getString(
                             cursor.getColumnIndexOrThrow(
                                     "branch_name"
                             )
                     );
-
 
             String status =
                     cursor.getString(
@@ -200,14 +166,12 @@ public class PaymentActivity extends AppCompatActivity {
                             )
                     );
 
-
             double amount =
                     cursor.getDouble(
                             cursor.getColumnIndexOrThrow(
                                     "amount"
                             )
                     );
-
 
             createCurrentPaymentCard(
                     repairId,
@@ -219,17 +183,10 @@ public class PaymentActivity extends AppCompatActivity {
                     amount
             );
 
-
         } while (cursor.moveToNext());
-
 
         cursor.close();
     }
-
-
-    // =====================================================
-    // CURRENT PAYMENT CARD
-    // =====================================================
 
     private void createCurrentPaymentCard(
             int repairId,
@@ -244,56 +201,40 @@ public class PaymentActivity extends AppCompatActivity {
         LinearLayout card =
                 createCard();
 
-
-        TextView title =
+        card.addView(
                 createTitle(
                         "Repair #" + repairId
-                );
-
-        card.addView(title);
-
-
-        TextView information =
-                createInformation(
-                        "Device: "
-                                + safeText(deviceCategory)
-                                + " - "
-                                + safeText(deviceModel)
-                                + "\n\n"
-
-                                + "Service: "
-                                + safeText(serviceName)
-                                + "\n\n"
-
-                                + "Branch: "
-                                + safeText(branchName)
-                                + "\n\n"
-
-                                + "Status: "
-                                + safeText(status)
-                                + "\n\n"
-
-                                + "Amount Due: LKR "
-                                + String.format(
-                                Locale.getDefault(),
-                                "%,.2f",
-                                amount
-                        )
-                );
-
-
-        card.addView(
-                information
+                )
         );
 
+        String informationText =
+                "Device: "
+                        + safeText(deviceCategory)
+                        + " - "
+                        + safeText(deviceModel)
+                        + "\n\n"
+                        + "Service: "
+                        + safeText(serviceName)
+                        + "\n\n"
+                        + "Branch: "
+                        + safeText(branchName)
+                        + "\n\n"
+                        + "Status: "
+                        + safeText(status)
+                        + "\n\n"
+                        + "Amount Due: LKR "
+                        + formatAmount(amount);
+
+        card.addView(
+                createInformation(
+                        informationText
+                )
+        );
 
         Button payButton =
                 new Button(this);
 
-        payButton.setText(
-                "Pay Now"
-        );
-
+        payButton.setText("Pay Now");
 
         LinearLayout.LayoutParams buttonParams =
                 new LinearLayout.LayoutParams(
@@ -308,11 +249,7 @@ public class PaymentActivity extends AppCompatActivity {
                 0
         );
 
-
-        payButton.setLayoutParams(
-                buttonParams
-        );
-
+        payButton.setLayoutParams(buttonParams);
 
         payButton.setOnClickListener(
                 v -> showPaymentConfirmation(
@@ -321,21 +258,10 @@ public class PaymentActivity extends AppCompatActivity {
                 )
         );
 
+        card.addView(payButton);
 
-        card.addView(
-                payButton
-        );
-
-
-        currentPaymentContainer.addView(
-                card
-        );
+        currentPaymentContainer.addView(card);
     }
-
-
-    // =====================================================
-    // PAYMENT CONFIRMATION
-    // =====================================================
 
     private void showPaymentConfirmation(
             int repairId,
@@ -343,29 +269,19 @@ public class PaymentActivity extends AppCompatActivity {
     ) {
 
         new AlertDialog.Builder(this)
-
-                .setTitle(
-                        "Confirm Payment"
-                )
-
+                .setTitle("Confirm Payment")
                 .setMessage(
                         "Repair #" + repairId
                                 + "\n\n"
                                 + "Amount: LKR "
-                                + String.format(
-                                Locale.getDefault(),
-                                "%,.2f",
-                                amount
-                        )
+                                + formatAmount(amount)
                                 + "\n\n"
                                 + "Confirm payment?"
                 )
-
                 .setNegativeButton(
                         "Cancel",
                         null
                 )
-
                 .setPositiveButton(
                         "Pay",
                         (dialog, which) ->
@@ -374,15 +290,10 @@ public class PaymentActivity extends AppCompatActivity {
                                         amount
                                 )
                 )
-
                 .show();
     }
 
-
-    // =====================================================
-    // PROCESS PAYMENT
-    // =====================================================
-
+    // Save the payment and refresh both payment sections.
     private void processPayment(
             int repairId,
             double amount
@@ -393,7 +304,6 @@ public class PaymentActivity extends AppCompatActivity {
                         System.currentTimeMillis()
                 );
 
-
         long paymentId =
                 databaseHelper.createPayment(
                         repairId,
@@ -401,7 +311,6 @@ public class PaymentActivity extends AppCompatActivity {
                         paymentDate,
                         "Paid"
                 );
-
 
         if (paymentId != -1) {
 
@@ -413,11 +322,7 @@ public class PaymentActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG
             ).show();
 
-
-            // Refresh both sections
-
             loadCurrentPayments();
-
             loadPaymentHistory();
 
         } else {
@@ -430,15 +335,9 @@ public class PaymentActivity extends AppCompatActivity {
         }
     }
 
-
-    // =====================================================
-    // PAYMENT HISTORY
-    // =====================================================
-
+    // Load the customer's completed payment records.
     private void loadPaymentHistory() {
-
         paymentHistoryContainer.removeAllViews();
-
 
         if (customerId == -1) {
 
@@ -450,16 +349,17 @@ public class PaymentActivity extends AppCompatActivity {
             return;
         }
 
-
         Cursor cursor =
                 databaseHelper.getPaymentHistory(
                         customerId
                 );
 
+        if (cursor == null ||
+                !cursor.moveToFirst()) {
 
-        if (!cursor.moveToFirst()) {
-
-            cursor.close();
+            if (cursor != null) {
+                cursor.close();
+            }
 
             showMessage(
                     paymentHistoryContainer,
@@ -469,16 +369,13 @@ public class PaymentActivity extends AppCompatActivity {
             return;
         }
 
-
         do {
-
             int paymentId =
                     cursor.getInt(
                             cursor.getColumnIndexOrThrow(
                                     "payment_id"
                             )
                     );
-
 
             int repairId =
                     cursor.getInt(
@@ -487,14 +384,12 @@ public class PaymentActivity extends AppCompatActivity {
                             )
                     );
 
-
             double amount =
                     cursor.getDouble(
                             cursor.getColumnIndexOrThrow(
                                     "amount"
                             )
                     );
-
 
             String paymentDate =
                     cursor.getString(
@@ -503,7 +398,6 @@ public class PaymentActivity extends AppCompatActivity {
                             )
                     );
 
-
             String status =
                     cursor.getString(
                             cursor.getColumnIndexOrThrow(
@@ -511,14 +405,12 @@ public class PaymentActivity extends AppCompatActivity {
                             )
                     );
 
-
             String serviceName =
                     cursor.getString(
                             cursor.getColumnIndexOrThrow(
                                     "service_name"
                             )
                     );
-
 
             createPaymentHistoryCard(
                     paymentId,
@@ -529,17 +421,10 @@ public class PaymentActivity extends AppCompatActivity {
                     serviceName
             );
 
-
         } while (cursor.moveToNext());
-
 
         cursor.close();
     }
-
-
-    // =====================================================
-    // PAYMENT HISTORY CARD
-    // =====================================================
 
     private void createPaymentHistoryCard(
             int paymentId,
@@ -553,64 +438,38 @@ public class PaymentActivity extends AppCompatActivity {
         LinearLayout card =
                 createCard();
 
-
-        TextView title =
+        card.addView(
                 createTitle(
                         "Payment #" + paymentId
-                );
-
-
-        card.addView(
-                title
+                )
         );
 
+        String informationText =
+                "Repair #: "
+                        + repairId
+                        + "\n\n"
+                        + "Service: "
+                        + safeText(serviceName)
+                        + "\n\n"
+                        + "Date: "
+                        + formatPaymentDate(paymentDate)
+                        + "\n\n"
+                        + "Amount: LKR "
+                        + formatAmount(amount)
+                        + "\n\n"
+                        + "Status: "
+                        + safeText(status);
 
-        TextView information =
+        card.addView(
                 createInformation(
-                        "Repair #: "
-                                + repairId
-                                + "\n\n"
-
-                                + "Service: "
-                                + safeText(serviceName)
-                                + "\n\n"
-
-                                + "Date: "
-                                + formatPaymentDate(
-                                paymentDate
-                        )
-                                + "\n\n"
-
-                                + "Amount: LKR "
-                                + String.format(
-                                Locale.getDefault(),
-                                "%,.2f",
-                                amount
-                        )
-                                + "\n\n"
-
-                                + "Status: "
-                                + safeText(status)
-                );
-
-
-        card.addView(
-                information
+                        informationText
+                )
         );
 
-
-        paymentHistoryContainer.addView(
-                card
-        );
+        paymentHistoryContainer.addView(card);
     }
 
-
-    // =====================================================
-    // CREATE CARD
-    // =====================================================
-
     private LinearLayout createCard() {
-
         LinearLayout card =
                 new LinearLayout(this);
 
@@ -625,13 +484,11 @@ public class PaymentActivity extends AppCompatActivity {
                 16
         );
 
-
         LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT
                 );
-
 
         params.setMargins(
                 0,
@@ -640,43 +497,25 @@ public class PaymentActivity extends AppCompatActivity {
                 20
         );
 
-
-        card.setLayoutParams(
-                params
-        );
-
+        card.setLayoutParams(params);
 
         card.setBackgroundResource(
                 android.R.drawable.editbox_background
         );
 
-
         return card;
     }
 
-
-    // =====================================================
-    // TITLE
-    // =====================================================
-
-    private TextView createTitle(
-            String text
-    ) {
-
+    private TextView createTitle(String text) {
         TextView textView =
                 new TextView(this);
 
-        textView.setText(
-                text
-        );
-
-        textView.setTextSize(
-                20
-        );
+        textView.setText(text);
+        textView.setTextSize(20);
 
         textView.setTypeface(
                 null,
-                android.graphics.Typeface.BOLD
+                Typeface.BOLD
         );
 
         textView.setPadding(
@@ -686,37 +525,18 @@ public class PaymentActivity extends AppCompatActivity {
                 12
         );
 
-
         return textView;
     }
 
-
-    // =====================================================
-    // INFORMATION
-    // =====================================================
-
-    private TextView createInformation(
-            String text
-    ) {
-
+    private TextView createInformation(String text) {
         TextView textView =
                 new TextView(this);
 
-        textView.setText(
-                text
-        );
-
-        textView.setTextSize(
-                16
-        );
+        textView.setText(text);
+        textView.setTextSize(16);
 
         return textView;
     }
-
-
-    // =====================================================
-    // MESSAGE
-    // =====================================================
 
     private void showMessage(
             LinearLayout container,
@@ -726,17 +546,9 @@ public class PaymentActivity extends AppCompatActivity {
         TextView textView =
                 new TextView(this);
 
-        textView.setText(
-                message
-        );
-
-        textView.setTextSize(
-                18
-        );
-
-        textView.setGravity(
-                Gravity.CENTER
-        );
+        textView.setText(message);
+        textView.setTextSize(18);
+        textView.setGravity(Gravity.CENTER);
 
         textView.setPadding(
                 20,
@@ -745,38 +557,20 @@ public class PaymentActivity extends AppCompatActivity {
                 40
         );
 
-
-        container.addView(
-                textView
-        );
+        container.addView(textView);
     }
 
+    private String formatPaymentDate(String dateValue) {
 
-    // =====================================================
-    // FORMAT DATE
-    // =====================================================
-
-    private String formatPaymentDate(
-            String dateValue
-    ) {
-
-        if (
-                dateValue == null
-                        ||
-                        dateValue.trim().isEmpty()
-        ) {
+        if (dateValue == null ||
+                dateValue.trim().isEmpty()) {
 
             return "Unknown";
         }
 
-
         try {
-
             long timestamp =
-                    Long.parseLong(
-                            dateValue
-                    );
-
+                    Long.parseLong(dateValue);
 
             SimpleDateFormat formatter =
                     new SimpleDateFormat(
@@ -784,31 +578,28 @@ public class PaymentActivity extends AppCompatActivity {
                             Locale.getDefault()
                     );
 
-
             return formatter.format(
                     new Date(timestamp)
             );
 
         } catch (Exception e) {
-
             return dateValue;
         }
     }
 
+    private String formatAmount(double amount) {
+        return String.format(
+                Locale.getDefault(),
+                "%,.2f",
+                amount
+        );
+    }
 
-    // =====================================================
-    // SAFE TEXT
-    // =====================================================
+    // Prevent null or empty database values from appearing in the UI.
+    private String safeText(String text) {
 
-    private String safeText(
-            String text
-    ) {
-
-        if (
-                text == null
-                        ||
-                        text.trim().isEmpty()
-        ) {
+        if (text == null ||
+                text.trim().isEmpty()) {
 
             return "Unknown";
         }

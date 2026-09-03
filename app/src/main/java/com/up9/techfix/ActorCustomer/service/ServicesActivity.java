@@ -33,13 +33,26 @@ public class ServicesActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_services);
 
+        setupWindowInsets();
+
+        servicesContainer =
+                findViewById(R.id.servicesContainer);
+
+        databaseHelper =
+                new DatabaseHelper(this);
+
+        loadServices();
+    }
+
+    private void setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main),
                 (v, insets) -> {
 
-                    Insets systemBars = insets.getInsets(
-                            WindowInsetsCompat.Type.systemBars()
-                    );
+                    Insets systemBars =
+                            insets.getInsets(
+                                    WindowInsetsCompat.Type.systemBars()
+                            );
 
                     v.setPadding(
                             systemBars.left,
@@ -51,15 +64,9 @@ public class ServicesActivity extends AppCompatActivity {
                     return insets;
                 }
         );
-
-        servicesContainer =
-                findViewById(R.id.servicesContainer);
-
-        databaseHelper = new DatabaseHelper(this);
-
-        loadServices();
     }
 
+    // Load all repair services from the database.
     private void loadServices() {
 
         servicesContainer.removeAllViews();
@@ -71,44 +78,57 @@ public class ServicesActivity extends AppCompatActivity {
 
         for (int i = 0; i < services.size(); i++) {
 
-            // Create a new row for every 2 services
             if (i % 2 == 0) {
 
-                currentRow = new LinearLayout(this);
+                currentRow =
+                        createServiceRow();
 
-                currentRow.setOrientation(
-                        LinearLayout.HORIZONTAL
+                servicesContainer.addView(
+                        currentRow
                 );
-
-                currentRow.setGravity(
-                        Gravity.CENTER
-                );
-
-                currentRow.setWeightSum(2);
-
-                LinearLayout.LayoutParams rowParams =
-                        new LinearLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT
-                        );
-
-                currentRow.setLayoutParams(rowParams);
-
-                servicesContainer.addView(currentRow);
             }
 
-            Service service = services.get(i);
+            Service service =
+                    services.get(i);
 
-            Button serviceButton =
-                    createServiceButton(service);
-
-            currentRow.addView(serviceButton);
+            currentRow.addView(
+                    createServiceButton(service)
+            );
         }
     }
 
-    private Button createServiceButton(Service service) {
+    private LinearLayout createServiceRow() {
 
-        Button button = new Button(this);
+        LinearLayout row =
+                new LinearLayout(this);
+
+        row.setOrientation(
+                LinearLayout.HORIZONTAL
+        );
+
+        row.setGravity(
+                Gravity.CENTER
+        );
+
+        row.setWeightSum(2);
+
+        LinearLayout.LayoutParams rowParams =
+                new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+
+        row.setLayoutParams(rowParams);
+
+        return row;
+    }
+
+    private Button createServiceButton(
+            Service service
+    ) {
+
+        Button button =
+                new Button(this);
 
         LinearLayout.LayoutParams buttonParams =
                 new LinearLayout.LayoutParams(
@@ -124,87 +144,90 @@ public class ServicesActivity extends AppCompatActivity {
                 8
         );
 
-        button.setLayoutParams(buttonParams);
-
-        // =====================================================
-        // SERVICE NAME
-        // =====================================================
-
-        button.setText(service.getName());
-
-        button.setTextSize(16);
-
-        button.setGravity(
-                Gravity.CENTER
+        button.setLayoutParams(
+                buttonParams
         );
 
+        button.setText(
+                service.getName()
+        );
+
+        button.setTextSize(16);
+        button.setGravity(Gravity.CENTER);
         button.setAllCaps(false);
 
-        // =====================================================
-        // SERVICE IMAGE
-        // =====================================================
+        setServiceImage(
+                button,
+                service.getImageUri()
+        );
 
-        String imageName = service.getImageUri();
-
-        if (imageName != null && !imageName.trim().isEmpty()) {
-
-            int imageResourceId =
-                    getResources().getIdentifier(
-                            imageName.trim(),
-                            "drawable",
-                            getPackageName()
-                    );
-
-            if (imageResourceId != 0) {
-
-                Drawable drawable =
-                        ContextCompat.getDrawable(
-                                this,
-                                imageResourceId
-                        );
-
-                if (drawable != null) {
-
-                    int imageSize = 80;
-
-                    drawable.setBounds(
-                            0,
-                            0,
-                            imageSize,
-                            imageSize
-                    );
-
-                    button.setCompoundDrawables(
-                            null,
-                            drawable,
-                            null,
-                            null
-                    );
-
-                    button.setCompoundDrawablePadding(12);
-                }
-            }
-        }
-
-        // =====================================================
-        // CLICK
-        // =====================================================
-
-        button.setOnClickListener(v -> {
-
-            openServiceDetails(service);
-
-        });
+        button.setOnClickListener(
+                v -> openServiceDetails(service)
+        );
 
         return button;
     }
 
-    private void openServiceDetails(Service service) {
+    private void setServiceImage(
+            Button button,
+            String imageName
+    ) {
 
-        Intent intent = new Intent(
-                ServicesActivity.this,
-                ServiceDetailsActivity.class
+        if (imageName == null ||
+                imageName.trim().isEmpty()) {
+
+            return;
+        }
+
+        int imageResourceId =
+                getResources().getIdentifier(
+                        imageName.trim(),
+                        "drawable",
+                        getPackageName()
+                );
+
+        if (imageResourceId == 0) {
+            return;
+        }
+
+        Drawable drawable =
+                ContextCompat.getDrawable(
+                        this,
+                        imageResourceId
+                );
+
+        if (drawable == null) {
+            return;
+        }
+
+        int imageSize = 80;
+
+        drawable.setBounds(
+                0,
+                0,
+                imageSize,
+                imageSize
         );
+
+        button.setCompoundDrawables(
+                null,
+                drawable,
+                null,
+                null
+        );
+
+        button.setCompoundDrawablePadding(12);
+    }
+
+    private void openServiceDetails(
+            Service service
+    ) {
+
+        Intent intent =
+                new Intent(
+                        ServicesActivity.this,
+                        ServiceDetailsActivity.class
+                );
 
         intent.putExtra(
                 "serviceId",

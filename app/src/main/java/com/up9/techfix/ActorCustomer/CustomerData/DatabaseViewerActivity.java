@@ -19,16 +19,14 @@ public class DatabaseViewerActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
 
-    private Button btnAddTestServices;
-    private Button btnAddTestPayment;
     private Button btnRefresh;
 
     private TableLayout tableCustomers;
     private TableLayout tableServices;
+    private TableLayout tableCategories;
     private TableLayout tableBranches;
     private TableLayout tableRepairs;
     private TableLayout tablePayments;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,163 +34,35 @@ public class DatabaseViewerActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_database_viewer);
 
+        databaseHelper = new DatabaseHelper(this);
 
-        // =====================================================
-        // DATABASE
-        // =====================================================
+        tableCustomers = findViewById(R.id.tableCustomers);
+        tableServices = findViewById(R.id.tableServices);
+        tableCategories = findViewById(R.id.tableCategories);
+        tableBranches = findViewById(R.id.tableBranches);
+        tableRepairs = findViewById(R.id.tableRepairs);
+        tablePayments = findViewById(R.id.tablePayments);
 
-        databaseHelper =
-                new DatabaseHelper(this);
-
-
-        // =====================================================
-        // TABLES
-        // =====================================================
-
-        tableCustomers =
-                findViewById(R.id.tableCustomers);
-
-        tableServices =
-                findViewById(R.id.tableServices);
-
-        tableBranches =
-                findViewById(R.id.tableBranches);
-
-        tableRepairs =
-                findViewById(R.id.tableRepairs);
-
-        tablePayments =
-                findViewById(R.id.tablePayments);
-
-
-        // =====================================================
-        // BUTTONS
-        // =====================================================
-
-        btnRefresh =
-                findViewById(R.id.btnRefresh);
-
-        btnAddTestServices =
-                findViewById(R.id.btnAddTestServices);
-
-        btnAddTestPayment =
-                findViewById(R.id.btnAddTestPayment);
-
-
-        // =====================================================
-        // DISPLAY DATABASE WHEN PAGE OPENS
-        // =====================================================
+        btnRefresh = findViewById(R.id.btnRefresh);
 
         displayDatabase();
 
-
-        // =====================================================
-        // ADD TEST SERVICES
-        // =====================================================
-
-        btnAddTestServices.setOnClickListener(v -> {
-
-            databaseHelper.insertTestServices();
-
-            displayDatabase();
-        });
-
-
-        // =====================================================
-        // ADD TEST PAYMENT
-        // =====================================================
-
-        btnAddTestPayment.setOnClickListener(v -> {
-
-            databaseHelper.insertTestPayment();
-
-            displayDatabase();
-        });
-
-
-        // =====================================================
-        // REFRESH DATABASE
-        // =====================================================
-
-        btnRefresh.setOnClickListener(v -> {
-
-            displayDatabase();
-        });
+        btnRefresh.setOnClickListener(v -> displayDatabase());
     }
-
-
-    // =====================================================
-    // DISPLAY DATABASE
-    // =====================================================
 
     private void displayDatabase() {
 
-        SQLiteDatabase db =
-                databaseHelper.getReadableDatabase();
+        SQLiteDatabase db = databaseHelper.getReadableDatabase();
 
-
-        // =================================================
-        // CUSTOMERS
-        // =================================================
-
-        createTable(
-                db,
-                "customers",
-                tableCustomers
-        );
-
-
-        // =================================================
-        // SERVICES
-        // =================================================
-
-        createTable(
-                db,
-                "services",
-                tableServices
-        );
-
-
-        // =================================================
-        // BRANCHES
-        // =================================================
-
-        createTable(
-                db,
-                "branches",
-                tableBranches
-        );
-
-
-        // =================================================
-        // REPAIRS
-        // =================================================
-
-        createTable(
-                db,
-                "repairs",
-                tableRepairs
-        );
-
-
-        // =================================================
-        // PAYMENTS
-        // =================================================
-
-        createTable(
-                db,
-                "payments",
-                tablePayments
-        );
-
+        createTable(db, "customers", tableCustomers);
+        createTable(db, "services", tableServices);
+        createTable(db, "categories", tableCategories);
+        createTable(db, "branches", tableBranches);
+        createTable(db, "repairs", tableRepairs);
+        createTable(db, "payments", tablePayments);
 
         db.close();
     }
-
-
-    // =====================================================
-    // CREATE TABLE DISPLAY
-    // =====================================================
 
     private void createTable(
             SQLiteDatabase db,
@@ -200,173 +70,84 @@ public class DatabaseViewerActivity extends AppCompatActivity {
             TableLayout tableLayout
     ) {
 
-        // Remove existing rows
-        // before refreshing.
-
         tableLayout.removeAllViews();
 
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM " + tableName,
+                null
+        );
 
-        Cursor cursor =
-                db.rawQuery(
-                        "SELECT * FROM " + tableName,
-                        null
-                );
+        String[] columns = cursor.getColumnNames();
 
-
-        String[] columns =
-                cursor.getColumnNames();
-
-
-        // =================================================
-        // HEADER ROW
-        // =================================================
-
-        TableRow headerRow =
-                new TableRow(this);
-
+        TableRow headerRow = new TableRow(this);
 
         for (String column : columns) {
 
-            TextView header =
-                    createCell(
-                            column.toUpperCase()
-                    );
-
+            TextView header = createCell(
+                    column.toUpperCase()
+            );
 
             header.setTypeface(
                     Typeface.DEFAULT,
                     Typeface.BOLD
             );
 
-
-            header.setGravity(
-                    Gravity.CENTER
-            );
-
+            header.setGravity(Gravity.CENTER);
 
             headerRow.addView(header);
         }
 
-
-        tableLayout.addView(
-                headerRow
-        );
-
-
-        // =================================================
-        // DATA ROWS
-        // =================================================
+        tableLayout.addView(headerRow);
 
         if (cursor.getCount() == 0) {
 
-            TableRow emptyRow =
-                    new TableRow(this);
+            TableRow emptyRow = new TableRow(this);
 
+            TextView emptyText = createCell("No data");
 
-            TextView emptyText =
-                    createCell(
-                            "No data"
-                    );
+            emptyText.setGravity(Gravity.CENTER);
 
+            emptyRow.addView(emptyText);
 
-            emptyText.setGravity(
-                    Gravity.CENTER
-            );
-
-
-            emptyRow.addView(
-                    emptyText
-            );
-
-
-            tableLayout.addView(
-                    emptyRow
-            );
+            tableLayout.addView(emptyRow);
 
         } else {
 
             while (cursor.moveToNext()) {
 
-                TableRow dataRow =
-                        new TableRow(this);
+                TableRow dataRow = new TableRow(this);
 
+                for (int i = 0; i < columns.length; i++) {
 
-                for (
-                        int i = 0;
-                        i < columns.length;
-                        i++
-                ) {
-
-                    String value =
-                            cursor.getString(i);
-
+                    String value = cursor.getString(i);
 
                     if (value == null) {
-
                         value = "NULL";
                     }
 
-
-                    TextView cell =
-                            createCell(value);
-
-
                     dataRow.addView(
-                            cell
+                            createCell(value)
                     );
                 }
 
-
-                tableLayout.addView(
-                        dataRow
-                );
+                tableLayout.addView(dataRow);
             }
         }
-
 
         cursor.close();
     }
 
+    private TextView createCell(String text) {
 
-    // =====================================================
-    // CREATE TABLE CELL
-    // =====================================================
+        TextView textView = new TextView(this);
 
-    private TextView createCell(
-            String text
-    ) {
-
-        TextView textView =
-                new TextView(this);
-
-
-        textView.setText(
-                text
-        );
-
-
-        textView.setTextSize(
-                14
-        );
-
-
-        textView.setPadding(
-                20,
-                15,
-                20,
-                15
-        );
-
-
-        textView.setGravity(
-                Gravity.CENTER_VERTICAL
-        );
-
-
+        textView.setText(text);
+        textView.setTextSize(14);
+        textView.setPadding(20, 15, 20, 15);
+        textView.setGravity(Gravity.CENTER_VERTICAL);
         textView.setBackgroundResource(
                 android.R.drawable.editbox_background
         );
-
 
         TableRow.LayoutParams params =
                 new TableRow.LayoutParams(
@@ -374,19 +155,9 @@ public class DatabaseViewerActivity extends AppCompatActivity {
                         TableRow.LayoutParams.WRAP_CONTENT
                 );
 
+        params.setMargins(1, 1, 1, 1);
 
-        params.setMargins(
-                1,
-                1,
-                1,
-                1
-        );
-
-
-        textView.setLayoutParams(
-                params
-        );
-
+        textView.setLayoutParams(params);
 
         return textView;
     }
