@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+
     xmlns:tools="http://schemas.android.com/tools">
+
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -20,8 +22,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TechFix">
+
+        <!-- Admin Dashboard - TEMPORARY LAUNCHER FOR TESTING -->
+
         <activity
-            android:name=".MainActivity"
+            android:name=".admin.dashboard.AdminDashboardActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />
         <activity
@@ -71,7 +76,71 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ActorCustomer.CustomerData.DatabaseViewerActivity"
+            android:name=".ActorCustomer.CustomerData.DatabaseViewerActivity"/>
+
+        <!-- Main Activity -->
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".admin.spareparts.categories.ManageBranchesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".admin.branches.BranchFormActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.spareparts.categories.ManageCategoriesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".admin.spareparts.categories.CategoryFormActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.services.ManageServicesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".admin.services.ServiceFormActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.technicians.ManageTechniciansActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".admin.technicians.TechnicianFormActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.spareparts.ManageSparePartsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".admin.spareparts.SparePartFormActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.appoiments.ManageAppointmentsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".admin.appoiments.ManageAppointmentActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".admin.payments.ManagePaymentsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".admin.payments.ManagePaymentActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".admin.repairsamples.ManageRepairSamplesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".admin.repairsamples.AddEditRepairSampleActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>
