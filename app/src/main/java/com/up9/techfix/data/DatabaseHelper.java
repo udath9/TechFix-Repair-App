@@ -6,12 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.up9.techfix.admin.branches.Branch;
 import com.up9.techfix.admin.categories.DeviceCategory;
 import com.up9.techfix.admin.repairsamples.RepairSample;
 import com.up9.techfix.admin.services.RepairService;
 import com.up9.techfix.admin.spareparts.SparePart;
-import android.database.sqlite.SQLiteConstraintException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -1649,18 +1647,65 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // CUSTOMER BRANCHES
     // ============================================================
 
-    public Cursor getAllBranches() {
+    public List<Branch> getAllBranches() {
 
-        SQLiteDatabase db =
-                getReadableDatabase();
+        List<Branch> branchList = new ArrayList<>();
 
-        return db.rawQuery(
-                "SELECT id, name, address, phone, " +
-                        "latitude, longitude " +
-                        "FROM " + TABLE_BRANCHES +
-                        " ORDER BY id ASC",
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT id, name, address, phone, latitude, longitude " +
+                        "FROM branches " +
+                        "ORDER BY id ASC",
                 null
         );
+
+        try {
+
+            while (cursor.moveToNext()) {
+
+                int id = cursor.getInt(
+                        cursor.getColumnIndexOrThrow("id")
+                );
+
+                String name = cursor.getString(
+                        cursor.getColumnIndexOrThrow("name")
+                );
+
+                String address = cursor.getString(
+                        cursor.getColumnIndexOrThrow("address")
+                );
+
+                String phone = cursor.getString(
+                        cursor.getColumnIndexOrThrow("phone")
+                );
+
+                double latitude = cursor.getDouble(
+                        cursor.getColumnIndexOrThrow("latitude")
+                );
+
+                double longitude = cursor.getDouble(
+                        cursor.getColumnIndexOrThrow("longitude")
+                );
+
+                Branch branch = new Branch(
+                        id,
+                        name,
+                        address,
+                        phone,
+                        latitude,
+                        longitude
+                );
+
+                branchList.add(branch);
+            }
+
+        } finally {
+
+            cursor.close();
+        }
+
+        return branchList;
     }
 
 
@@ -1698,103 +1743,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    // ============================================================
-    // DEFAULT BRANCHES
-    // ============================================================
-
-    public void insertDefaultBranches() {
-
-        SQLiteDatabase db =
-                getWritableDatabase();
-
-        Cursor cursor =
-                db.rawQuery(
-                        "SELECT COUNT(*) FROM " +
-                                TABLE_BRANCHES,
-                        null
-                );
-
-        boolean empty = true;
-
-        if (cursor.moveToFirst()) {
-            empty = cursor.getInt(0) == 0;
-        }
-
-        cursor.close();
-
-        if (!empty) {
-            return;
-        }
-
-        insertBranch(
-                db,
-                "Colombo",
-                "TechFix Colombo Branch",
-                "0112345678",
-                6.9271,
-                79.8612
-        );
-
-        insertBranch(
-                db,
-                "Galle",
-                "TechFix Galle Branch",
-                "0912345678",
-                6.0329,
-                80.2168
-        );
-    }
-
-
-    private long insertBranch(
-            SQLiteDatabase db,
-            String name,
-            String address,
-            String phone,
-            double latitude,
-            double longitude
-    ) {
-
-        ContentValues values =
-                new ContentValues();
-
-        values.put(
-                COL_BRANCH_NAME,
-                name
-        );
-
-        values.put(
-                COL_BRANCH_ADDRESS,
-                address
-        );
-
-        values.put(
-                COL_BRANCH_PHONE,
-                phone
-        );
-
-        values.put(
-                COL_BRANCH_LATITUDE,
-                latitude
-        );
-
-        values.put(
-                COL_BRANCH_LONGITUDE,
-                longitude
-        );
-
-        return db.insert(
-                TABLE_BRANCHES,
-                null,
-                values
-        );
-    }
-
-
-    // ============================================================
-    // ADMIN BRANCH - INSERT
-    // ============================================================
-
     public long insertBranch(
             String name,
             String address,
@@ -1803,39 +1751,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             double longitude
     ) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = this.getWritableDatabase();
 
-        ContentValues values =
-                new ContentValues();
+        ContentValues values = new ContentValues();
 
-        values.put(
-                COL_BRANCH_NAME,
-                name
-        );
-
-        values.put(
-                COL_BRANCH_ADDRESS,
-                address
-        );
-
-        values.put(
-                COL_BRANCH_PHONE,
-                phone
-        );
-
-        values.put(
-                COL_BRANCH_LATITUDE,
-                latitude
-        );
-
-        values.put(
-                COL_BRANCH_LONGITUDE,
-                longitude
-        );
+        values.put("name", name);
+        values.put("address", address);
+        values.put("phone", phone);
+        values.put("latitude", latitude);
+        values.put("longitude", longitude);
 
         return db.insert(
-                TABLE_BRANCHES,
+                "branches",
                 null,
                 values
         );
@@ -1901,10 +1828,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    // ============================================================
-    // ADMIN BRANCH - UPDATE
-    // ============================================================
-
     public int updateBranch(
             int id,
             String name,
@@ -1914,39 +1837,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             double longitude
     ) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = this.getWritableDatabase();
 
-        ContentValues values =
-                new ContentValues();
+        ContentValues values = new ContentValues();
 
-        values.put(
-                COL_BRANCH_NAME,
-                name
-        );
-
-        values.put(
-                COL_BRANCH_ADDRESS,
-                address
-        );
-
-        values.put(
-                COL_BRANCH_PHONE,
-                phone
-        );
-
-        values.put(
-                COL_BRANCH_LATITUDE,
-                latitude
-        );
-
-        values.put(
-                COL_BRANCH_LONGITUDE,
-                longitude
-        );
+        values.put("name", name);
+        values.put("address", address);
+        values.put("phone", phone);
+        values.put("latitude", latitude);
+        values.put("longitude", longitude);
 
         return db.update(
-                TABLE_BRANCHES,
+                "branches",
                 values,
                 "id = ?",
                 new String[]{
@@ -1954,19 +1856,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
-
-
-    // ============================================================
-    // ADMIN BRANCH - DELETE
-    // ============================================================
-
     public int deleteBranch(int id) {
 
-        SQLiteDatabase db =
-                getWritableDatabase();
+        SQLiteDatabase db = this.getWritableDatabase();
 
         return db.delete(
-                TABLE_BRANCHES,
+                "branches",
                 "id = ?",
                 new String[]{
                         String.valueOf(id)

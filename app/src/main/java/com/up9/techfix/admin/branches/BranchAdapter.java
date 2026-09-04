@@ -1,4 +1,5 @@
 package com.up9.techfix.admin.branches;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,17 +10,24 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.up9.techfix.R;
+import com.up9.techfix.data.Branch;
 
 import java.util.List;
 
-public class BranchAdapter extends RecyclerView.Adapter<BranchAdapter.BranchViewHolder> {
+public class BranchAdapter
+        extends RecyclerView.Adapter<BranchAdapter.BranchViewHolder> {
 
     private final List<Branch> branchList;
     private final OnBranchActionListener listener;
 
     public interface OnBranchActionListener {
+
         void onEdit(Branch branch);
-        void onDelete(Branch branch, int position);
+
+        void onDelete(
+                Branch branch,
+                int position
+        );
     }
 
     public BranchAdapter(
@@ -38,8 +46,14 @@ public class BranchAdapter extends RecyclerView.Adapter<BranchAdapter.BranchView
             int viewType
     ) {
 
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_branch, parent, false);
+        View view =
+                LayoutInflater
+                        .from(parent.getContext())
+                        .inflate(
+                                R.layout.item_branch,
+                                parent,
+                                false
+                        );
 
         return new BranchViewHolder(view);
     }
@@ -50,9 +64,12 @@ public class BranchAdapter extends RecyclerView.Adapter<BranchAdapter.BranchView
             int position
     ) {
 
-        Branch branch = branchList.get(position);
+        Branch branch =
+                branchList.get(position);
 
-        holder.txtBranchName.setText(branch.getName());
+        holder.txtBranchName.setText(
+                branch.getName()
+        );
 
         holder.txtBranchAddress.setText(
                 branch.getAddress()
@@ -68,19 +85,22 @@ public class BranchAdapter extends RecyclerView.Adapter<BranchAdapter.BranchView
                         + branch.getLongitude()
         );
 
-        holder.btnEdit.setOnClickListener(v -> {
-
-            listener.onEdit(branch);
-
-        });
+        holder.btnEdit.setOnClickListener(v ->
+                listener.onEdit(branch)
+        );
 
         holder.btnDelete.setOnClickListener(v -> {
 
-            listener.onDelete(
-                    branch,
-                    holder.getAdapterPosition()
-            );
+            int adapterPosition =
+                    holder.getAdapterPosition();
 
+            if (adapterPosition != RecyclerView.NO_POSITION) {
+
+                listener.onDelete(
+                        branch,
+                        adapterPosition
+                );
+            }
         });
     }
 

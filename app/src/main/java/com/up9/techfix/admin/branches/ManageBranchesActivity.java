@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.up9.techfix.R;
+import com.up9.techfix.data.Branch;
 import com.up9.techfix.data.DatabaseHelper;
 
 import java.util.List;
@@ -21,11 +22,9 @@ public class ManageBranchesActivity extends AppCompatActivity
         implements BranchAdapter.OnBranchActionListener {
 
     private RecyclerView recyclerBranches;
-
     private Button btnAddBranch;
 
     private BranchAdapter branchAdapter;
-
     private List<Branch> branchList;
 
     private DatabaseHelper databaseHelper;
@@ -188,7 +187,7 @@ public class ManageBranchesActivity extends AppCompatActivity
     private void loadBranches() {
 
         branchList =
-                (List<Branch>) databaseHelper.getAllBranches();
+                databaseHelper.getAllBranches();
 
         branchAdapter =
                 new BranchAdapter(
