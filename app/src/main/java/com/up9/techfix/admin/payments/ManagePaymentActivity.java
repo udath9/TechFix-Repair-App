@@ -1,35 +1,46 @@
-package com.up9.techfix.admin.payments;
-import com.up9.techfix.R;
+ package com.up9.techfix.admin.payments;
 
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class ManagePaymentActivity
-        extends AppCompatActivity {
+import com.up9.techfix.R;
+import com.up9.techfix.data.DatabaseHelper;
+import com.up9.techfix.data.Payment;
+
+public class ManagePaymentActivity extends AppCompatActivity {
+
+    private static final String EXTRA_PAYMENT_ID = "paymentId";
+    private static final String EXTRA_REPAIR_ID = "repairId";
+    private static final String EXTRA_AMOUNT = "amount";
+    private static final String EXTRA_PAYMENT_DATE = "paymentDate";
+    private static final String EXTRA_STATUS = "status";
 
     private TextView txtPaymentCustomerDetails;
     private TextView txtPaymentAppointmentDetails;
 
     private EditText edtPaymentAmount;
+    private EditText edtPaymentDate;
 
-    private Spinner spinnerPaymentMethod;
     private Spinner spinnerPaymentStatus;
 
     private Button btnUpdatePayment;
 
-    private final String[] paymentMethods = {
-            "Cash",
-            "Card",
-            "Bank Transfer",
-            "Online Payment"
-    };
+    private DatabaseHelper databaseHelper;
+
+    private int paymentId = -1;
+    private int repairId = -1;
 
     private final String[] paymentStatuses = {
             "Pending",
@@ -37,6 +48,45 @@ public class ManagePaymentActivity
             "Failed",
             "Refunded"
     };
+
+    public static void start(
+            Context context,
+            Payment payment
+    ) {
+
+        Intent intent =
+                new Intent(
+                        context,
+                        ManagePaymentActivity.class
+                );
+
+        intent.putExtra(
+                EXTRA_PAYMENT_ID,
+                payment.getId()
+        );
+
+        intent.putExtra(
+                EXTRA_REPAIR_ID,
+                payment.getRepairId()
+        );
+
+        intent.putExtra(
+                EXTRA_AMOUNT,
+                payment.getAmount()
+        );
+
+        intent.putExtra(
+                EXTRA_PAYMENT_DATE,
+                payment.getPaymentDate()
+        );
+
+        intent.putExtra(
+                EXTRA_STATUS,
+                payment.getStatus()
+        );
+
+        context.startActivity(intent);
+    }
 
     @Override
     protected void onCreate(
@@ -48,6 +98,22 @@ public class ManagePaymentActivity
         setContentView(
                 R.layout.activity_manage_payment
         );
+
+        databaseHelper =
+                new DatabaseHelper(this);
+
+        initializeViews();
+
+        setupStatusSpinner();
+
+        loadPayment();
+
+        btnUpdatePayment.setOnClickListener(
+                v -> updatePayment()
+        );
+    }
+
+    private void initializeViews() {
 
         txtPaymentCustomerDetails =
                 findViewById(
@@ -64,9 +130,9 @@ public class ManagePaymentActivity
                         R.id.edtPaymentAmount
                 );
 
-        spinnerPaymentMethod =
+        edtPaymentDate =
                 findViewById(
-                        R.id.spinnerPaymentMethod
+                        R.id.edtPaymentDate
                 );
 
         spinnerPaymentStatus =
@@ -78,100 +144,192 @@ public class ManagePaymentActivity
                 findViewById(
                         R.id.btnUpdatePayment
                 );
-
-        setupSpinners();
-
-        loadPayment();
-
-        btnUpdatePayment.setOnClickListener(
-                v -> updatePayment()
-        );
     }
 
-    private void setupSpinners() {
-
-        setupSpinner(
-                spinnerPaymentMethod,
-                paymentMethods
-        );
-
-        setupSpinner(
-                spinnerPaymentStatus,
-                paymentStatuses
-        );
-    }
-
-    private void setupSpinner(
-            Spinner spinner,
-            String[] values
-    ) {
+    private void setupStatusSpinner() {
 
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(
                         this,
                         android.R.layout.simple_spinner_item,
-                        values
+                        paymentStatuses
                 );
 
         adapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item
         );
 
-        spinner.setAdapter(adapter);
+        spinnerPaymentStatus.setAdapter(
+                adapter
+        );
     }
 
     private void loadPayment() {
 
-        Intent intent = getIntent();
+        Intent intent =
+                getIntent();
 
-        String customer =
-                intent.getStringExtra(
-                        "customerName"
+        paymentId =
+                intent.getIntExtra(
+                        EXTRA_PAYMENT_ID,
+                        -1
                 );
 
-        int appointmentId =
+        repairId =
                 intent.getIntExtra(
-                        "appointmentId",
-                        0
+                        EXTRA_REPAIR_ID,
+                        -1
                 );
 
         double amount =
                 intent.getDoubleExtra(
-                        "amount",
-                        0
+                        EXTRA_AMOUNT,
+                        0.0
                 );
 
-        String method =
+        String paymentDate =
                 intent.getStringExtra(
-                        "method"
+                        EXTRA_PAYMENT_DATE
                 );
 
         String status =
                 intent.getStringExtra(
-                        "status"
+                        EXTRA_STATUS
                 );
 
-        txtPaymentCustomerDetails.setText(
-                "Customer: " + customer
-        );
+        loadRepairDetails();
 
         txtPaymentAppointmentDetails.setText(
-                "Appointment: #" + appointmentId
+                "Repair: #" +
+                        repairId +
+                        "\n\nPayment: #" +
+                        paymentId
         );
 
         edtPaymentAmount.setText(
                 String.valueOf(amount)
         );
 
-        setSpinnerValue(
-                spinnerPaymentMethod,
-                method
+        edtPaymentDate.setText(
+                safeText(paymentDate)
         );
 
         setSpinnerValue(
                 spinnerPaymentStatus,
                 status
         );
+    }
+
+    private void loadRepairDetails() {
+
+        if (repairId <= 0) {
+
+            txtPaymentCustomerDetails.setText(
+                    "Repair information not available."
+            );
+
+            return;
+        }
+
+        Cursor cursor = null;
+
+        try {
+
+            cursor =
+                    databaseHelper.getRepairById(
+                            repairId
+                    );
+
+            if (cursor != null &&
+                    cursor.moveToFirst()) {
+
+                String customerName =
+                        getCursorString(
+                                cursor,
+                                "customer_name"
+                        );
+
+                String deviceModel =
+                        getCursorString(
+                                cursor,
+                                "device_model"
+                        );
+
+                String serviceName =
+                        getCursorString(
+                                cursor,
+                                "service_name"
+                        );
+
+                String branchName =
+                        getCursorString(
+                                cursor,
+                                "branch_name"
+                        );
+
+                String details =
+                        "Customer: " +
+                                safeText(
+                                        customerName
+                                ) +
+
+                                "\n\nDevice: " +
+                                safeText(
+                                        deviceModel
+                                ) +
+
+                                "\n\nService: " +
+                                safeText(
+                                        serviceName
+                                ) +
+
+                                "\n\nBranch: " +
+                                safeText(
+                                        branchName
+                                );
+
+                txtPaymentCustomerDetails.setText(
+                        details
+                );
+
+            } else {
+
+                txtPaymentCustomerDetails.setText(
+                        "Repair information not found."
+                );
+            }
+
+        } catch (Exception e) {
+
+            txtPaymentCustomerDetails.setText(
+                    "Unable to load repair information."
+            );
+
+        } finally {
+
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    private String getCursorString(
+            Cursor cursor,
+            String columnName
+    ) {
+
+        int index =
+                cursor.getColumnIndex(
+                        columnName
+                );
+
+        if (index < 0 ||
+                cursor.isNull(index)) {
+
+            return "";
+        }
+
+        return cursor.getString(index);
     }
 
     private void setSpinnerValue(
@@ -187,19 +345,34 @@ public class ManagePaymentActivity
              i < spinner.getCount();
              i++) {
 
-            if (spinner
-                    .getItemAtPosition(i)
-                    .toString()
-                    .equals(value)) {
+            Object item =
+                    spinner.getItemAtPosition(i);
+
+            if (item != null &&
+                    item.toString()
+                            .equalsIgnoreCase(
+                                    value
+                            )) {
 
                 spinner.setSelection(i);
 
-                break;
+                return;
             }
         }
     }
 
     private void updatePayment() {
+
+        if (paymentId <= 0) {
+
+            Toast.makeText(
+                    this,
+                    "Invalid payment ID.",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            return;
+        }
 
         String amountText =
                 edtPaymentAmount
@@ -233,6 +406,8 @@ public class ManagePaymentActivity
                     "Enter a valid amount"
             );
 
+            edtPaymentAmount.requestFocus();
+
             return;
         }
 
@@ -242,42 +417,123 @@ public class ManagePaymentActivity
                     "Amount cannot be negative"
             );
 
+            edtPaymentAmount.requestFocus();
+
             return;
         }
 
-        String method =
-                spinnerPaymentMethod
-                        .getSelectedItem()
-                        .toString();
+        String paymentDate =
+                edtPaymentDate
+                        .getText()
+                        .toString()
+                        .trim();
+
+        if (paymentDate.isEmpty()) {
+
+            edtPaymentDate.setError(
+                    "Enter payment date"
+            );
+
+            edtPaymentDate.requestFocus();
+
+            return;
+        }
 
         String status =
                 spinnerPaymentStatus
                         .getSelectedItem()
                         .toString();
 
-        Intent result =
-                new Intent();
+        SQLiteDatabase db =
+                databaseHelper
+                        .getWritableDatabase();
 
-        result.putExtra(
-                "amount",
+        ContentValues values =
+                new ContentValues();
+
+        values.put(
+                DatabaseHelper.COL_PAYMENT_AMOUNT,
                 amount
         );
 
-        result.putExtra(
-                "method",
-                method
+        values.put(
+                DatabaseHelper.COL_PAYMENT_DATE,
+                paymentDate
         );
 
-        result.putExtra(
-                "status",
+        values.put(
+                DatabaseHelper.COL_PAYMENT_STATUS,
                 status
         );
 
-        setResult(
-                RESULT_OK,
-                result
-        );
+        try {
 
-        finish();
+            int updated =
+                    db.update(
+                            DatabaseHelper.TABLE_PAYMENTS,
+                            values,
+                            DatabaseHelper.COL_PAYMENT_ID +
+                                    " = ?",
+                            new String[]{
+                                    String.valueOf(
+                                            paymentId
+                                    )
+                            }
+                    );
+
+            if (updated > 0) {
+
+                Toast.makeText(
+                        this,
+                        "Payment updated successfully.",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                setResult(
+                        RESULT_OK
+                );
+
+                finish();
+
+            } else {
+
+                Toast.makeText(
+                        this,
+                        "Payment record not found.",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+
+        } catch (Exception e) {
+
+            Toast.makeText(
+                    this,
+                    "Unable to update payment.",
+                    Toast.LENGTH_LONG
+            ).show();
+        }
+    }
+
+    private String safeText(
+            String value
+    ) {
+
+        if (value == null ||
+                value.trim().isEmpty()) {
+
+            return "Not available";
+        }
+
+        return value;
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        if (databaseHelper != null) {
+            databaseHelper.close();
+        }
+
+        super.onDestroy();
     }
 }

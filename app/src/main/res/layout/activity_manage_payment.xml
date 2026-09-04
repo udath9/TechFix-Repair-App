@@ -25,7 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"
-            android:text="Customer: Nimal Perera"
+            android:text="Customer information"
             android:textColor="#333333"
             android:textSize="16sp" />
 
@@ -33,10 +33,12 @@
             android:id="@+id/txtPaymentAppointmentDetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="Appointment: #1001"
+            android:layout_marginTop="15dp"
+            android:text="Repair information"
             android:textColor="#333333"
             android:textSize="16sp" />
+
+        <!-- Amount -->
 
         <TextView
             android:layout_width="match_parent"
@@ -51,22 +53,30 @@
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:layout_marginTop="8dp"
+            android:hint="Enter amount"
             android:inputType="numberDecimal"
             android:padding="12dp" />
+
+        <!-- Payment Date -->
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:text="Payment Method"
+            android:text="Payment Date"
             android:textColor="#333333"
             android:textStyle="bold" />
 
-        <Spinner
-            android:id="@+id/spinnerPaymentMethod"
+        <EditText
+            android:id="@+id/edtPaymentDate"
             android:layout_width="match_parent"
             android:layout_height="55dp"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:hint="Payment date"
+            android:inputType="text"
+            android:padding="12dp" />
+
+        <!-- Payment Status -->
 
         <TextView
             android:layout_width="match_parent"
@@ -81,6 +91,8 @@
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:layout_marginTop="8dp" />
+
+        <!-- Update Button -->
 
         <Button
             android:id="@+id/btnUpdatePayment"

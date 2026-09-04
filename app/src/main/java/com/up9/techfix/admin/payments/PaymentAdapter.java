@@ -1,4 +1,5 @@
 package com.up9.techfix.admin.payments;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,14 +10,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.up9.techfix.R;
+import com.up9.techfix.data.Payment;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class PaymentAdapter
         extends RecyclerView.Adapter<PaymentAdapter.PaymentViewHolder> {
 
     private final List<Payment> paymentList;
-
     private final OnPaymentActionListener listener;
 
     public interface OnPaymentActionListener {
@@ -60,51 +64,124 @@ public class PaymentAdapter
         Payment payment =
                 paymentList.get(position);
 
+
+
         holder.txtPaymentReference.setText(
                 "Payment #" +
-                        payment.getPaymentReference()
+                        payment.getId()
         );
+
 
         holder.txtPaymentCustomer.setText(
                 "Customer: " +
-                        payment.getCustomerName()
+                        safeText(
+                                payment.getCustomerName()
+                        )
         );
 
+
         holder.txtPaymentAppointment.setText(
-                "Appointment: #" +
-                        payment.getAppointmentId()
+                "Repair: #" +
+                        payment.getRepairId()
         );
 
         holder.txtPaymentAmount.setText(
                 String.format(
-                        "Amount: Rs. %.2f",
+                        Locale.getDefault(),
+                        "Amount: LKR %,.2f",
                         payment.getAmount()
                 )
         );
 
         holder.txtPaymentMethod.setText(
-                "Method: " +
-                        payment.getPaymentMethod()
+                "Service: " +
+                        safeText(
+                                payment.getServiceName()
+                        )
         );
+
 
         holder.txtPaymentDate.setText(
                 "Date: " +
-                        payment.getPaymentDate()
+                        formatPaymentDate(
+                                payment.getPaymentDate()
+                        )
         );
 
+
         holder.txtPaymentStatus.setText(
-                payment.getPaymentStatus()
+                "Status: " +
+                        safeText(
+                                payment.getStatus()
+                        )
         );
 
         holder.btnManagePayment.setOnClickListener(
-                v -> listener.onManage(payment)
+                v -> {
+
+                    if (listener != null) {
+
+                        listener.onManage(
+                                payment
+                        );
+                    }
+                }
         );
+    }
+
+
+    private String safeText(
+            String value
+    ) {
+
+        if (value == null ||
+                value.trim().isEmpty()) {
+
+            return "Not available";
+        }
+
+        return value;
+    }
+
+    private String formatPaymentDate(
+            String dateValue
+    ) {
+
+        if (dateValue == null ||
+                dateValue.trim().isEmpty()) {
+
+            return "Unknown";
+        }
+
+        try {
+
+            long timestamp =
+                    Long.parseLong(
+                            dateValue
+                    );
+
+            SimpleDateFormat formatter =
+                    new SimpleDateFormat(
+                            "dd MMMM yyyy",
+                            Locale.getDefault()
+                    );
+
+            return formatter.format(
+                    new Date(timestamp)
+            );
+
+        } catch (Exception e) {
+
+            return dateValue;
+        }
     }
 
     @Override
     public int getItemCount() {
 
-        return paymentList.size();
+        return paymentList == null
+                ? 0
+                : paymentList.size();
     }
 
     public static class PaymentViewHolder

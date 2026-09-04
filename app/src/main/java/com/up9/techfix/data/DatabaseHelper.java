@@ -20,10 +20,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "TechFix.db";
     private static final int DATABASE_VERSION = 12;
 
-    // =====================================================
     // TABLE NAMES
-    // =====================================================
-
     public static final String TABLE_CUSTOMERS = "customers";
     public static final String TABLE_BRANCHES = "branches";
     public static final String TABLE_CATEGORIES = "categories";
@@ -34,10 +31,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TABLE_SPARE_PARTS = "spare_parts";
     public static final String TABLE_USERS = "users";
 
-    // =====================================================
     // USERS / AUTHENTICATION
-    // =====================================================
-
     public static final String COL_USER_ID = "id";
     public static final String COL_USER_FULL_NAME = "full_name";
     public static final String COL_USER_EMAIL = "email";
@@ -45,20 +39,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_USER_PASSWORD = "password";
     public static final String COL_USER_ROLE = "role";
 
-    // =====================================================
     // CUSTOMER COLUMNS
-    // =====================================================
-
     public static final String COL_CUSTOMER_ID = "id";
     public static final String COL_CUSTOMER_FULL_NAME = "full_name";
     public static final String COL_CUSTOMER_EMAIL = "email";
     public static final String COL_CUSTOMER_PHONE = "phone";
     public static final String COL_CUSTOMER_PASSWORD = "password";
 
-    // =====================================================
     // BRANCH COLUMNS
-    // =====================================================
-
     public static final String COL_BRANCH_ID = "id";
     public static final String COL_BRANCH_NAME = "name";
     public static final String COL_BRANCH_ADDRESS = "address";
@@ -66,19 +54,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_BRANCH_LATITUDE = "latitude";
     public static final String COL_BRANCH_LONGITUDE = "longitude";
 
-    // =====================================================
     // CATEGORY COLUMNS
-    // =====================================================
-
     public static final String COL_CATEGORY_ID = "id";
     public static final String COL_CATEGORY_NAME = "name";
     public static final String COL_CATEGORY_DESCRIPTION = "description";
     public static final String COL_CATEGORY_PRICE_MODIFIER = "price_modifier";
 
-    // =====================================================
-    // SERVICE COLUMNS
-    // =====================================================
 
+    // SERVICE COLUMNS
     public static final String COL_SERVICE_ID = "id";
     public static final String COL_SERVICE_NAME = "name";
     public static final String COL_SERVICE_IMAGE_URI = "image_uri";
@@ -86,10 +69,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_SERVICE_PRICE = "price";
     public static final String COL_SERVICE_ESTIMATED_DAYS = "estimated_days";
 
-    // =====================================================
-    // REPAIR SAMPLE COLUMNS
-    // =====================================================
 
+    // REPAIR SAMPLE COLUMNS
     public static final String COL_SAMPLE_ID = "id";
     public static final String COL_SAMPLE_DEVICE_NAME = "device_name";
     public static final String COL_SAMPLE_CATEGORY = "category";
@@ -97,10 +78,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_SAMPLE_DESCRIPTION = "description";
     public static final String COL_SAMPLE_IMAGE_URI = "image_uri";
 
-    // =====================================================
-    // SPARE PART COLUMNS
-    // =====================================================
 
+    // SPARE PART
     public static final String COL_SPARE_PART_ID = "id";
     public static final String COL_SPARE_PART_NAME = "name";
     public static final String COL_SPARE_PART_CATEGORY = "category";
@@ -112,10 +91,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_SPARE_PART_DESCRIPTION = "description";
     public static final String COL_SPARE_PART_IMAGE_URI = "image_uri";
 
-    // =====================================================
-    // REPAIR COLUMNS
-    // =====================================================
 
+    // REPAIR COLUMNS
     public static final String COL_REPAIR_ID = "id";
     public static final String COL_REPAIR_CUSTOMER_ID = "customer_id";
     public static final String COL_REPAIR_CATEGORY_ID = "category_id";
@@ -135,19 +112,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_REPAIR_DATE = "repair_date";
     public static final String COL_FINAL_PRICE = "final_price";
 
-    // =====================================================
-    // PAYMENT COLUMNS
-    // =====================================================
 
+    // PAYMENT COLUMNS
     public static final String COL_PAYMENT_ID = "id";
     public static final String COL_PAYMENT_REPAIR_ID = "repair_id";
     public static final String COL_PAYMENT_AMOUNT = "amount";
     public static final String COL_PAYMENT_DATE = "payment_date";
     public static final String COL_PAYMENT_STATUS = "status";
 
-    // =====================================================
     // CONSTRUCTOR
-    // =====================================================
 
     public DatabaseHelper(Context context) {
         super(
@@ -157,10 +130,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 DATABASE_VERSION
         );
     }
-
-    // =====================================================
-    // ON CREATE
-    // =====================================================
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -178,10 +147,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         insertDefaultAdmin(db);
         insertDefaultTechnician(db);
     }
-
-    // =====================================================
-    // ON UPGRADE
-    // =====================================================
 
     @Override
     public void onUpgrade(
@@ -320,10 +285,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         insertDefaultTechnician(db);
     }
 
-    // =====================================================
-    // CREATE USERS TABLE
-    // =====================================================
-
     private void createUsersTable(SQLiteDatabase db) {
 
         db.execSQL(
@@ -339,11 +300,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         ")"
         );
     }
-
-    // =====================================================
-    // CREATE CUSTOMERS TABLE
-    // =====================================================
-
     private void createCustomersTable(SQLiteDatabase db) {
 
         db.execSQL(
@@ -358,10 +314,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         ")"
         );
     }
-
-    // =====================================================
-    // CREATE BRANCHES TABLE
-    // =====================================================
 
     private void createBranchesTable(SQLiteDatabase db) {
 
@@ -378,11 +330,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         ")"
         );
     }
-
-    // =====================================================
-    // CREATE CATEGORIES TABLE
-    // =====================================================
-
     private void createCategoriesTable(SQLiteDatabase db) {
 
         db.execSQL(
@@ -396,10 +343,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         ")"
         );
     }
-
-    // =====================================================
-    // CREATE SERVICES TABLE
-    // =====================================================
 
     private void createServicesTable(SQLiteDatabase db) {
 
@@ -417,9 +360,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    // =====================================================
-    // CREATE REPAIR SAMPLES TABLE
-    // =====================================================
 
     private void createRepairSamplesTable(SQLiteDatabase db) {
 
@@ -437,9 +377,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    // =====================================================
-    // CREATE SPARE PARTS TABLE
-    // =====================================================
 
     private void createSparePartsTable(SQLiteDatabase db) {
 
@@ -461,9 +398,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    // =====================================================
-    // CREATE REPAIRS TABLE
-    // =====================================================
 
     private void createRepairsTable(SQLiteDatabase db) {
 
@@ -489,10 +423,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    // =====================================================
-    // CREATE PAYMENTS TABLE
-    // =====================================================
-
     private void createPaymentsTable(SQLiteDatabase db) {
 
         db.execSQL(
@@ -507,10 +437,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         ")"
         );
     }
-
-    // =====================================================
-    // COLUMN EXISTS
-    // =====================================================
 
     private boolean columnExists(
             SQLiteDatabase db,
@@ -542,10 +468,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return exists;
     }
-
-    // =====================================================
-    // LOGIN USER MODEL
-    // =====================================================
 
     public static class LoginUser {
 
@@ -591,10 +513,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    // =====================================================
-    // LOGIN - ALL ROLES
-    // =====================================================
-
     public LoginUser loginUser(
             String email,
             String password
@@ -637,11 +555,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return user;
     }
-
-    // =====================================================
-    // CUSTOMER REGISTRATION
-    // =====================================================
-
     public long registerCustomer(
             String fullName,
             String email,
@@ -769,10 +682,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    // =====================================================
-    // CUSTOMER LOGIN
-    // =====================================================
-
     public boolean checkCustomerLogin(
             String email,
             String password
@@ -789,11 +698,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         user.getRole()
                 );
     }
-
-    // =====================================================
-    // DEFAULT ADMIN
-    // =====================================================
-
     private void insertDefaultAdmin(SQLiteDatabase db) {
 
         Cursor cursor = db.rawQuery(
@@ -848,11 +752,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 values
         );
     }
-
-    // =====================================================
-    // DEFAULT TECHNICIAN
-    // =====================================================
-
     private void insertDefaultTechnician(SQLiteDatabase db) {
 
         Cursor cursor = db.rawQuery(
@@ -907,11 +806,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 values
         );
     }
-
-    // =====================================================
-    // GET CUSTOMER ID
-    // =====================================================
-
     public int getCustomerId(
             String email,
             String password
@@ -977,11 +871,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return customerId;
     }
-
-    // =====================================================
-    // SERVICES
-    // =====================================================
-
     public List<Service> getAllServices() {
 
         List<Service> serviceList =
@@ -1136,10 +1025,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
-
-    // =====================================================
-    // CATEGORIES
-    // =====================================================
 
     public long insertCategory(
             String name,
@@ -1356,11 +1241,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
-
-    // =====================================================
-    // BRANCHES
-    // =====================================================
-
     public List<Branch> getAllBranches() {
 
         List<Branch> branchList =
@@ -1616,10 +1496,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    // =====================================================
-    // REPAIR SAMPLES
-    // =====================================================
-
     public long insertRepairSample(
             String deviceName,
             String category,
@@ -1792,11 +1668,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
-
-    // =====================================================
-    // SPARE PARTS
-    // =====================================================
-
     public long insertSparePart(
             String name,
             String category,
@@ -2126,28 +1997,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return getLowStockSpareParts();
     }
-
-    // =====================================================
-    // CREATE REPAIR
-    // =====================================================
     public Cursor getAllTechnicians() {
 
         SQLiteDatabase db =
                 getReadableDatabase();
 
-        return db.query(
-                "technicians",
+        return db.rawQuery(
+                "SELECT " +
+                        "id, " +
+                        "full_name, " +
+                        "phone, " +
+                        "email " +
+                        "FROM " +
+                        TABLE_USERS +
+                        " WHERE role = ? " +
+                        "ORDER BY full_name ASC",
                 new String[]{
-                        "id",
-                        "name"
-                },
-                null,
-                null,
-                null,
-                null,
-                "name ASC"
+                        "TECHNICIAN"
+                }
         );
     }
+
     public long createRepair(
             int customerId,
             int categoryId,
@@ -2243,11 +2113,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 values
         );
     }
-
-    // =====================================================
-    // CUSTOMER REPAIRS
-    // =====================================================
-
     public Cursor getCustomerRepairs(
             int customerId
     ) {
@@ -2295,11 +2160,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
-
-    // =====================================================
-    // CUSTOMER REPAIR BY ID
-    // =====================================================
-
     public Cursor getRepairById(
             int repairId,
             int customerId
@@ -2345,6 +2205,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
+
     public boolean updateRepair(
             int repairId,
             int branchId,
@@ -2360,36 +2221,50 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values =
                 new ContentValues();
 
+
         values.put(
-                "branch_id",
+                COL_REPAIR_BRANCH_ID,
                 branchId
         );
 
-        values.put(
-                "technician_id",
-                technicianId
-        );
+
+        if (technicianId > 0) {
+
+            values.put(
+                    COL_REPAIR_ASSIGNED_TECHNICIAN_ID,
+                    technicianId
+            );
+
+            values.put(
+                    COL_REPAIR_TECHNICIAN_NAME,
+                    technicianName
+            );
+
+        } else {
+
+            values.putNull(
+                    COL_REPAIR_ASSIGNED_TECHNICIAN_ID
+            );
+
+            values.putNull(
+                    COL_REPAIR_TECHNICIAN_NAME
+            );
+        }
 
         values.put(
-                "technician_name",
-                technicianName
-        );
-
-        values.put(
-                "status",
+                COL_REPAIR_STATUS,
                 status
         );
-
         values.put(
-                "final_price",
+                COL_FINAL_PRICE,
                 finalPrice
         );
 
         int rows =
                 db.update(
-                        "repairs",
+                        TABLE_REPAIRS,
                         values,
-                        "id = ?",
+                        COL_REPAIR_ID + " = ?",
                         new String[]{
                                 String.valueOf(repairId)
                         }
@@ -2397,10 +2272,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return rows > 0;
     }
-
-    // =====================================================
-    // CANCEL REPAIR
-    // =====================================================
 
     public boolean cancelRepair(
             int repairId,
@@ -2434,10 +2305,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return rows > 0;
     }
-
-    // =====================================================
-    // GET ALL REPAIRS
-    // =====================================================
 
     public Cursor getAllRepairs() {
 
@@ -2487,10 +2354,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 null
         );
     }
-// ============================================================
-// ADMIN - GET ALL REPAIRS AS LIST
-// ============================================================
-
     public List<com.up9.techfix.admin.appoiments.RepairAppointment>
     getAllRepairAppointments() {
 
@@ -2742,10 +2605,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return list;
     }
-    // =====================================================
-    // GET REPAIR BY ID - ADMIN
-    // =====================================================
-
     public Cursor getRepairById(
             int repairId
     ) {
@@ -2800,10 +2659,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    // =====================================================
-    // UPDATE REPAIR STATUS
-    // =====================================================
-
     public boolean updateRepairStatus(
             int repairId,
             String status
@@ -2832,10 +2687,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return rows > 0;
     }
-    // =====================================================
-// CUSTOMER ACTIVE REPAIRS
-// =====================================================
-
     public Cursor getCustomerActiveRepairs(int customerId) {
 
         SQLiteDatabase db = getReadableDatabase();
@@ -2879,10 +2730,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    // =====================================================
-    // ASSIGN TECHNICIAN
-    // =====================================================
-
     public boolean assignTechnician(
             int repairId,
             int technicianId,
@@ -2923,10 +2770,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return rows > 0;
     }
 
-    // =====================================================
-    // ASSIGN TECHNICIAN - ID ONLY
-    // =====================================================
-
     public int assignTechnician(
             int repairId,
             int technicianId
@@ -2952,10 +2795,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
-
-    // =====================================================
-    // UPDATE FINAL PRICE
-    // =====================================================
 
     public boolean updateRepairFinalPrice(
             int repairId,
@@ -2985,10 +2824,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return rows > 0;
     }
-
-    // =====================================================
-    // GET PENDING REPAIRS
-    // =====================================================
 
     public Cursor getPendingRepairs() {
 
@@ -3027,10 +2862,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    // =====================================================
-    // REPAIR COUNT BY STATUS
-    // =====================================================
-
     public int getRepairCountByStatus(
             String status
     ) {
@@ -3059,11 +2890,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return count;
     }
-
-    // =====================================================
-    // REPAIR HISTORY
-    // =====================================================
-
     public Cursor getRepairHistory(
             int customerId
     ) {
@@ -3107,11 +2933,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
-
-    // =====================================================
-    // UNPAID REPAIRS
-    // =====================================================
-
     public Cursor getUnpaidRepairs(
             int customerId
     ) {
@@ -3163,10 +2984,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    // =====================================================
-    // PAYMENT HISTORY
-    // =====================================================
-
     public Cursor getPaymentHistory(
             int customerId
     ) {
@@ -3203,10 +3020,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
-
-    // =====================================================
-    // CREATE PAYMENT
-    // =====================================================
 
     public long createPayment(
             int repairId,
@@ -3248,10 +3061,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    // =====================================================
-    // UPDATE REPAIR IN-PROGRESS PHOTO
-    // =====================================================
-
     public int updateRepairInProgressPhoto(
             int repairId,
             String imageUri
@@ -3286,11 +3095,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
-
-    // =====================================================
-    // DASHBOARD - TOTAL REPAIRS
-    // =====================================================
-
     public int getTotalRepairs() {
 
         SQLiteDatabase db =
@@ -3313,16 +3117,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return count;
     }
-
-    // =====================================================
-    // DASHBOARD - PENDING REPAIRS
-    // =====================================================
-
-
-
-    // =====================================================
-    // CUSTOMERS
-    // =====================================================
 
     public Cursor getAllCustomers() {
 
@@ -3356,10 +3150,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
-
-    // =====================================================
-    // CLOSE DATABASE
-    // =====================================================
 
     @Override
     public synchronized void close() {

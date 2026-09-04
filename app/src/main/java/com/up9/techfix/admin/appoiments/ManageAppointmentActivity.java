@@ -1,5 +1,6 @@
 package com.up9.techfix.admin.appoiments;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -18,17 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class ManageAppointmentActivity extends AppCompatActivity {
-
-    // ============================================================
-    // DATABASE
-    // ============================================================
-
+public class ManageAppointmentActivity
+        extends AppCompatActivity {
     private DatabaseHelper databaseHelper;
-
-    // ============================================================
-    // VIEWS
-    // ============================================================
 
     private TextView txtManageCustomer;
     private TextView txtManageDevice;
@@ -42,10 +35,6 @@ public class ManageAppointmentActivity extends AppCompatActivity {
 
     private Button btnUpdateAppointment;
 
-    // ============================================================
-    // APPOINTMENT DATA
-    // ============================================================
-
     private int repairId = -1;
 
     private String customerName;
@@ -58,11 +47,6 @@ public class ManageAppointmentActivity extends AppCompatActivity {
 
     private String currentStatus;
     private double currentPrice = 0.0;
-
-    // ============================================================
-    // BRANCH LIST
-    // ============================================================
-
     private final List<Branch> branchList =
             new ArrayList<>();
 
@@ -71,35 +55,11 @@ public class ManageAppointmentActivity extends AppCompatActivity {
 
     private final List<String> branchNames =
             new ArrayList<>();
-
-    // ============================================================
-    // TECHNICIAN LIST
-    // ============================================================
-    /*
-     * Your current DatabaseHelper does not expose a
-     * getAllTechnicians() method.
-     *
-     * Therefore we do NOT call a non-existing method.
-     *
-     * We use the technician information already attached
-     * to the repair.
-     *
-     * The current technician is placed into the Spinner.
-     *
-     * When you later add getAllTechnicians() to DatabaseHelper,
-     * this section can be expanded to show every technician.
-     */
-
     private final List<Integer> technicianIds =
             new ArrayList<>();
 
     private final List<String> technicianNames =
             new ArrayList<>();
-
-    // ============================================================
-    // STATUS LIST
-    // ============================================================
-
     private final String[] statuses = {
 
             "Pending",
@@ -111,11 +71,6 @@ public class ManageAppointmentActivity extends AppCompatActivity {
             "Completed",
             "Cancelled"
     };
-
-    // ============================================================
-    // ON CREATE
-    // ============================================================
-
     @Override
     protected void onCreate(
             Bundle savedInstanceState
@@ -127,30 +82,14 @@ public class ManageAppointmentActivity extends AppCompatActivity {
                 R.layout.activity_manage_appointment
         );
 
-        // --------------------------------------------------------
-        // DATABASE
-        // --------------------------------------------------------
-
         databaseHelper =
                 new DatabaseHelper(this);
 
-        // --------------------------------------------------------
-        // INITIALIZE VIEWS
-        // --------------------------------------------------------
-
         initializeViews();
-
-        // --------------------------------------------------------
-        // GET DATA FROM ManageAppointmentsActivity
-        // --------------------------------------------------------
 
         readAppointmentData();
 
-        // --------------------------------------------------------
-        // VALIDATE REPAIR ID
-        // --------------------------------------------------------
-
-        if (repairId == -1) {
+        if (repairId <= 0) {
 
             Toast.makeText(
                     this,
@@ -163,43 +102,18 @@ public class ManageAppointmentActivity extends AppCompatActivity {
             return;
         }
 
-        // --------------------------------------------------------
-        // DISPLAY APPOINTMENT
-        // --------------------------------------------------------
-
         displayAppointment();
-
-        // --------------------------------------------------------
-        // LOAD BRANCHES
-        // --------------------------------------------------------
 
         loadBranches();
 
-        // --------------------------------------------------------
-        // LOAD TECHNICIAN
-        // --------------------------------------------------------
-
-        loadTechnician();
-
-        // --------------------------------------------------------
-        // LOAD STATUS
-        // --------------------------------------------------------
+        loadTechnicians();
 
         setupStatusSpinner();
-
-        // --------------------------------------------------------
-        // UPDATE BUTTON
-        // --------------------------------------------------------
 
         btnUpdateAppointment.setOnClickListener(
                 v -> updateAppointment()
         );
     }
-
-    // ============================================================
-    // INITIALIZE VIEWS
-    // ============================================================
-
     private void initializeViews() {
 
         txtManageCustomer =
@@ -243,10 +157,6 @@ public class ManageAppointmentActivity extends AppCompatActivity {
                 );
     }
 
-    // ============================================================
-    // READ APPOINTMENT DATA
-    // ============================================================
-
     private void readAppointmentData() {
 
         repairId =
@@ -260,20 +170,48 @@ public class ManageAppointmentActivity extends AppCompatActivity {
                         "customerName"
                 );
 
+        /*
+         * Support both old and new extra names.
+         */
+
         deviceModel =
                 getIntent().getStringExtra(
                         "deviceModel"
                 );
+
+        if (deviceModel == null) {
+
+            deviceModel =
+                    getIntent().getStringExtra(
+                            "device"
+                    );
+        }
 
         serviceName =
                 getIntent().getStringExtra(
                         "serviceName"
                 );
 
+        if (serviceName == null) {
+
+            serviceName =
+                    getIntent().getStringExtra(
+                            "service"
+                    );
+        }
+
         currentBranchName =
                 getIntent().getStringExtra(
                         "branchName"
                 );
+
+        if (currentBranchName == null) {
+
+            currentBranchName =
+                    getIntent().getStringExtra(
+                            "branch"
+                    );
+        }
 
         currentTechnicianId =
                 getIntent().getIntExtra(
@@ -286,6 +224,14 @@ public class ManageAppointmentActivity extends AppCompatActivity {
                         "technicianName"
                 );
 
+        if (currentTechnicianName == null) {
+
+            currentTechnicianName =
+                    getIntent().getStringExtra(
+                            "technician"
+                    );
+        }
+
         currentStatus =
                 getIntent().getStringExtra(
                         "status"
@@ -294,54 +240,46 @@ public class ManageAppointmentActivity extends AppCompatActivity {
         currentPrice =
                 getIntent().getDoubleExtra(
                         "finalPrice",
-                        0.0
+                        getIntent().getDoubleExtra(
+                                "price",
+                                0.0
+                        )
+                );
+        customerName =
+                safeTextOrDefault(
+                        customerName,
+                        "Unknown Customer"
                 );
 
-        // --------------------------------------------------------
-        // SAFETY DEFAULTS
-        // --------------------------------------------------------
+        deviceModel =
+                safeTextOrDefault(
+                        deviceModel,
+                        "Unknown Device"
+                );
 
-        if (customerName == null ||
-                customerName.trim().isEmpty()) {
+        serviceName =
+                safeTextOrDefault(
+                        serviceName,
+                        "Repair Service"
+                );
 
-            customerName =
-                    "Unknown Customer";
-        }
+        currentBranchName =
+                safeTextOrDefault(
+                        currentBranchName,
+                        "Not Assigned"
+                );
 
-        if (deviceModel == null ||
-                deviceModel.trim().isEmpty()) {
+        currentTechnicianName =
+                safeTextOrDefault(
+                        currentTechnicianName,
+                        "Not Assigned"
+                );
 
-            deviceModel =
-                    "Unknown Device";
-        }
-
-        if (serviceName == null ||
-                serviceName.trim().isEmpty()) {
-
-            serviceName =
-                    "Repair Service";
-        }
-
-        if (currentBranchName == null ||
-                currentBranchName.trim().isEmpty()) {
-
-            currentBranchName =
-                    "Not Assigned";
-        }
-
-        if (currentTechnicianName == null ||
-                currentTechnicianName.trim().isEmpty()) {
-
-            currentTechnicianName =
-                    "Not Assigned";
-        }
-
-        if (currentStatus == null ||
-                currentStatus.trim().isEmpty()) {
-
-            currentStatus =
-                    "Pending";
-        }
+        currentStatus =
+                safeTextOrDefault(
+                        currentStatus,
+                        "Pending"
+                );
 
         if ("Ready for Collection"
                 .equalsIgnoreCase(currentStatus)) {
@@ -350,18 +288,13 @@ public class ManageAppointmentActivity extends AppCompatActivity {
                     "Ready for Pickup";
         }
     }
-
-    // ============================================================
-    // DISPLAY APPOINTMENT
-    // ============================================================
-
     private void displayAppointment() {
 
         txtManageCustomer.setText(
                 String.format(
                         Locale.getDefault(),
                         "Customer: %s",
-                        safeText(customerName)
+                        customerName
                 )
         );
 
@@ -369,7 +302,7 @@ public class ManageAppointmentActivity extends AppCompatActivity {
                 String.format(
                         Locale.getDefault(),
                         "Device: %s",
-                        safeText(deviceModel)
+                        deviceModel
                 )
         );
 
@@ -377,7 +310,7 @@ public class ManageAppointmentActivity extends AppCompatActivity {
                 String.format(
                         Locale.getDefault(),
                         "Service: %s",
-                        safeText(serviceName)
+                        serviceName
                 )
         );
 
@@ -390,24 +323,11 @@ public class ManageAppointmentActivity extends AppCompatActivity {
         );
     }
 
-    // ============================================================
-    // LOAD BRANCHES
-    // ============================================================
-
     private void loadBranches() {
 
         branchList.clear();
         branchIds.clear();
         branchNames.clear();
-
-        /*
-         * IMPORTANT:
-         *
-         * DatabaseHelper.getAllBranches()
-         * returns List<Branch>.
-         *
-         * Therefore NO Cursor is used here.
-         */
 
         List<Branch> databaseBranches =
                 databaseHelper.getAllBranches();
@@ -419,11 +339,8 @@ public class ManageAppointmentActivity extends AppCompatActivity {
             );
         }
 
-        // --------------------------------------------------------
-        // Convert Branch objects into Spinner data
-        // --------------------------------------------------------
-
-        for (Branch branch : branchList) {
+        for (Branch branch :
+                branchList) {
 
             if (branch == null) {
                 continue;
@@ -434,15 +351,12 @@ public class ManageAppointmentActivity extends AppCompatActivity {
             );
 
             branchNames.add(
-                    safeText(
-                            branch.getName()
+                    safeTextOrDefault(
+                            branch.getName(),
+                            "Unknown Branch"
                     )
             );
         }
-
-        // --------------------------------------------------------
-        // CREATE SPINNER ADAPTER
-        // --------------------------------------------------------
 
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(
@@ -459,19 +373,10 @@ public class ManageAppointmentActivity extends AppCompatActivity {
                 adapter
         );
 
-        // --------------------------------------------------------
-        // SELECT CURRENT BRANCH
-        // --------------------------------------------------------
-
         selectBranch(
                 currentBranchName
         );
     }
-
-    // ============================================================
-    // SELECT CURRENT BRANCH
-    // ============================================================
-
     private void selectBranch(
             String branchName
     ) {
@@ -497,54 +402,72 @@ public class ManageAppointmentActivity extends AppCompatActivity {
         }
     }
 
-    // ============================================================
-    // LOAD TECHNICIAN
-    // ============================================================
-
-    private void loadTechnician() {
+    private void loadTechnicians() {
 
         technicianIds.clear();
         technicianNames.clear();
 
-        /*
-         * The current DatabaseHelper does not have
-         * getAllTechnicians().
-         *
-         * We therefore use the technician already stored
-         * in the RepairAppointment.
-         */
+        Cursor cursor = null;
 
-        if (currentTechnicianId > 0 &&
-                currentTechnicianName != null &&
-                !currentTechnicianName
-                        .trim()
-                        .isEmpty() &&
-                !"Not Assigned".equalsIgnoreCase(
-                        currentTechnicianName
-                )) {
+        try {
 
-            technicianIds.add(
-                    currentTechnicianId
-            );
+            cursor =
+                    databaseHelper.getAllTechnicians();
 
-            technicianNames.add(
-                    currentTechnicianName
-            );
+            if (cursor != null &&
+                    cursor.moveToFirst()) {
 
-        } else {
+                do {
 
-            /*
-             * No technician has been assigned yet.
-             *
-             * We use -1 to represent "Not Assigned".
-             */
+                    int id =
+                            cursor.getInt(
+                                    cursor.getColumnIndexOrThrow(
+                                            "id"
+                                    )
+                            );
 
-            technicianIds.add(-1);
+                    String name =
+                            cursor.getString(
+                                    cursor.getColumnIndexOrThrow(
+                                            "full_name"
+                                    )
+                            );
 
-            technicianNames.add(
-                    "Not Assigned"
-            );
+                    if (name == null ||
+                            name.trim().isEmpty()) {
+
+                        name =
+                                "Technician #" + id;
+                    }
+
+                    technicianIds.add(id);
+
+                    technicianNames.add(name);
+
+                } while (cursor.moveToNext());
+            }
+
+        } catch (Exception e) {
+
+            Toast.makeText(
+                    this,
+                    "Unable to load technicians.",
+                    Toast.LENGTH_LONG
+            ).show();
+
+        } finally {
+
+            if (cursor != null) {
+                cursor.close();
+            }
         }
+
+        technicianIds.add(0, -1);
+
+        technicianNames.add(
+                0,
+                "Not Assigned"
+        );
 
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(
@@ -560,11 +483,38 @@ public class ManageAppointmentActivity extends AppCompatActivity {
         spinnerManageTechnician.setAdapter(
                 adapter
         );
+
+        selectTechnician(
+                currentTechnicianId
+        );
     }
 
-    // ============================================================
-    // STATUS SPINNER
-    // ============================================================
+    private void selectTechnician(
+            int technicianId
+    ) {
+
+        if (technicianId <= 0) {
+
+            spinnerManageTechnician
+                    .setSelection(0);
+
+            return;
+        }
+
+        for (int i = 0;
+             i < technicianIds.size();
+             i++) {
+
+            if (technicianIds.get(i)
+                    == technicianId) {
+
+                spinnerManageTechnician
+                        .setSelection(i);
+
+                return;
+            }
+        }
+    }
 
     private void setupStatusSpinner() {
 
@@ -587,10 +537,6 @@ public class ManageAppointmentActivity extends AppCompatActivity {
                 currentStatus
         );
     }
-
-    // ============================================================
-    // SELECT STATUS
-    // ============================================================
 
     private void selectStatus(
             String status
@@ -629,15 +575,7 @@ public class ManageAppointmentActivity extends AppCompatActivity {
         }
     }
 
-    // ============================================================
-    // UPDATE APPOINTMENT
-    // ============================================================
-
     private void updateAppointment() {
-
-        // --------------------------------------------------------
-        // VALIDATE BRANCH
-        // --------------------------------------------------------
 
         int branchPosition =
                 spinnerManageBranch
@@ -655,9 +593,10 @@ public class ManageAppointmentActivity extends AppCompatActivity {
             return;
         }
 
-        // --------------------------------------------------------
-        // VALIDATE TECHNICIAN
-        // --------------------------------------------------------
+        int branchId =
+                branchIds.get(
+                        branchPosition
+                );
 
         int technicianPosition =
                 spinnerManageTechnician
@@ -675,9 +614,21 @@ public class ManageAppointmentActivity extends AppCompatActivity {
             return;
         }
 
-        // --------------------------------------------------------
-        // GET STATUS
-        // --------------------------------------------------------
+        int technicianId =
+                technicianIds.get(
+                        technicianPosition
+                );
+
+        String technicianName =
+                technicianNames.get(
+                        technicianPosition
+                );
+
+        if (technicianId <= 0) {
+
+            technicianName =
+                    "";
+        }
 
         Object selectedStatus =
                 spinnerManageStatus
@@ -698,11 +649,6 @@ public class ManageAppointmentActivity extends AppCompatActivity {
                 selectedStatus
                         .toString()
                         .trim();
-
-        // --------------------------------------------------------
-        // GET PRICE
-        // --------------------------------------------------------
-
         String priceText =
                 edtManagePrice
                         .getText()
@@ -740,10 +686,6 @@ public class ManageAppointmentActivity extends AppCompatActivity {
             return;
         }
 
-        // --------------------------------------------------------
-        // PRICE VALIDATION
-        // --------------------------------------------------------
-
         if (price < 0) {
 
             edtManagePrice.setError(
@@ -755,106 +697,70 @@ public class ManageAppointmentActivity extends AppCompatActivity {
             return;
         }
 
-        // --------------------------------------------------------
-        // GET SELECTED BRANCH
-        // --------------------------------------------------------
+        try {
 
-        int branchId =
-                branchIds.get(
-                        branchPosition
+            boolean updated =
+                    databaseHelper.updateRepair(
+                            repairId,
+                            branchId,
+                            technicianId,
+                            technicianName,
+                            status,
+                            price
+                    );
+
+            if (updated) {
+
+                Toast.makeText(
+                        this,
+                        "Appointment updated successfully.",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                setResult(
+                        RESULT_OK
                 );
 
-        // --------------------------------------------------------
-        // GET SELECTED TECHNICIAN
-        // --------------------------------------------------------
+                finish();
 
-        int technicianId =
-                technicianIds.get(
-                        technicianPosition
-                );
+            } else {
 
-        String technicianName =
-                technicianNames.get(
-                        technicianPosition
-                );
+                Toast.makeText(
+                        this,
+                        "No appointment was updated.",
+                        Toast.LENGTH_LONG
+                ).show();
+            }
 
-        // --------------------------------------------------------
-        // UPDATE DATABASE
-        // --------------------------------------------------------
-
-        boolean updated =
-                databaseHelper.updateRepair(
-                        repairId,
-                        branchId,
-                        technicianId,
-                        technicianName,
-                        status,
-                        price
-                );
-
-        // --------------------------------------------------------
-        // SUCCESS
-        // --------------------------------------------------------
-
-        if (updated) {
+        } catch (Exception e) {
 
             Toast.makeText(
                     this,
-                    "Appointment updated successfully.",
-                    Toast.LENGTH_SHORT
+                    "Update failed: " +
+                            e.getMessage(),
+                    Toast.LENGTH_LONG
             ).show();
-
-            /*
-             * Tell ManageAppointmentsActivity that the
-             * database was successfully updated.
-             */
-
-            setResult(
-                    RESULT_OK
-            );
-
-            finish();
-
-            return;
         }
-
-        // --------------------------------------------------------
-        // FAILED
-        // --------------------------------------------------------
-
-        Toast.makeText(
-                this,
-                "Unable to update appointment.",
-                Toast.LENGTH_LONG
-        ).show();
     }
 
-    // ============================================================
-    // SAFE TEXT
-    // ============================================================
-
-    private String safeText(
-            String value
+    private String safeTextOrDefault(
+            String value,
+            String defaultValue
     ) {
 
         if (value == null ||
                 value.trim().isEmpty()) {
 
-            return "Not available";
+            return defaultValue;
         }
 
         return value.trim();
     }
 
-    // ============================================================
-    // CLOSE DATABASE
-    // ============================================================
-
     @Override
     protected void onDestroy() {
 
         if (databaseHelper != null) {
-
             databaseHelper.close();
         }
 
