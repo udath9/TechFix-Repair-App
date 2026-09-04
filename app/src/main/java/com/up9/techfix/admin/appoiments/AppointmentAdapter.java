@@ -1,7 +1,5 @@
 package com.up9.techfix.admin.appoiments;
 
-
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,25 +12,35 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.up9.techfix.R;
 
 import java.util.List;
+import java.util.Locale;
 
 public class AppointmentAdapter
-        extends RecyclerView.Adapter<AppointmentAdapter.AppointmentViewHolder> {
+        extends RecyclerView.Adapter<
+        AppointmentAdapter.AppointmentViewHolder> {
 
-    private final List<RepairAppointment> appointmentList;
+    private final List<RepairAppointment>
+            appointmentList;
 
-    private final OnAppointmentActionListener listener;
+    private final OnAppointmentActionListener
+            listener;
 
     public interface OnAppointmentActionListener {
 
-        void onManage(RepairAppointment appointment);
+        void onManage(
+                RepairAppointment appointment
+        );
     }
 
     public AppointmentAdapter(
             List<RepairAppointment> appointmentList,
             OnAppointmentActionListener listener
     ) {
-        this.appointmentList = appointmentList;
-        this.listener = listener;
+
+        this.appointmentList =
+                appointmentList;
+
+        this.listener =
+                listener;
     }
 
     @NonNull
@@ -64,64 +72,105 @@ public class AppointmentAdapter
                 appointmentList.get(position);
 
         holder.txtAppointmentId.setText(
-                "Appointment #" + appointment.getId()
+                "Appointment #"
+                        + appointment.getId()
         );
 
         holder.txtCustomerName.setText(
-                "Customer: " +
+                "Customer: "
+                        + safeText(
                         appointment.getCustomerName()
+                )
         );
 
         holder.txtDevice.setText(
-                "Device: " +
+                "Device: "
+                        + safeText(
                         appointment.getDevice()
+                )
         );
 
         holder.txtService.setText(
-                "Service: " +
+                "Service: "
+                        + safeText(
                         appointment.getService()
+                )
         );
 
         holder.txtAppointmentDate.setText(
-                "Date: " +
+                "Date: "
+                        + safeText(
                         appointment.getAppointmentDate()
+                )
         );
 
         holder.txtAppointmentTime.setText(
-                "Time: " +
+                "Time: "
+                        + safeText(
                         appointment.getAppointmentTime()
+                )
         );
 
         holder.txtAppointmentBranch.setText(
-                "Branch: " +
+                "Branch: "
+                        + safeText(
                         appointment.getBranch()
+                )
         );
 
         holder.txtAppointmentTechnician.setText(
-                "Technician: " +
+                "Technician: "
+                        + safeText(
                         appointment.getTechnician()
+                )
         );
 
         holder.txtAppointmentPrice.setText(
                 String.format(
-                        "Estimated Price: Rs. %.2f",
+                        Locale.getDefault(),
+                        "Estimated Price: Rs. %,.2f",
                         appointment.getEstimatedPrice()
                 )
         );
 
         holder.txtAppointmentStatus.setText(
-                appointment.getStatus()
+                "Status: "
+                        + safeText(
+                        appointment.getStatus()
+                )
         );
 
-        holder.btnManageAppointment.setOnClickListener(
-                v -> listener.onManage(appointment)
-        );
+        holder.btnManageAppointment
+                .setOnClickListener(v -> {
+
+                    if (listener != null) {
+
+                        listener.onManage(
+                                appointment
+                        );
+                    }
+                });
+    }
+
+    private String safeText(
+            String value
+    ) {
+
+        if (value == null ||
+                value.trim().isEmpty()) {
+
+            return "Not available";
+        }
+
+        return value;
     }
 
     @Override
     public int getItemCount() {
 
-        return appointmentList.size();
+        return appointmentList == null
+                ? 0
+                : appointmentList.size();
     }
 
     public static class AppointmentViewHolder

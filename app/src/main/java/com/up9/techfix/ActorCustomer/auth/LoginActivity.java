@@ -184,15 +184,41 @@ public class LoginActivity extends AppCompatActivity {
         // Customer
         // ----------------------------------------------------
 
-        if ("CUSTOMER".equalsIgnoreCase(
-                user.getRole()
-        )) {
+        // ----------------------------------------------------
+// Customer
+// ----------------------------------------------------
+
+        if ("CUSTOMER".equalsIgnoreCase(user.getRole())) {
 
             int customerId =
                     databaseHelper.getCustomerId(
-                            email
+                            user.getEmail()
                     );
 
+            /*
+             * The users table contains the login account.
+             * The customers table contains the customer profile
+             * used by the repair system.
+             *
+             * If the customer profile exists, save its ID.
+             */
+            if (customerId <= 0) {
+
+                Toast.makeText(
+                        this,
+                        "Customer profile not found. Please register again.",
+                        Toast.LENGTH_LONG
+                ).show();
+
+                return;
+            }
+
+            /*
+             * Save the CUSTOMER table ID.
+             *
+             * IMPORTANT:
+             * This is NOT necessarily the same as user.getId().
+             */
             preferences.edit()
                     .putInt(
                             "customerId",
@@ -206,10 +232,11 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT
             ).show();
 
-            Intent intent = new Intent(
-                    LoginActivity.this,
-                    CustomerHomeActivity.class
-            );
+            Intent intent =
+                    new Intent(
+                            LoginActivity.this,
+                            CustomerHomeActivity.class
+                    );
 
             startActivity(intent);
 

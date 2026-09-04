@@ -8,11 +8,7 @@ import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.up9.techfix.R;
 import com.up9.techfix.data.DatabaseHelper;
@@ -30,32 +26,15 @@ public class RepairHistoryActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_repair_history);
-
-        ViewCompat.setOnApplyWindowInsetsListener(
-                findViewById(R.id.main),
-                (v, insets) -> {
-
-                    Insets systemBars =
-                            insets.getInsets(
-                                    WindowInsetsCompat.Type.systemBars()
-                            );
-
-                    v.setPadding(
-                            systemBars.left,
-                            systemBars.top,
-                            systemBars.right,
-                            systemBars.bottom
-                    );
-
-                    return insets;
-                }
+        setContentView(
+                R.layout.activity_repair_history
         );
 
-        databaseHelper = new DatabaseHelper(this);
+        databaseHelper =
+                new DatabaseHelper(this);
 
         SharedPreferences preferences =
                 getSharedPreferences(
@@ -63,40 +42,61 @@ public class RepairHistoryActivity extends AppCompatActivity {
                         MODE_PRIVATE
                 );
 
-        customerId = preferences.getInt(
-                "customerId",
-                -1
-        );
+        customerId =
+                preferences.getInt(
+                        "customerId",
+                        -1
+                );
 
         historyContainer =
-                findViewById(R.id.historyContainer);
+                findViewById(
+                        R.id.historyContainer
+                );
 
         loadRepairHistory();
     }
 
-    // Load the logged-in customer's repair history.
     private void loadRepairHistory() {
+
         historyContainer.removeAllViews();
 
         if (customerId == -1) {
+
             showMessage(
                     "Customer information not found.\n"
                             + "Please log in again."
             );
+
             return;
         }
 
         Cursor cursor =
-                databaseHelper.getRepairHistory(customerId);
+                databaseHelper.getRepairHistory(
+                        customerId
+                );
+
+        if (cursor == null) {
+
+            showMessage(
+                    "Unable to load repair history."
+            );
+
+            return;
+        }
 
         if (!cursor.moveToFirst()) {
+
             cursor.close();
 
-            showMessage("No repair history found.");
+            showMessage(
+                    "No repair history found."
+            );
+
             return;
         }
 
         do {
+
             int repairId =
                     cursor.getInt(
                             cursor.getColumnIndexOrThrow(
@@ -104,7 +104,7 @@ public class RepairHistoryActivity extends AppCompatActivity {
                             )
                     );
 
-            String deviceCategory =
+            String categoryName =
                     cursor.getString(
                             cursor.getColumnIndexOrThrow(
                                     "category_name"
@@ -153,19 +153,18 @@ public class RepairHistoryActivity extends AppCompatActivity {
                             )
                     );
 
-            String formattedDate =
-                    formatRepairDate(repairDate);
-
             LinearLayout repairCard =
                     createRepairCard();
 
             repairCard.addView(
-                    createTitle("Repair #" + repairId)
+                    createTitle(
+                            "Repair #" + repairId
+                    )
             );
 
-            String repairInformation =
+            String information =
                     "Device: "
-                            + safeText(deviceCategory)
+                            + safeText(categoryName)
                             + " - "
                             + safeText(deviceModel)
                             + "\n\n"
@@ -176,7 +175,7 @@ public class RepairHistoryActivity extends AppCompatActivity {
                             + safeText(branchName)
                             + "\n\n"
                             + "Date: "
-                            + formattedDate
+                            + formatRepairDate(repairDate)
                             + "\n\n"
                             + "Status: "
                             + safeText(status)
@@ -189,10 +188,12 @@ public class RepairHistoryActivity extends AppCompatActivity {
                     );
 
             repairCard.addView(
-                    createInformation(repairInformation)
+                    createInformation(information)
             );
 
-            historyContainer.addView(repairCard);
+            historyContainer.addView(
+                    repairCard
+            );
 
         } while (cursor.moveToNext());
 
@@ -200,6 +201,7 @@ public class RepairHistoryActivity extends AppCompatActivity {
     }
 
     private LinearLayout createRepairCard() {
+
         LinearLayout card =
                 new LinearLayout(this);
 
@@ -237,16 +239,12 @@ public class RepairHistoryActivity extends AppCompatActivity {
     }
 
     private TextView createTitle(String text) {
+
         TextView textView =
                 new TextView(this);
 
         textView.setText(text);
         textView.setTextSize(20);
-        textView.setTextColor(
-                getResources().getColor(
-                        android.R.color.black
-                )
-        );
 
         textView.setTypeface(
                 null,
@@ -264,6 +262,7 @@ public class RepairHistoryActivity extends AppCompatActivity {
     }
 
     private TextView createInformation(String text) {
+
         TextView textView =
                 new TextView(this);
 
@@ -274,12 +273,15 @@ public class RepairHistoryActivity extends AppCompatActivity {
     }
 
     private void showMessage(String message) {
+
         TextView messageText =
                 new TextView(this);
 
         messageText.setText(message);
         messageText.setTextSize(18);
-        messageText.setGravity(Gravity.CENTER);
+        messageText.setGravity(
+                Gravity.CENTER
+        );
 
         messageText.setPadding(
                 20,
@@ -288,16 +290,23 @@ public class RepairHistoryActivity extends AppCompatActivity {
                 40
         );
 
-        historyContainer.addView(messageText);
+        historyContainer.addView(
+                messageText
+        );
     }
 
-    // Convert the stored timestamp into a readable date.
-    private String formatRepairDate(String dateValue) {
-        if (dateValue == null || dateValue.trim().isEmpty()) {
+    private String formatRepairDate(
+            String dateValue
+    ) {
+
+        if (dateValue == null ||
+                dateValue.trim().isEmpty()) {
+
             return "Unknown";
         }
 
         try {
+
             long timestamp =
                     Long.parseLong(dateValue);
 
@@ -312,16 +321,29 @@ public class RepairHistoryActivity extends AppCompatActivity {
             );
 
         } catch (Exception e) {
+
             return dateValue;
         }
     }
 
-    // Prevent null or empty database values from appearing in the UI.
     private String safeText(String text) {
-        if (text == null || text.trim().isEmpty()) {
+
+        if (text == null ||
+                text.trim().isEmpty()) {
+
             return "Unknown";
         }
 
         return text;
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        if (databaseHelper != null) {
+            databaseHelper.close();
+        }
+
+        super.onDestroy();
     }
 }
