@@ -10,35 +10,35 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.up9.techfix.R;
+import com.up9.techfix.data.Category;
 
 import java.util.List;
 
 public class CategoryAdapter
         extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
 
-    private final List<DeviceCategory> categoryList;
+    private final List<Category> categoryList;
 
     private final OnCategoryActionListener listener;
 
 
     public interface OnCategoryActionListener {
 
-        void onEdit(DeviceCategory category);
+        void onEdit(Category category);
 
         void onDelete(
-                DeviceCategory category,
+                Category category,
                 int position
         );
     }
 
 
     public CategoryAdapter(
-            List<DeviceCategory> categoryList,
+            List<Category> categoryList,
             OnCategoryActionListener listener
     ) {
 
         this.categoryList = categoryList;
-
         this.listener = listener;
     }
 
@@ -69,7 +69,7 @@ public class CategoryAdapter
             int position
     ) {
 
-        DeviceCategory category =
+        Category category =
                 categoryList.get(position);
 
 
@@ -96,10 +96,20 @@ public class CategoryAdapter
 
 
         holder.btnDeleteCategory.setOnClickListener(
-                v -> listener.onDelete(
-                        category,
-                        holder.getAdapterPosition()
-                )
+                v -> {
+
+                    int adapterPosition =
+                            holder.getBindingAdapterPosition();
+
+                    if (adapterPosition !=
+                            RecyclerView.NO_POSITION) {
+
+                        listener.onDelete(
+                                category,
+                                adapterPosition
+                        );
+                    }
+                }
         );
     }
 

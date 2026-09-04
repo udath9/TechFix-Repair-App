@@ -1,45 +1,34 @@
 package com.up9.techfix.admin.categories;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
 
-import java.util.Locale;
-
 public class CategoryFormActivity extends AppCompatActivity {
-
-    private TextView txtCategoryFormTitle;
 
     private EditText edtCategoryName;
     private EditText edtCategoryDescription;
-    private EditText edtCategoryPriceModifier;
+    private EditText edtPriceModifier;
 
     private Button btnSaveCategory;
     private Button btnCancelCategory;
 
-    private boolean isEditMode = false;
-
+    private boolean editMode = false;
     private int categoryId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
 
         setContentView(
                 R.layout.category_form
         );
-
-        txtCategoryFormTitle =
-                findViewById(
-                        R.id.txtCategoryFormTitle
-                );
 
         edtCategoryName =
                 findViewById(
@@ -51,9 +40,9 @@ public class CategoryFormActivity extends AppCompatActivity {
                         R.id.edtCategoryDescription
                 );
 
-        edtCategoryPriceModifier =
+        edtPriceModifier =
                 findViewById(
-                        R.id.edtCategoryPriceModifier
+                        R.id.edtPriceModifier
                 );
 
         btnSaveCategory =
@@ -66,85 +55,70 @@ public class CategoryFormActivity extends AppCompatActivity {
                         R.id.btnCancelCategory
                 );
 
-        checkEditMode();
 
-        btnSaveCategory.setOnClickListener(
-                v -> saveCategory()
-        );
-
-        btnCancelCategory.setOnClickListener(v -> {
-
-            setResult(
-                    RESULT_CANCELED
-            );
-
-            finish();
-        });
-    }
-
-    private void checkEditMode() {
-
-        Intent intent =
-                getIntent();
-
-        isEditMode =
-                intent.getBooleanExtra(
+        editMode =
+                getIntent().getBooleanExtra(
                         "editMode",
                         false
                 );
 
-        if (isEditMode) {
+        if (editMode) {
 
             categoryId =
-                    intent.getIntExtra(
+                    getIntent().getIntExtra(
                             "categoryId",
                             -1
                     );
 
-            txtCategoryFormTitle.setText(
-                    "Edit Device Category"
+            String name =
+                    getIntent().getStringExtra(
+                            "name"
+                    );
+
+            String description =
+                    getIntent().getStringExtra(
+                            "description"
+                    );
+
+            double priceModifier =
+                    getIntent().getDoubleExtra(
+                            "priceModifier",
+                            1.0
+                    );
+
+            edtCategoryName.setText(
+                    name
+            );
+
+            edtCategoryDescription.setText(
+                    description
+            );
+
+            edtPriceModifier.setText(
+                    String.valueOf(
+                            priceModifier
+                    )
             );
 
             btnSaveCategory.setText(
                     "Update Category"
             );
 
-            edtCategoryName.setText(
-                    intent.getStringExtra(
-                            "name"
-                    )
-            );
-
-            edtCategoryDescription.setText(
-                    intent.getStringExtra(
-                            "description"
-                    )
-            );
-
-            double priceModifier =
-                    intent.getDoubleExtra(
-                            "priceModifier",
-                            0.0
-                    );
-
-            edtCategoryPriceModifier.setText(
-                    String.format(
-                            Locale.getDefault(),
-                            "%.2f",
-                            priceModifier
-                    )
-            );
-
         } else {
 
-            txtCategoryFormTitle.setText(
-                    "Add Device Category"
-            );
-
-            btnSaveCategory.setText(
-                    "Save Category"
+            edtPriceModifier.setText(
+                    "1.0"
             );
         }
+
+
+        btnSaveCategory.setOnClickListener(
+                v -> saveCategory()
+        );
+
+        btnCancelCategory.setOnClickListener(
+                v -> finish()
+        );
     }
 
     private void saveCategory() {
@@ -162,12 +136,12 @@ public class CategoryFormActivity extends AppCompatActivity {
                         .trim();
 
         String modifierText =
-                edtCategoryPriceModifier
+                edtPriceModifier
                         .getText()
                         .toString()
                         .trim();
 
-        if (name.isEmpty()) {
+        if (TextUtils.isEmpty(name)) {
 
             edtCategoryName.setError(
                     "Enter category name"
@@ -178,13 +152,13 @@ public class CategoryFormActivity extends AppCompatActivity {
             return;
         }
 
-        if (modifierText.isEmpty()) {
+        if (TextUtils.isEmpty(modifierText)) {
 
-            edtCategoryPriceModifier.setError(
+            edtPriceModifier.setError(
                     "Enter price modifier"
             );
 
-            edtCategoryPriceModifier.requestFocus();
+            edtPriceModifier.requestFocus();
 
             return;
         }
@@ -200,50 +174,49 @@ public class CategoryFormActivity extends AppCompatActivity {
 
         } catch (NumberFormatException e) {
 
-            edtCategoryPriceModifier.setError(
-                    "Enter a valid price modifier"
+            edtPriceModifier.setError(
+                    "Enter a valid number"
             );
 
-            edtCategoryPriceModifier.requestFocus();
+            edtPriceModifier.requestFocus();
 
             return;
         }
 
-        Intent resultIntent =
-                new Intent();
+        if (priceModifier <= 0) {
 
-        resultIntent.putExtra(
+            edtPriceModifier.setError(
+                    "Price modifier must be greater than 0"
+            );
+
+            edtPriceModifier.requestFocus();
+
+            return;
+        }
+
+        getIntent().putExtra(
                 "name",
                 name
         );
 
-        resultIntent.putExtra(
+        getIntent().putExtra(
                 "description",
                 description
         );
 
-        resultIntent.putExtra(
+        getIntent().putExtra(
                 "priceModifier",
                 priceModifier
         );
 
-        resultIntent.putExtra(
+        getIntent().putExtra(
                 "editMode",
-                isEditMode
+                editMode
         );
 
-        if (isEditMode) {
+        if (editMode) {
 
-            if (categoryId == -1) {
-
-                edtCategoryName.setError(
-                        "Invalid category ID"
-                );
-
-                return;
-            }
-
-            resultIntent.putExtra(
+            getIntent().putExtra(
                     "categoryId",
                     categoryId
             );
@@ -251,8 +224,16 @@ public class CategoryFormActivity extends AppCompatActivity {
 
         setResult(
                 RESULT_OK,
-                resultIntent
+                getIntent()
         );
+
+        Toast.makeText(
+                this,
+                editMode
+                        ? "Category ready to update"
+                        : "Category ready to save",
+                Toast.LENGTH_SHORT
+        ).show();
 
         finish();
     }

@@ -12,7 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
-import com.up9.techfix.admin.categories.DeviceCategory;
+import com.up9.techfix.data.Category;
 import com.up9.techfix.data.DatabaseHelper;
 
 import java.util.ArrayList;
@@ -119,11 +119,11 @@ public class SparePartFormActivity extends AppCompatActivity {
 
         categoryNames.clear();
 
-        List<DeviceCategory> categories =
-                databaseHelper.getAllCategoryModels();
+        List<Category> categories =
+                databaseHelper.getAllCategories();
 
 
-        for (DeviceCategory category : categories) {
+        for (Category category : categories) {
 
             categoryNames.add(
                     category.getName()

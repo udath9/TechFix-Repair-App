@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
 import com.up9.techfix.admin.services.RepairService;
-import com.up9.techfix.admin.categories.DeviceCategory;
+import com.up9.techfix.data.Category;
 import com.up9.techfix.data.DatabaseHelper;
 
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
 
     private String selectedImageUri = "";
 
-    private final List<DeviceCategory> categoryList =
+    private final List<Category> categoryList =
             new ArrayList<>();
 
     private final List<RepairService> serviceList =
@@ -183,11 +183,11 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
 
         categoryList.clear();
 
-        categoryList.addAll(databaseHelper.getAllCategoryModels());
+        categoryList.addAll(databaseHelper.getAllCategories());
         List<String> categoryNames =
                 new ArrayList<>();
 
-        for (DeviceCategory category :
+        for (Category category :
                 categoryList) {
 
             categoryNames.add(

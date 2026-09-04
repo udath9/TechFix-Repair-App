@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,6 +29,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
 import com.up9.techfix.R;
+import com.up9.techfix.data.Category;
 import com.up9.techfix.data.DatabaseHelper;
 import com.up9.techfix.data.Service;
 
@@ -42,18 +42,11 @@ import java.util.Locale;
 
 public class BookRepairActivity extends AppCompatActivity {
 
-    // ============================================================
-    // LOCATION
-    // ============================================================
-
     private FusedLocationProviderClient fusedLocationClient;
 
     private ActivityResultLauncher<String[]> locationPermissionLauncher;
 
 
-    // ============================================================
-    // IMAGE
-    // ============================================================
 
     private ActivityResultLauncher<String> imagePickerLauncher;
 
@@ -64,17 +57,8 @@ public class BookRepairActivity extends AppCompatActivity {
     private String selectedImageUri = null;
 
 
-    // ============================================================
-    // DATABASE
-    // ============================================================
-
     private DatabaseHelper databaseHelper;
 
-
-
-    // ============================================================
-    // UI
-    // ============================================================
 
     private TextView tvNearestBranch;
 
@@ -95,44 +79,20 @@ public class BookRepairActivity extends AppCompatActivity {
     private Button btnSubmitRepair;
 
 
-    // ============================================================
-    // CATEGORIES
-    // ============================================================
-
-    private final List<String> categoryNames =
+    private final List<Category> categoryList =
             new ArrayList<>();
-
-    private final List<Integer> categoryIds =
-            new ArrayList<>();
-
-
-    // ============================================================
-    // SERVICES
-    // ============================================================
 
     private List<Service> serviceList =
             new ArrayList<>();
 
 
-    // ============================================================
-    // SELECTED BRANCH
-    // ============================================================
 
     private String selectedBranchName = null;
 
     private int selectedBranchId = -1;
 
 
-    // ============================================================
-    // CUSTOMER
-    // ============================================================
-
     private int customerId = -1;
-
-
-    // ============================================================
-    // ON CREATE
-    // ============================================================
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,14 +110,11 @@ public class BookRepairActivity extends AppCompatActivity {
         databaseHelper =
                 new DatabaseHelper(this);
 
+
         fusedLocationClient =
                 LocationServices
                         .getFusedLocationProviderClient(this);
 
-
-        // --------------------------------------------------------
-        // Get logged-in customer ID
-        // --------------------------------------------------------
 
         SharedPreferences preferences =
                 getSharedPreferences(
@@ -172,15 +129,12 @@ public class BookRepairActivity extends AppCompatActivity {
                 );
 
 
-        // --------------------------------------------------------
-        // Initialize
-        // --------------------------------------------------------
-
         initializeViews();
 
         setupDeviceCategories();
 
         setupServices();
+
 
         setupLocation();
 
@@ -188,13 +142,10 @@ public class BookRepairActivity extends AppCompatActivity {
 
         setupButtons();
 
+
         selectServiceFromIntent();
     }
 
-
-    // ============================================================
-    // WINDOW INSETS
-    // ============================================================
 
     private void setupWindowInsets() {
 
@@ -225,11 +176,6 @@ public class BookRepairActivity extends AppCompatActivity {
                 }
         );
     }
-
-
-    // ============================================================
-    // INITIALIZE VIEWS
-    // ============================================================
 
     private void initializeViews() {
 
@@ -280,10 +226,6 @@ public class BookRepairActivity extends AppCompatActivity {
     }
 
 
-    // ============================================================
-    // LOCATION SETUP
-    // ============================================================
-
     private void setupLocation() {
 
         locationPermissionLauncher =
@@ -329,16 +271,7 @@ public class BookRepairActivity extends AppCompatActivity {
                 );
     }
 
-
-    // ============================================================
-    // IMAGE PICKERS
-    // ============================================================
-
     private void setupImagePickers() {
-
-        // --------------------------------------------------------
-        // Gallery
-        // --------------------------------------------------------
 
         imagePickerLauncher =
                 registerForActivityResult(
@@ -388,10 +321,6 @@ public class BookRepairActivity extends AppCompatActivity {
                 );
 
 
-        // --------------------------------------------------------
-        // Camera permission
-        // --------------------------------------------------------
-
         cameraPermissionLauncher =
                 registerForActivityResult(
                         new ActivityResultContracts
@@ -416,10 +345,6 @@ public class BookRepairActivity extends AppCompatActivity {
                         }
                 );
 
-
-        // --------------------------------------------------------
-        // Camera
-        // --------------------------------------------------------
 
         cameraLauncher =
                 registerForActivityResult(
@@ -471,10 +396,6 @@ public class BookRepairActivity extends AppCompatActivity {
     }
 
 
-    // ============================================================
-    // BUTTONS
-    // ============================================================
-
     private void setupButtons() {
 
         btnSubmitRepair.setOnClickListener(
@@ -492,10 +413,6 @@ public class BookRepairActivity extends AppCompatActivity {
         );
     }
 
-
-    // ============================================================
-    // IMAGE OPTIONS
-    // ============================================================
 
     private void showImageOptions() {
 
@@ -547,10 +464,6 @@ public class BookRepairActivity extends AppCompatActivity {
     }
 
 
-    // ============================================================
-    // SELECT SERVICE FROM INTENT
-    // ============================================================
-
     private void selectServiceFromIntent() {
 
         int selectedServiceId =
@@ -577,8 +490,6 @@ public class BookRepairActivity extends AppCompatActivity {
                             selectedServiceId
             ) {
 
-                // +1 because position 0 is
-                // "Select Repair Service"
 
                 spinnerService.setSelection(
                         i + 1
@@ -590,9 +501,6 @@ public class BookRepairActivity extends AppCompatActivity {
     }
 
 
-    // ============================================================
-    // COPY GALLERY IMAGE
-    // ============================================================
 
     private String copyImageToInternalStorage(
             Uri sourceUri
@@ -662,10 +570,6 @@ public class BookRepairActivity extends AppCompatActivity {
     }
 
 
-    // ============================================================
-    // SAVE CAMERA IMAGE
-    // ============================================================
-
     private String saveCameraImage(
             Bitmap bitmap
     ) {
@@ -714,64 +618,38 @@ public class BookRepairActivity extends AppCompatActivity {
     }
 
 
-    // ============================================================
-    // LOAD DEVICE CATEGORIES
-    // ============================================================
-
     private void setupDeviceCategories() {
 
-        categoryNames.clear();
-
-        categoryIds.clear();
+        categoryList.clear();
 
 
-        // First spinner item
+        List<Category> databaseCategories =
+                databaseHelper.getAllCategories();
+
+
+        if (databaseCategories != null) {
+
+            categoryList.addAll(
+                    databaseCategories
+            );
+        }
+
+        List<String> categoryNames =
+                new ArrayList<>();
 
         categoryNames.add(
                 "Select Device Category"
         );
 
-        categoryIds.add(-1);
 
-
-        Cursor cursor =
-                databaseHelper.getAllCategories();
-
-        if (
-                cursor != null
-                        &&
-                        cursor.moveToFirst()
+        for (
+                Category category :
+                categoryList
         ) {
 
-            do {
-
-                int categoryId =
-                        cursor.getInt(
-                                cursor.getColumnIndexOrThrow(
-                                        "id"
-                                )
-                        );
-
-                String categoryName =
-                        cursor.getString(
-                                cursor.getColumnIndexOrThrow(
-                                        "name"
-                                )
-                        );
-
-                categoryIds.add(
-                        categoryId
-                );
-
-                categoryNames.add(
-                        categoryName
-                );
-
-            } while (cursor.moveToNext());
-        }
-
-        if (cursor != null) {
-            cursor.close();
+            categoryNames.add(
+                    category.getName()
+            );
         }
 
 
@@ -793,7 +671,7 @@ public class BookRepairActivity extends AppCompatActivity {
         );
 
 
-        if (categoryNames.size() == 1) {
+        if (categoryList.isEmpty()) {
 
             Toast.makeText(
                     this,
@@ -804,9 +682,6 @@ public class BookRepairActivity extends AppCompatActivity {
     }
 
 
-    // ============================================================
-    // LOAD SERVICES
-    // ============================================================
 
     private void setupServices() {
 
@@ -867,11 +742,6 @@ public class BookRepairActivity extends AppCompatActivity {
         }
     }
 
-
-    // ============================================================
-    // SUBMIT REPAIR REQUEST
-    // ============================================================
-
     private void submitRepairRequest() {
 
         String deviceModel =
@@ -887,10 +757,6 @@ public class BookRepairActivity extends AppCompatActivity {
                         .trim();
 
 
-        // --------------------------------------------------------
-        // Check customer login
-        // --------------------------------------------------------
-
         if (customerId == -1) {
 
             Toast.makeText(
@@ -903,18 +769,15 @@ public class BookRepairActivity extends AppCompatActivity {
         }
 
 
-        // --------------------------------------------------------
-        // Category
-        // --------------------------------------------------------
-
         int categoryPosition =
                 spinnerDeviceCategory
                         .getSelectedItemPosition();
 
+
         if (
                 categoryPosition <= 0
                         ||
-                        categoryPosition >= categoryIds.size()
+                        categoryPosition > categoryList.size()
         ) {
 
             Toast.makeText(
@@ -926,13 +789,17 @@ public class BookRepairActivity extends AppCompatActivity {
             return;
         }
 
-
-        int selectedCategoryId =
-                categoryIds.get(
-                        categoryPosition
+        Category selectedCategory =
+                categoryList.get(
+                        categoryPosition - 1
                 );
 
-        if (selectedCategoryId == -1) {
+
+        int selectedCategoryId =
+                selectedCategory.getId();
+
+
+        if (selectedCategoryId <= 0) {
 
             Toast.makeText(
                     this,
@@ -943,14 +810,10 @@ public class BookRepairActivity extends AppCompatActivity {
             return;
         }
 
-
-        // --------------------------------------------------------
-        // Service
-        // --------------------------------------------------------
-
         int selectedPosition =
                 spinnerService
                         .getSelectedItemPosition();
+
 
         if (
                 selectedPosition <= 0
@@ -967,11 +830,6 @@ public class BookRepairActivity extends AppCompatActivity {
             return;
         }
 
-
-        // --------------------------------------------------------
-        // Device model
-        // --------------------------------------------------------
-
         if (deviceModel.isEmpty()) {
 
             etDeviceModel.setError(
@@ -982,11 +840,6 @@ public class BookRepairActivity extends AppCompatActivity {
 
             return;
         }
-
-
-        // --------------------------------------------------------
-        // Problem description
-        // --------------------------------------------------------
 
         if (problemDescription.isEmpty()) {
 
@@ -1000,10 +853,6 @@ public class BookRepairActivity extends AppCompatActivity {
         }
 
 
-        // --------------------------------------------------------
-        // Branch
-        // --------------------------------------------------------
-
         if (selectedBranchId == -1) {
 
             Toast.makeText(
@@ -1016,22 +865,15 @@ public class BookRepairActivity extends AppCompatActivity {
         }
 
 
-        // --------------------------------------------------------
-        // Selected service
-        // --------------------------------------------------------
-
         Service selectedService =
                 serviceList.get(
                         selectedPosition - 1
                 );
 
+
         int selectedServiceId =
                 selectedService.getId();
 
-
-        // --------------------------------------------------------
-        // Create repair
-        // --------------------------------------------------------
 
         long repairId =
                 databaseHelper.createRepair(
@@ -1048,10 +890,6 @@ public class BookRepairActivity extends AppCompatActivity {
                         )
                 );
 
-
-        // --------------------------------------------------------
-        // Success
-        // --------------------------------------------------------
 
         if (repairId != -1) {
 
@@ -1075,11 +913,6 @@ public class BookRepairActivity extends AppCompatActivity {
         }
     }
 
-
-    // ============================================================
-    // FIND NEAREST BRANCH
-    // ============================================================
-
     private void getCurrentLocation() {
 
         boolean fineGranted =
@@ -1091,6 +924,7 @@ public class BookRepairActivity extends AppCompatActivity {
                         ==
                         PackageManager.PERMISSION_GRANTED;
 
+
         boolean coarseGranted =
                 ContextCompat.checkSelfPermission(
                         this,
@@ -1100,10 +934,6 @@ public class BookRepairActivity extends AppCompatActivity {
                         ==
                         PackageManager.PERMISSION_GRANTED;
 
-
-        // --------------------------------------------------------
-        // Request permission if necessary
-        // --------------------------------------------------------
 
         if (!fineGranted && !coarseGranted) {
 
@@ -1120,10 +950,6 @@ public class BookRepairActivity extends AppCompatActivity {
             return;
         }
 
-
-        // --------------------------------------------------------
-        // Get location
-        // --------------------------------------------------------
 
         fusedLocationClient
                 .getLastLocation()
@@ -1150,9 +976,6 @@ public class BookRepairActivity extends AppCompatActivity {
                                     location.getLongitude();
 
 
-                            // ------------------------------------------------
-                            // TechFix Colombo coordinates
-                            // ------------------------------------------------
 
                             double colomboLatitude =
                                     6.9271;
@@ -1160,10 +983,6 @@ public class BookRepairActivity extends AppCompatActivity {
                             double colomboLongitude =
                                     79.8612;
 
-
-                            // ------------------------------------------------
-                            // TechFix Galle coordinates
-                            // ------------------------------------------------
 
                             double galleLatitude =
                                     6.0329;
@@ -1178,11 +997,6 @@ public class BookRepairActivity extends AppCompatActivity {
                             float[] galleDistance =
                                     new float[1];
 
-
-                            // ------------------------------------------------
-                            // Calculate Colombo distance
-                            // ------------------------------------------------
-
                             android.location.Location
                                     .distanceBetween(
                                             customerLatitude,
@@ -1195,9 +1009,6 @@ public class BookRepairActivity extends AppCompatActivity {
                                     );
 
 
-                            // ------------------------------------------------
-                            // Calculate Galle distance
-                            // ------------------------------------------------
 
                             android.location.Location
                                     .distanceBetween(
@@ -1238,17 +1049,10 @@ public class BookRepairActivity extends AppCompatActivity {
                             }
 
 
-                            // ------------------------------------------------
-                            // Convert meters to kilometers
-                            // ------------------------------------------------
-
                             double distanceInKm =
                                     nearestDistance / 1000.0;
 
 
-                            // ------------------------------------------------
-                            // Find branch ID from database
-                            // ------------------------------------------------
 
                             selectedBranchId =
                                     databaseHelper
@@ -1259,10 +1063,6 @@ public class BookRepairActivity extends AppCompatActivity {
                             selectedBranchName =
                                     nearestBranch;
 
-
-                            // ------------------------------------------------
-                            // Branch found
-                            // ------------------------------------------------
 
                             if (
                                     selectedBranchId != -1
@@ -1292,9 +1092,6 @@ public class BookRepairActivity extends AppCompatActivity {
 
                             } else {
 
-                                // ------------------------------------------------
-                                // Branch does not exist in database
-                                // ------------------------------------------------
 
                                 tvNearestBranch.setText(
                                         "Nearest branch: "
@@ -1341,20 +1138,10 @@ public class BookRepairActivity extends AppCompatActivity {
     }
 
 
-    // ============================================================
-    // ON DESTROY
-    // ============================================================
-
     @Override
     protected void onDestroy() {
 
         super.onDestroy();
 
-        /*
-         * Do not manually close DatabaseHelper here.
-         *
-         * DatabaseHelper manages the SQLite connection
-         * when its methods are used.
-         */
     }
 }

@@ -13,42 +13,57 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.up9.techfix.R;
+import com.up9.techfix.data.Category;
 import com.up9.techfix.data.DatabaseHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class ManageCategoriesActivity extends AppCompatActivity
+public class ManageCategoriesActivity
+        extends AppCompatActivity
         implements CategoryAdapter.OnCategoryActionListener {
 
     private RecyclerView recyclerCategories;
     private Button btnAddCategory;
 
     private CategoryAdapter categoryAdapter;
-    private List<DeviceCategory> categoryList;
+
+    private final List<Category> categoryList =
+            new ArrayList<>();
 
     private DatabaseHelper databaseHelper;
 
 
-    private final ActivityResultLauncher<Intent> categoryFormLauncher =
+    private final ActivityResultLauncher<Intent>
+            categoryFormLauncher =
             registerForActivityResult(
-                    new ActivityResultContracts.StartActivityForResult(),
+                    new ActivityResultContracts
+                            .StartActivityForResult(),
+
                     result -> {
 
-                        if (result.getResultCode() != RESULT_OK) {
+                        if (result.getResultCode()
+                                != RESULT_OK) {
+
                             return;
                         }
 
-                        Intent data = result.getData();
+                        Intent data =
+                                result.getData();
 
                         if (data == null) {
                             return;
                         }
 
                         String name =
-                                data.getStringExtra("name");
+                                data.getStringExtra(
+                                        "name"
+                                );
 
                         String description =
-                                data.getStringExtra("description");
+                                data.getStringExtra(
+                                        "description"
+                                );
 
                         double priceModifier =
                                 data.getDoubleExtra(
@@ -68,11 +83,21 @@ public class ManageCategoriesActivity extends AppCompatActivity
                                         -1
                                 );
 
+                        if (editMode) {
 
-                        // UPDATE
-                        if (editMode && categoryId != -1) {
+                            if (categoryId == -1) {
 
-                            int updateResult =
+                                Toast.makeText(
+                                        this,
+                                        "Invalid category ID.",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+
+                                return;
+                            }
+
+
+                            int resultUpdate =
                                     databaseHelper.updateCategory(
                                             categoryId,
                                             name,
@@ -80,11 +105,12 @@ public class ManageCategoriesActivity extends AppCompatActivity
                                             priceModifier
                                     );
 
-                            if (updateResult > 0) {
+
+                            if (resultUpdate > 0) {
 
                                 Toast.makeText(
                                         this,
-                                        "Category updated successfully",
+                                        "Category updated successfully.",
                                         Toast.LENGTH_SHORT
                                 ).show();
 
@@ -92,28 +118,28 @@ public class ManageCategoriesActivity extends AppCompatActivity
 
                                 Toast.makeText(
                                         this,
-                                        "Failed to update category",
+                                        "Failed to update category.",
                                         Toast.LENGTH_SHORT
                                 ).show();
                             }
 
                         }
 
-                        // INSERT
                         else {
 
-                            long newId =
+                            long resultInsert =
                                     databaseHelper.insertCategory(
                                             name,
                                             description,
                                             priceModifier
                                     );
 
-                            if (newId != -1) {
+
+                            if (resultInsert != -1) {
 
                                 Toast.makeText(
                                         this,
-                                        "Category added successfully",
+                                        "Category added successfully.",
                                         Toast.LENGTH_SHORT
                                 ).show();
 
@@ -121,19 +147,21 @@ public class ManageCategoriesActivity extends AppCompatActivity
 
                                 Toast.makeText(
                                         this,
-                                        "Failed to add category",
+                                        "Failed to add category.",
                                         Toast.LENGTH_SHORT
                                 ).show();
                             }
                         }
 
+
                         loadCategories();
                     }
             );
 
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(
+            Bundle savedInstanceState
+    ) {
 
         super.onCreate(savedInstanceState);
 
@@ -141,15 +169,18 @@ public class ManageCategoriesActivity extends AppCompatActivity
                 R.layout.activity_manage_categories
         );
 
+
         recyclerCategories =
                 findViewById(
                         R.id.recyclerCategories
                 );
 
+
         btnAddCategory =
                 findViewById(
                         R.id.btnAddCategory
                 );
+
 
         databaseHelper =
                 new DatabaseHelper(this);
@@ -159,31 +190,6 @@ public class ManageCategoriesActivity extends AppCompatActivity
                 new LinearLayoutManager(this)
         );
 
-        loadCategories();
-
-
-        btnAddCategory.setOnClickListener(v -> {
-
-            Intent intent =
-                    new Intent(
-                            ManageCategoriesActivity.this,
-                            CategoryFormActivity.class
-                    );
-
-            intent.putExtra(
-                    "editMode",
-                    false
-            );
-
-            categoryFormLauncher.launch(intent);
-        });
-    }
-
-
-    private void loadCategories() {
-
-        categoryList =
-                (List<DeviceCategory>) databaseHelper.getAllCategories();
 
         categoryAdapter =
                 new CategoryAdapter(
@@ -191,14 +197,60 @@ public class ManageCategoriesActivity extends AppCompatActivity
                         this
                 );
 
+
         recyclerCategories.setAdapter(
                 categoryAdapter
+        );
+
+
+        loadCategories();
+
+        btnAddCategory.setOnClickListener(
+                v -> {
+
+                    Intent intent =
+                            new Intent(
+                                    this,
+                                    CategoryFormActivity.class
+                            );
+
+                    intent.putExtra(
+                            "editMode",
+                            false
+                    );
+
+                    categoryFormLauncher.launch(
+                            intent
+                    );
+                }
         );
     }
 
 
+    private void loadCategories() {
+
+        List<Category> databaseCategories =
+                databaseHelper.getAllCategories();
+
+
+        categoryList.clear();
+
+
+        if (databaseCategories != null) {
+
+            categoryList.addAll(
+                    databaseCategories
+            );
+        }
+
+
+        categoryAdapter.notifyDataSetChanged();
+    }
+
     @Override
-    public void onEdit(DeviceCategory category) {
+    public void onEdit(
+            Category category
+    ) {
 
         Intent intent =
                 new Intent(
@@ -206,48 +258,61 @@ public class ManageCategoriesActivity extends AppCompatActivity
                         CategoryFormActivity.class
                 );
 
+
         intent.putExtra(
                 "editMode",
                 true
         );
+
 
         intent.putExtra(
                 "categoryId",
                 category.getId()
         );
 
+
         intent.putExtra(
                 "name",
                 category.getName()
         );
+
 
         intent.putExtra(
                 "description",
                 category.getDescription()
         );
 
+
         intent.putExtra(
                 "priceModifier",
                 category.getPriceModifier()
         );
 
-        categoryFormLauncher.launch(intent);
+
+        categoryFormLauncher.launch(
+                intent
+        );
     }
 
 
     @Override
     public void onDelete(
-            DeviceCategory category,
+            Category category,
             int position
     ) {
 
         new AlertDialog.Builder(this)
-                .setTitle("Delete Category")
+
+                .setTitle(
+                        "Delete Category"
+                )
+
                 .setMessage(
                         "Are you sure you want to delete "
                                 + category.getName()
                                 + "?"
                 )
+
                 .setPositiveButton(
                         "Delete",
                         (dialog, which) -> {
@@ -257,11 +322,12 @@ public class ManageCategoriesActivity extends AppCompatActivity
                                             category.getId()
                                     );
 
+
                             if (result > 0) {
 
                                 Toast.makeText(
                                         this,
-                                        "Category deleted successfully",
+                                        "Category deleted successfully.",
                                         Toast.LENGTH_SHORT
                                 ).show();
 
@@ -271,16 +337,18 @@ public class ManageCategoriesActivity extends AppCompatActivity
 
                                 Toast.makeText(
                                         this,
-                                        "Failed to delete category",
+                                        "Failed to delete category.",
                                         Toast.LENGTH_SHORT
                                 ).show();
                             }
                         }
                 )
+
                 .setNegativeButton(
                         "Cancel",
                         null
                 )
+
                 .show();
     }
 
@@ -291,6 +359,7 @@ public class ManageCategoriesActivity extends AppCompatActivity
         super.onResume();
 
         if (databaseHelper != null) {
+
             loadCategories();
         }
     }

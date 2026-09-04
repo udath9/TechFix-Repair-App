@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.up9.techfix.admin.categories.DeviceCategory;
 import com.up9.techfix.admin.repairsamples.RepairSample;
 import com.up9.techfix.admin.services.RepairService;
 import com.up9.techfix.admin.spareparts.SparePart;
@@ -1310,32 +1309,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    // ============================================================
-    // CUSTOMER CATEGORIES
-    // ============================================================
-
-    /*
-     * Customer BookRepairActivity uses Cursor.
-     */
-    public Cursor getAllCategories() {
-
-        SQLiteDatabase db =
-                getReadableDatabase();
-
-        return db.rawQuery(
-                "SELECT id, name, description, " +
-                        "price_modifier " +
-                        "FROM " + TABLE_CATEGORIES +
-                        " ORDER BY id ASC",
-                null
-        );
-    }
-
-
-    // ============================================================
-    // ADMIN CATEGORIES - INSERT
-    // ============================================================
-
     public long insertCategory(
             String name,
             String description,
@@ -1371,13 +1344,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    // ============================================================
-    // ADMIN CATEGORIES - GET
-    // ============================================================
 
-    public List<DeviceCategory> getAllCategoryModels() {
+    public List<Category> getAllCategories() {
 
-        List<DeviceCategory> categories =
+        List<Category> categories =
                 new ArrayList<>();
 
         SQLiteDatabase db =
@@ -1385,8 +1355,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         Cursor cursor =
                 db.rawQuery(
-                        "SELECT id, name, description, " +
-                                "price_modifier " +
+                        "SELECT id, name, description, price_modifier " +
                                 "FROM " + TABLE_CATEGORIES +
                                 " ORDER BY id ASC",
                         null
@@ -1407,7 +1376,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     cursor.getDouble(3);
 
             categories.add(
-                    new DeviceCategory(
+                    new Category(
                             id,
                             name,
                             description,
@@ -1420,11 +1389,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return categories;
     }
-
-
-    // ============================================================
-    // CATEGORY NAME
-    // ============================================================
 
     public String getCategoryNameById(
             int categoryId

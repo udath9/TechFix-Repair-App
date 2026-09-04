@@ -1,15 +1,18 @@
-package com.up9.techfix.admin.categories;
+package com.up9.techfix.data;
 
-
-
-public class DeviceCategory {
+public class Category {
 
     private int id;
     private String name;
     private String description;
     private double priceModifier;
 
-    public DeviceCategory(int id, String name, String description, double priceModifier) {
+    public Category(
+            int id,
+            String name,
+            String description,
+            double priceModifier
+    ) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -24,16 +27,12 @@ public class DeviceCategory {
         return name;
     }
 
-    public double getPriceModifier() {
-        return priceModifier;
-    }
-
-    public void setPriceModifier(double priceModifier) {
-        this.priceModifier = priceModifier;
-    }
-
     public String getDescription() {
         return description;
+    }
+
+    public double getPriceModifier() {
+        return priceModifier;
     }
 
     public void setName(String name) {
@@ -42,5 +41,9 @@ public class DeviceCategory {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void setPriceModifier(double priceModifier) {
+        this.priceModifier = priceModifier;
     }
 }

@@ -73,7 +73,7 @@
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/edtCategoryPriceModifier"
+            android:id="@+id/edtPriceModifier"
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:layout_marginTop="8dp"
