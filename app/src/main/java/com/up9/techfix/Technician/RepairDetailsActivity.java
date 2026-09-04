@@ -9,10 +9,11 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
+import com.up9.techfix.data.DatabaseHelper;
 
 public class RepairDetailsActivity extends AppCompatActivity {
 
-    TechOpenHelper dbHelper;
+    DatabaseHelper dbHelper;
 
     int repairId;
 
@@ -43,7 +44,7 @@ public class RepairDetailsActivity extends AppCompatActivity {
         );
 
 
-        dbHelper = new TechOpenHelper(this);
+        dbHelper = new DatabaseHelper(this);
 
 
         tvCustomerName = findViewById(R.id.tvCustomerName);

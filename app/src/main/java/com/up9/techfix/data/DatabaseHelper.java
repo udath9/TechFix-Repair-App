@@ -30,6 +30,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TABLE_REPAIR_SAMPLES = "repair_samples";
     public static final String TABLE_SPARE_PARTS = "spare_parts";
     public static final String TABLE_USERS = "users";
+    public static final String TABLE_REPAIR_UPDATES = "repair_updates";
 
     // USERS / AUTHENTICATION
     public static final String COL_USER_ID = "id";
@@ -143,6 +144,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         createSparePartsTable(db);
         createRepairsTable(db);
         createPaymentsTable(db);
+        createRepairUpdatesTable(db);
 
         insertDefaultAdmin(db);
         insertDefaultTechnician(db);
@@ -164,6 +166,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         createSparePartsTable(db);
         createRepairsTable(db);
         createPaymentsTable(db);
+        createRepairUpdatesTable(db);
 
         if (!columnExists(
                 db,
@@ -434,6 +437,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         "amount REAL NOT NULL, " +
                         "payment_date TEXT, " +
                         "status TEXT" +
+                        ")"
+        );
+    }
+    private void createRepairUpdatesTable(SQLiteDatabase db) {
+
+        db.execSQL(
+                "CREATE TABLE IF NOT EXISTS " +
+                        TABLE_REPAIR_UPDATES +
+                        " (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "repair_id INTEGER NOT NULL, " +
+                        "technician_id INTEGER, " +
+                        "status TEXT NOT NULL, " +
+                        "notes TEXT, " +
+                        "spare_part TEXT, " +
+                        "quantity INTEGER DEFAULT 0, " +
+                        "photo_uri TEXT, " +
+                        "update_date TEXT" +
                         ")"
         );
     }
@@ -3149,6 +3170,151 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         String.valueOf(customerId)
                 }
         );
+    }
+    public int getUserId(String email, String password) {
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(
+                "users",
+                new String[]{"id"},
+                "email = ? AND password = ?",
+                new String[]{email, password},
+                null,
+                null,
+                null
+        );
+
+        int userId = -1;
+
+        if (cursor.moveToFirst()) {
+            userId = cursor.getInt(
+                    cursor.getColumnIndexOrThrow("id")
+            );
+        }
+
+        cursor.close();
+
+        return userId;
+    }
+    public String getUserRole(String email, String password) {
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(
+                "users",
+                new String[]{"role"},
+                "email = ? AND password = ?",
+                new String[]{email, password},
+                null,
+                null,
+                null
+        );
+
+        String role = null;
+
+        if (cursor.moveToFirst()) {
+            role = cursor.getString(
+                    cursor.getColumnIndexOrThrow("role")
+            );
+        }
+
+        cursor.close();
+
+        return role;
+    }
+    public long insertRepairUpdate(
+            int repairId,
+            int technicianId,
+            String status,
+            String notes,
+            String sparePart,
+            int quantity,
+            String photoUri,
+            String updateDate
+    ) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        ContentValues values =
+                new ContentValues();
+
+        values.put("repair_id", repairId);
+        values.put("technician_id", technicianId);
+        values.put("status", status);
+        values.put("notes", notes);
+        values.put("spare_part", sparePart);
+        values.put("quantity", quantity);
+        values.put("photo_uri", photoUri);
+        values.put("update_date", updateDate);
+
+        return db.insert(
+                TABLE_REPAIR_UPDATES,
+                null,
+                values
+        );
+    }
+    public Cursor getRepairsAssignedToTechnician(int technicianId) {
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        String query =
+                "SELECT " +
+                        "r.id AS repair_id, " +
+                        "r.customer_id AS customer_id, " +
+                        "cu.full_name AS customer_name, " +
+                        "cu.email AS customer_email, " +
+                        "cu.phone AS customer_phone, " +
+
+                        "r.category_id AS category_id, " +
+                        "c.name AS category_name, " +
+
+                        "r.device_model AS device_model, " +
+
+                        "r.service_id AS service_id, " +
+                        "s.name AS service_name, " +
+                        "s.price AS service_price, " +
+
+                        "r.problem_description AS problem_description, " +
+
+                        "r.branch_id AS branch_id, " +
+                        "b.name AS branch_name, " +
+                        "b.address AS branch_address, " +
+
+                        "r.image_uri AS image_uri, " +
+                        "r.in_progress_photo_uri AS in_progress_photo_uri, " +
+
+                        "r.assigned_technician_id AS assigned_technician_id, " +
+                        "r.technician_name AS technician_name, " +
+
+                        "r.status AS status, " +
+                        "r.repair_date AS repair_date, " +
+                        "r.final_price AS final_price " +
+
+                        "FROM repairs r " +
+
+                        "LEFT JOIN customers cu " +
+                        "ON r.customer_id = cu.id " +
+
+                        "LEFT JOIN categories c " +
+                        "ON r.category_id = c.id " +
+
+                        "LEFT JOIN services s " +
+                        "ON r.service_id = s.id " +
+
+                        "LEFT JOIN branches b " +
+                        "ON r.branch_id = b.id " +
+
+                        "WHERE r.assigned_technician_id = ? " +
+
+                        "ORDER BY r.id DESC";
+
+        return db.rawQuery(
+                query,
+                new String[]{String.valueOf(technicianId)}
+        );
+
     }
 
     @Override

@@ -14,8 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.up9.techfix.R;
 import com.up9.techfix.ActorCustomer.customer.CustomerHomeActivity;
 import com.up9.techfix.admin.dashboard.AdminDashboardActivity;
-import com.up9.techfix.admin.technicians.ManageTechniciansActivity;
-import com.up9.techfix.admin.technicians.ManageTechniciansActivity;
+import com.up9.techfix.Technician.TechnicianDashboardActivity;
 import com.up9.techfix.data.DatabaseHelper;
 
 public class LoginActivity extends AppCompatActivity {
@@ -31,7 +30,6 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_login);
@@ -39,26 +37,10 @@ public class LoginActivity extends AppCompatActivity {
         databaseHelper = new DatabaseHelper(this);
 
         etEmail = findViewById(R.id.etEmail);
-
         etPassword = findViewById(R.id.etPassword);
 
         btnLogin = findViewById(R.id.btnLogin);
-
-        tvRegister = findViewById(R.id.tvRegister);
-
-        // ----------------------------------------------------
-        // LOGIN BUTTON
-        // ----------------------------------------------------
-
-        btnLogin.setOnClickListener(v -> {
-
-            validateLogin();
-
-        });
-
-        // ----------------------------------------------------
-        // REGISTER
-        // ----------------------------------------------------
+        btnLogin.setOnClickListener(v -> validateLogin());
 
         tvRegister.setOnClickListener(v -> {
 
@@ -68,14 +50,8 @@ public class LoginActivity extends AppCompatActivity {
             );
 
             startActivity(intent);
-
         });
     }
-
-    // ========================================================
-    // VALIDATE LOGIN
-    // ========================================================
-
     private void validateLogin() {
 
         String email =
@@ -86,10 +62,6 @@ public class LoginActivity extends AppCompatActivity {
         String password =
                 etPassword.getText()
                         .toString();
-
-        // ----------------------------------------------------
-        // Email validation
-        // ----------------------------------------------------
 
         if (email.isEmpty()) {
 
@@ -115,9 +87,6 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // ----------------------------------------------------
-        // Password validation
-        // ----------------------------------------------------
 
         if (password.isEmpty()) {
 
@@ -129,10 +98,6 @@ public class LoginActivity extends AppCompatActivity {
 
             return;
         }
-
-        // ----------------------------------------------------
-        // LOGIN
-        // ----------------------------------------------------
 
         DatabaseHelper.LoginUser user =
                 databaseHelper.loginUser(
@@ -150,10 +115,6 @@ public class LoginActivity extends AppCompatActivity {
 
             return;
         }
-
-        // ----------------------------------------------------
-        // Save session
-        // ----------------------------------------------------
 
         SharedPreferences preferences =
                 getSharedPreferences(
@@ -180,28 +141,15 @@ public class LoginActivity extends AppCompatActivity {
                 )
                 .apply();
 
-        // ----------------------------------------------------
-        // Customer
-        // ----------------------------------------------------
-
-        // ----------------------------------------------------
-// Customer
-// ----------------------------------------------------
-
-        if ("CUSTOMER".equalsIgnoreCase(user.getRole())) {
+        if ("CUSTOMER".equalsIgnoreCase(
+                user.getRole()
+        )) {
 
             int customerId =
                     databaseHelper.getCustomerId(
                             user.getEmail()
                     );
 
-            /*
-             * The users table contains the login account.
-             * The customers table contains the customer profile
-             * used by the repair system.
-             *
-             * If the customer profile exists, save its ID.
-             */
             if (customerId <= 0) {
 
                 Toast.makeText(
@@ -213,12 +161,6 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            /*
-             * Save the CUSTOMER table ID.
-             *
-             * IMPORTANT:
-             * This is NOT necessarily the same as user.getId().
-             */
             preferences.edit()
                     .putInt(
                             "customerId",
@@ -245,10 +187,6 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // ----------------------------------------------------
-        // Admin
-        // ----------------------------------------------------
-
         if ("ADMIN".equalsIgnoreCase(
                 user.getRole()
         )) {
@@ -259,10 +197,11 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT
             ).show();
 
-            Intent intent = new Intent(
-                    LoginActivity.this,
-                    AdminDashboardActivity.class
-            );
+            Intent intent =
+                    new Intent(
+                            LoginActivity.this,
+                            AdminDashboardActivity.class
+                    );
 
             startActivity(intent);
 
@@ -271,13 +210,17 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // ----------------------------------------------------
-        // Technician
-        // ----------------------------------------------------
-
         if ("TECHNICIAN".equalsIgnoreCase(
                 user.getRole()
         )) {
+
+
+            preferences.edit()
+                    .putInt(
+                            "technicianId",
+                            user.getId()
+                    )
+                    .apply();
 
             Toast.makeText(
                     this,
@@ -285,10 +228,11 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT
             ).show();
 
-            Intent intent = new Intent(
-                    LoginActivity.this,
-                    ManageTechniciansActivity.class
-            );
+            Intent intent =
+                    new Intent(
+                            LoginActivity.this,
+                            TechnicianDashboardActivity.class
+                    );
 
             startActivity(intent);
 
@@ -296,11 +240,6 @@ public class LoginActivity extends AppCompatActivity {
 
             return;
         }
-
-        // ----------------------------------------------------
-        // Unknown role
-        // ----------------------------------------------------
-
         Toast.makeText(
                 this,
                 "Unknown user role.",
