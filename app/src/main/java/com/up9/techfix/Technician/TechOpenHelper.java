@@ -2,13 +2,14 @@ package com.up9.techfix.Technician;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class TechOpenHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "Technician.db";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
 
     public TechOpenHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -51,13 +52,48 @@ public class TechOpenHelper extends SQLiteOpenHelper {
                         "quantity INTEGER, " +
                         "photo TEXT)"
         );
+
+
+        insertSampleRepairs(db);
     }
 
+    private void insertSampleRepairs(SQLiteDatabase db) {
+
+        ContentValues values = new ContentValues();
+
+        values.put("customer_name", "Nimal Perera");
+        values.put("customer_phone", "0771234567");
+        values.put("customer_email", "nimal@gmail.com");
+        values.put("device_category", "Mobile Phone");
+        values.put("device_model", "Samsung Galaxy A54");
+        values.put("service", "Screen Replacement");
+        values.put("problem", "Screen is cracked");
+        values.put("branch", "Colombo");
+        values.put("repair_date", "30 August 2026");
+        values.put("status", "Assigned");
+
+        db.insert("Repairs", null, values);
+
+
+        ContentValues values2 = new ContentValues();
+
+        values2.put("customer_name", "Kamal Silva");
+        values2.put("customer_phone", "0712345678");
+        values2.put("customer_email", "kamal@gmail.com");
+        values2.put("device_category", "Laptop");
+        values2.put("device_model", "Dell Inspiron 15");
+        values2.put("service", "Windows Installation");
+        values2.put("problem", "Windows system problem");
+        values2.put("branch", "Colombo");
+        values2.put("repair_date", "31 August 2026");
+        values2.put("status", "In Progress");
+
+        db.insert("Repairs", null, values2);
+    }
+
+
     @Override
-    public void onUpgrade(
-            SQLiteDatabase db,
-            int oldVersion,
-            int newVersion) {
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
         db.execSQL("DROP TABLE IF EXISTS RepairUpdates");
         db.execSQL("DROP TABLE IF EXISTS Repairs");
@@ -66,57 +102,69 @@ public class TechOpenHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Insert technician
-    public long insertTechnician(
-            String name,
-            String email,
-            String phone,
-            String specialization) {
+
+    public Cursor getAllRepairs() {
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        return db.rawQuery(
+                "SELECT * FROM Repairs",
+                null
+        );
+    }
+
+
+    public Cursor getRepairsByStatus(String status) {
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        return db.query(
+                "Repairs",
+                null,
+                "status = ?",
+                new String[]{status},
+                null,
+                null,
+                "repair_id DESC"
+        );
+    }
+
+
+    public Cursor getRepairById(int repairId) {
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        return db.query(
+                "Repairs",
+                null,
+                "repair_id = ?",
+                new String[]{String.valueOf(repairId)},
+                null,
+                null,
+                null
+        );
+    }
+
+
+    public boolean updateRepairStatus(int repairId, String newStatus) {
 
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
 
-        values.put("name", name);
-        values.put("email", email);
-        values.put("phone", phone);
-        values.put("specialization", specialization);
+        values.put("status", newStatus);
 
-        return db.insert("Technician", null, values);
+        int result = db.update(
+                "Repairs",
+                values,
+                "repair_id = ?",
+                new String[]{String.valueOf(repairId)}
+        );
+
+        return result > 0;
     }
 
-    // Insert repair
-    public long insertRepair(
-            String customerName,
-            String customerPhone,
-            String customerEmail,
-            String deviceCategory,
-            String deviceModel,
-            String service,
-            String problem,
-            String branch,
-            String repairDate,
-            String status) {
 
-        SQLiteDatabase db = getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-
-        values.put("customer_name", customerName);
-        values.put("customer_phone", customerPhone);
-        values.put("customer_email", customerEmail);
-        values.put("device_category", deviceCategory);
-        values.put("device_model", deviceModel);
-        values.put("service", service);
-        values.put("problem", problem);
-        values.put("branch", branch);
-        values.put("repair_date", repairDate);
-        values.put("status", status);
-
-        return db.insert("Repairs", null, values);
-    }
-
-    // Insert repair update
     public long insertRepairUpdate(
             int repairId,
             String status,
@@ -137,5 +185,26 @@ public class TechOpenHelper extends SQLiteOpenHelper {
         values.put("photo", photo);
 
         return db.insert("RepairUpdates", null, values);
+    }
+
+
+    public int getRepairCountByStatus(String status) {
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT COUNT(*) FROM Repairs WHERE status = ?",
+                new String[]{status}
+        );
+
+        int count = 0;
+
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+
+        cursor.close();
+
+        return count;
     }
 }

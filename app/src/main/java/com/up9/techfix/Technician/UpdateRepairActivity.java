@@ -21,16 +21,30 @@ public class UpdateRepairActivity extends AppCompatActivity {
     EditText etNotes;
     EditText etSparePart;
     EditText etQuantity;
+
     Button btnSaveUpdate;
 
     ImageView ivRepairPhoto;
     Button btnTakePhoto;
+
+    TechOpenHelper dbHelper;
+
+    int repairId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_update_repair);
+
+
+        repairId = getIntent().getIntExtra(
+                "repair_id",
+                1
+        );
+
+
+        dbHelper = new TechOpenHelper(this);
 
 
         spinnerStatus = findViewById(R.id.spinnerStatus);
@@ -43,39 +57,22 @@ public class UpdateRepairActivity extends AppCompatActivity {
         btnTakePhoto = findViewById(R.id.btnTakePhoto);
 
 
-
-        btnTakePhoto.setOnClickListener(v -> {
-
-            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-            if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-                startActivityForResult(cameraIntent, 100);
-            } else {
-                Toast.makeText(
-                        UpdateRepairActivity.this,
-                        "Camera is not available",
-                        Toast.LENGTH_SHORT
-                ).show();
-            }
-        });
-
-
-
         String[] statuses = {
                 "Assigned",
-                "Diagnosing",
-                "Repairing",
+                "In Progress",
                 "Waiting for Parts",
                 "Testing",
                 "Completed",
                 "Ready for Collection"
         };
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_item,
-                statuses
-        );
+
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(
+                        this,
+                        android.R.layout.simple_spinner_item,
+                        statuses
+                );
 
         adapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item
@@ -85,27 +82,111 @@ public class UpdateRepairActivity extends AppCompatActivity {
 
 
 
+        btnTakePhoto.setOnClickListener(v -> {
+
+            Intent cameraIntent =
+                    new Intent(
+                            MediaStore.ACTION_IMAGE_CAPTURE
+                    );
+
+            startActivityForResult(
+                    cameraIntent,
+                    100
+            );
+        });
+
+
+
         btnSaveUpdate.setOnClickListener(v -> {
 
-            String status = spinnerStatus.getSelectedItem().toString();
-            String notes = etNotes.getText().toString().trim();
-            String sparePart = etSparePart.getText().toString().trim();
-            String quantity = etQuantity.getText().toString().trim();
+            String status =
+                    spinnerStatus
+                            .getSelectedItem()
+                            .toString();
+
+            String notes =
+                    etNotes
+                            .getText()
+                            .toString()
+                            .trim();
+
+            String sparePart =
+                    etSparePart
+                            .getText()
+                            .toString()
+                            .trim();
+
+            String quantityText =
+                    etQuantity
+                            .getText()
+                            .toString()
+                            .trim();
+
 
             if (notes.isEmpty()) {
-                etNotes.setError("Please enter technician notes");
+
+                etNotes.setError(
+                        "Please enter technician notes"
+                );
+
                 etNotes.requestFocus();
+
                 return;
             }
 
-            Toast.makeText(
-                    UpdateRepairActivity.this,
-                    "Repair updated: " + status,
-                    Toast.LENGTH_SHORT
-            ).show();
+
+            int quantity = 0;
+
+            if (!quantityText.isEmpty()) {
+
+                quantity =
+                        Integer.parseInt(
+                                quantityText
+                        );
+            }
+
+
+            // Update Repairs table
+            boolean updated =
+                    dbHelper.updateRepairStatus(
+                            repairId,
+                            status
+                    );
+
+
+            // Save Repair Update history
+            long updateResult =
+                    dbHelper.insertRepairUpdate(
+                            repairId,
+                            status,
+                            notes,
+                            sparePart,
+                            quantity,
+                            ""
+                    );
+
+
+            if (updated && updateResult != -1) {
+
+                Toast.makeText(
+                        UpdateRepairActivity.this,
+                        "Repair updated successfully",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+
+                finish();
+
+            } else {
+
+                Toast.makeText(
+                        UpdateRepairActivity.this,
+                        "Update failed",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
         });
     }
-
 
 
     @Override
@@ -114,11 +195,18 @@ public class UpdateRepairActivity extends AppCompatActivity {
             int resultCode,
             Intent data) {
 
-        super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(
+                requestCode,
+                resultCode,
+                data
+        );
 
-        if (requestCode == 100 && resultCode == RESULT_OK && data != null) {
+        if (requestCode == 100
+                && resultCode == RESULT_OK
+                && data != null) {
 
-            Bundle extras = data.getExtras();
+            Bundle extras =
+                    data.getExtras();
 
             if (extras != null) {
 
@@ -127,13 +215,9 @@ public class UpdateRepairActivity extends AppCompatActivity {
 
                 if (imageBitmap != null) {
 
-                    ivRepairPhoto.setImageBitmap(imageBitmap);
-
-                    Toast.makeText(
-                            UpdateRepairActivity.this,
-                            "Repair photo added",
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    ivRepairPhoto.setImageBitmap(
+                            imageBitmap
+                    );
                 }
             }
         }

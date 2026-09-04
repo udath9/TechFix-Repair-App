@@ -13,6 +13,7 @@
 
 
 
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -75,12 +76,12 @@
 
 
 
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="22dp"
             android:orientation="horizontal">
+
 
 
 
@@ -95,9 +96,10 @@
                 android:padding="12dp">
 
                 <TextView
+                    android:id="@+id/tvAssignedCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="5"
+                    android:text="0"
                     android:textColor="#222222"
                     android:textSize="28sp"
                     android:textStyle="bold" />
@@ -115,7 +117,6 @@
 
 
 
-
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="120dp"
@@ -127,9 +128,10 @@
                 android:padding="12dp">
 
                 <TextView
+                    android:id="@+id/tvProgressCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="2"
+                    android:text="0"
                     android:textColor="#222222"
                     android:textSize="28sp"
                     android:textStyle="bold" />
@@ -148,11 +150,14 @@
         </LinearLayout>
 
 
+
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:orientation="horizontal">
+
 
 
 
@@ -167,9 +172,10 @@
                 android:padding="12dp">
 
                 <TextView
+                    android:id="@+id/tvWaitingCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1"
+                    android:text="0"
                     android:textColor="#222222"
                     android:textSize="28sp"
                     android:textStyle="bold" />
@@ -199,9 +205,10 @@
                 android:padding="12dp">
 
                 <TextView
+                    android:id="@+id/tvCompletedCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="3"
+                    android:text="0"
                     android:textColor="#222222"
                     android:textSize="28sp"
                     android:textStyle="bold" />
@@ -231,6 +238,7 @@
             android:textSize="19sp"
             android:textStyle="bold" />
 
+
         <Button
             android:id="@+id/btnViewRepairs"
             android:layout_width="match_parent"
@@ -238,6 +246,7 @@
             android:layout_marginTop="15dp"
             android:text="View My Repairs"
             android:textSize="15sp" />
+
 
         <Button
             android:id="@+id/btnRepairHistory"

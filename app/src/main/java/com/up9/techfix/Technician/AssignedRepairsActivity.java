@@ -22,18 +22,30 @@ public class AssignedRepairsActivity extends AppCompatActivity {
         btnRepair1 = findViewById(R.id.btnRepair1);
         btnRepair2 = findViewById(R.id.btnRepair2);
 
-        btnRepair1.setOnClickListener(v -> openRepairDetails());
 
-        btnRepair2.setOnClickListener(v -> openRepairDetails());
-    }
+        btnRepair1.setOnClickListener(v -> {
 
-    private void openRepairDetails() {
+            Intent intent = new Intent(
+                    AssignedRepairsActivity.this,
+                    RepairDetailsActivity.class
+            );
 
-        Intent intent = new Intent(
-                AssignedRepairsActivity.this,
-                RepairDetailsActivity.class
-        );
+            intent.putExtra("repair_id", 1);
 
-        startActivity(intent);
+            startActivity(intent);
+        });
+
+
+        btnRepair2.setOnClickListener(v -> {
+
+            Intent intent = new Intent(
+                    AssignedRepairsActivity.this,
+                    RepairDetailsActivity.class
+            );
+
+            intent.putExtra("repair_id", 2);
+
+            startActivity(intent);
+        });
     }
 }
