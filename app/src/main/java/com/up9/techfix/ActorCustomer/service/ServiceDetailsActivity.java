@@ -1,7 +1,7 @@
 package com.up9.techfix.ActorCustomer.service;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -19,7 +18,8 @@ import com.up9.techfix.ActorCustomer.RepairBooking.BookRepairActivity;
 
 import java.util.Locale;
 
-public class ServiceDetailsActivity extends AppCompatActivity {
+public class ServiceDetailsActivity
+        extends AppCompatActivity {
 
     private ImageView ivServiceImage;
     private TextView tvServiceTitle;
@@ -28,11 +28,17 @@ public class ServiceDetailsActivity extends AppCompatActivity {
     private Button btnBookThisService;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(
+            Bundle savedInstanceState
+    ) {
+
         super.onCreate(savedInstanceState);
 
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_service_details);
+
+        setContentView(
+                R.layout.activity_service_details
+        );
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main),
@@ -55,36 +61,53 @@ public class ServiceDetailsActivity extends AppCompatActivity {
         );
 
         ivServiceImage =
-                findViewById(R.id.ivServiceImage);
+                findViewById(
+                        R.id.ivServiceImage
+                );
 
         tvServiceTitle =
-                findViewById(R.id.tvServiceTitle);
+                findViewById(
+                        R.id.tvServiceTitle
+                );
 
         tvServicePrice =
-                findViewById(R.id.tvServicePrice);
+                findViewById(
+                        R.id.tvServicePrice
+                );
 
         tvServiceDescription =
-                findViewById(R.id.tvServiceDescription);
+                findViewById(
+                        R.id.tvServiceDescription
+                );
 
         btnBookThisService =
-                findViewById(R.id.btnBookThisService);
+                findViewById(
+                        R.id.btnBookThisService
+                );
 
-
-        // Get service data sent from ServicesActivity
-
-        Intent intent = getIntent();
+        Intent intent =
+                getIntent();
 
         int serviceId =
-                intent.getIntExtra("serviceId", -1);
+                intent.getIntExtra(
+                        "serviceId",
+                        -1
+                );
 
         String serviceName =
-                intent.getStringExtra("serviceName");
+                intent.getStringExtra(
+                        "serviceName"
+                );
 
         String serviceImageUri =
-                intent.getStringExtra("serviceImageUri");
+                intent.getStringExtra(
+                        "serviceImageUri"
+                );
 
         String serviceDescription =
-                intent.getStringExtra("serviceDescription");
+                intent.getStringExtra(
+                        "serviceDescription"
+                );
 
         double servicePrice =
                 intent.getDoubleExtra(
@@ -93,41 +116,10 @@ public class ServiceDetailsActivity extends AppCompatActivity {
                 );
 
 
-        // Display service image
+        loadServiceImage(
+                serviceImageUri
+        );
 
-        if (serviceImageUri != null &&
-                !serviceImageUri.trim().isEmpty()) {
-
-            int imageResourceId =
-                    getResources().getIdentifier(
-                            serviceImageUri.trim(),
-                            "drawable",
-                            getPackageName()
-                    );
-
-            if (imageResourceId != 0) {
-
-                Drawable drawable =
-                        ContextCompat.getDrawable(
-                                this,
-                                imageResourceId
-                        );
-
-                if (drawable != null) {
-
-                    ivServiceImage.setImageDrawable(
-                            drawable
-                    );
-
-                    ivServiceImage.setVisibility(
-                            ImageView.VISIBLE
-                    );
-                }
-            }
-        }
-
-
-        // Display service name
 
         if (serviceName != null) {
 
@@ -136,8 +128,6 @@ public class ServiceDetailsActivity extends AppCompatActivity {
             );
         }
 
-
-        // Display service price
 
         tvServicePrice.setText(
                 String.format(
@@ -148,8 +138,6 @@ public class ServiceDetailsActivity extends AppCompatActivity {
         );
 
 
-        // Display service description
-
         if (serviceDescription != null) {
 
             tvServiceDescription.setText(
@@ -158,24 +146,60 @@ public class ServiceDetailsActivity extends AppCompatActivity {
         }
 
 
-        // Book this service
+        btnBookThisService.setOnClickListener(
+                v -> {
 
-        btnBookThisService.setOnClickListener(v -> {
+                    Intent bookingIntent =
+                            new Intent(
+                                    this,
+                                    BookRepairActivity.class
+                            );
 
-            Intent bookingIntent =
-                    new Intent(
-                            ServiceDetailsActivity.this,
-                            BookRepairActivity.class
+                    bookingIntent.putExtra(
+                            "serviceId",
+                            serviceId
                     );
 
-            bookingIntent.putExtra(
-                    "serviceId",
-                    serviceId
+                    startActivity(
+                            bookingIntent
+                    );
+                }
+        );
+    }
+
+    private void loadServiceImage(
+            String imageUri
+    ) {
+
+        if (
+                imageUri == null
+                        ||
+                        imageUri.trim().isEmpty()
+        ) {
+
+            ivServiceImage.setImageResource(
+                    android.R.drawable.ic_menu_gallery
             );
 
-            startActivity(
-                    bookingIntent
+            return;
+        }
+
+        try {
+
+            Uri uri =
+                    Uri.parse(
+                            imageUri
+                    );
+
+            ivServiceImage.setImageURI(
+                    uri
             );
-        });
+
+        } catch (Exception e) {
+
+            ivServiceImage.setImageResource(
+                    android.R.drawable.ic_menu_gallery
+            );
+        }
     }
 }

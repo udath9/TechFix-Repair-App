@@ -14,36 +14,32 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.up9.techfix.R;
 import com.up9.techfix.data.DatabaseHelper;
+import com.up9.techfix.data.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ManageServicesActivity extends AppCompatActivity
         implements ServiceAdapter.OnServiceActionListener {
 
     private RecyclerView recyclerServices;
-
     private Button btnAddService;
 
     private ServiceAdapter serviceAdapter;
-
-    private List<RepairService> serviceList;
+    private List<Service> serviceList;
 
     private DatabaseHelper databaseHelper;
-
 
     private final ActivityResultLauncher<Intent> serviceFormLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.StartActivityForResult(),
                     result -> {
 
-                        if (result.getResultCode() != RESULT_OK) {
-                            return;
+                        if (result.getResultCode() == RESULT_OK) {
+                            loadServices();
                         }
-
-                        loadServices();
                     }
             );
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,53 +50,25 @@ public class ManageServicesActivity extends AppCompatActivity
                 R.layout.activity_manage_services
         );
 
-
         recyclerServices =
                 findViewById(
                         R.id.recyclerServices
                 );
-
 
         btnAddService =
                 findViewById(
                         R.id.btnAddService
                 );
 
-
         databaseHelper =
                 new DatabaseHelper(this);
 
+        serviceList =
+                new ArrayList<>();
 
         recyclerServices.setLayoutManager(
                 new LinearLayoutManager(this)
         );
-
-
-        loadServices();
-
-
-        btnAddService.setOnClickListener(v -> {
-
-            Intent intent =
-                    new Intent(
-                            ManageServicesActivity.this,
-                            ServiceFormActivity.class
-                    );
-
-            intent.putExtra(
-                    "editMode",
-                    false
-            );
-
-            serviceFormLauncher.launch(intent);
-        });
-    }
-
-
-    private void loadServices() {
-
-        serviceList.addAll(databaseHelper.getAllServiceModels());
-
 
         serviceAdapter =
                 new ServiceAdapter(
@@ -108,17 +76,47 @@ public class ManageServicesActivity extends AppCompatActivity
                         this
                 );
 
-
         recyclerServices.setAdapter(
                 serviceAdapter
         );
+
+        btnAddService.setOnClickListener(
+                v -> {
+
+                    Intent intent =
+                            new Intent(
+                                    this,
+                                    ServiceFormActivity.class
+                            );
+
+                    intent.putExtra(
+                            "editMode",
+                            false
+                    );
+
+                    serviceFormLauncher.launch(intent);
+                }
+        );
+
+        loadServices();
     }
 
+    private void loadServices() {
+
+        List<Service> newServices =
+                databaseHelper.getAllServices();
+
+        serviceList.clear();
+
+        if (newServices != null) {
+            serviceList.addAll(newServices);
+        }
+
+        serviceAdapter.notifyDataSetChanged();
+    }
 
     @Override
-    public void onEdit(
-            RepairService service
-    ) {
+    public void onEdit(Service service) {
 
         Intent intent =
                 new Intent(
@@ -126,69 +124,57 @@ public class ManageServicesActivity extends AppCompatActivity
                         ServiceFormActivity.class
                 );
 
-
         intent.putExtra(
                 "editMode",
                 true
         );
-
 
         intent.putExtra(
                 "serviceId",
                 service.getId()
         );
 
-
         intent.putExtra(
                 "name",
                 service.getName()
         );
-
 
         intent.putExtra(
                 "imageUri",
                 service.getImageUri()
         );
 
-
         intent.putExtra(
                 "description",
                 service.getDescription()
         );
-
 
         intent.putExtra(
                 "price",
                 service.getPrice()
         );
 
-
         intent.putExtra(
                 "estimatedDays",
                 service.getEstimatedDays()
         );
 
-
         serviceFormLauncher.launch(intent);
     }
 
-
     @Override
     public void onDelete(
-            RepairService service,
+            Service service,
             int position
     ) {
 
         new AlertDialog.Builder(this)
-
                 .setTitle("Delete Service")
-
                 .setMessage(
                         "Are you sure you want to delete "
                                 + service.getName()
                                 + "?"
                 )
-
                 .setPositiveButton(
                         "Delete",
                         (dialog, which) -> {
@@ -197,7 +183,6 @@ public class ManageServicesActivity extends AppCompatActivity
                                     databaseHelper.deleteService(
                                             service.getId()
                                     );
-
 
                             if (result > 0) {
 
@@ -219,22 +204,23 @@ public class ManageServicesActivity extends AppCompatActivity
                             }
                         }
                 )
-
                 .setNegativeButton(
                         "Cancel",
                         null
                 )
-
                 .show();
     }
-
 
     @Override
     protected void onResume() {
 
         super.onResume();
 
-        if (databaseHelper != null) {
+        if (
+                databaseHelper != null
+                        &&
+                        serviceAdapter != null
+        ) {
             loadServices();
         }
     }

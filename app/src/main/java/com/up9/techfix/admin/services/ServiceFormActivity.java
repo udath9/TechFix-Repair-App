@@ -1,9 +1,13 @@
 package com.up9.techfix.admin.services;
 
-import android.content.Intent;
+import android.Manifest;
+import android.content.ContentResolver;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -13,16 +17,18 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.up9.techfix.R;
 import com.up9.techfix.data.DatabaseHelper;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Locale;
+import java.io.InputStream;
 
 public class ServiceFormActivity extends AppCompatActivity {
+
+    private static final String TAG = "ServiceFormActivity";
 
     private TextView txtServiceFormTitle;
 
@@ -41,53 +47,105 @@ public class ServiceFormActivity extends AppCompatActivity {
     private DatabaseHelper databaseHelper;
 
     private boolean isEditMode = false;
-
     private int serviceId = -1;
 
     private String selectedImageUri = "";
 
-    private final ActivityResultLauncher<String> imagePicker =
+    private final ActivityResultLauncher<String> imagePickerLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.GetContent(),
                     uri -> {
 
-                        if (uri != null) {
+                        if (uri == null) {
+                            return;
+                        }
 
-                            selectedImageUri =
-                                    uri.toString();
+                        String savedUri =
+                                copyImageToInternalStorage(uri);
 
-                            imgServicePreview.setImageURI(uri);
+                        if (savedUri != null) {
+
+                            selectedImageUri = savedUri;
+
+                            loadImage(selectedImageUri);
+
+                            Toast.makeText(
+                                    this,
+                                    "Image selected successfully",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+
+                        } else {
+
+                            Toast.makeText(
+                                    this,
+                                    "Unable to save image",
+                                    Toast.LENGTH_LONG
+                            ).show();
                         }
                     }
             );
+
 
     private final ActivityResultLauncher<Void> cameraLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.TakePicturePreview(),
                     bitmap -> {
 
-                        if (bitmap != null) {
+                        if (bitmap == null) {
 
-                            String savedUri =
-                                    saveBitmapToInternalStorage(bitmap);
+                            Toast.makeText(
+                                    this,
+                                    "Camera cancelled",
+                                    Toast.LENGTH_SHORT
+                            ).show();
 
-                            if (savedUri != null) {
+                            return;
+                        }
 
-                                selectedImageUri =
-                                        savedUri;
+                        String savedUri =
+                                saveCameraImage(bitmap);
 
-                                imgServicePreview.setImageBitmap(
-                                        bitmap
-                                );
+                        if (savedUri != null) {
 
-                            } else {
+                            selectedImageUri = savedUri;
 
-                                Toast.makeText(
-                                        this,
-                                        "Failed to save camera image",
-                                        Toast.LENGTH_SHORT
-                                ).show();
-                            }
+                            loadImage(selectedImageUri);
+
+                            Toast.makeText(
+                                    this,
+                                    "Camera image saved successfully",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+
+                        } else {
+
+                            Toast.makeText(
+                                    this,
+                                    "Failed to save camera image",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        }
+                    }
+            );
+
+
+    private final ActivityResultLauncher<String> cameraPermissionLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.RequestPermission(),
+                    isGranted -> {
+
+                        if (isGranted) {
+
+                            cameraLauncher.launch(null);
+
+                        } else {
+
+                            Toast.makeText(
+                                    this,
+                                    "Camera permission is required",
+                                    Toast.LENGTH_LONG
+                            ).show();
                         }
                     }
             );
@@ -109,25 +167,30 @@ public class ServiceFormActivity extends AppCompatActivity {
         checkEditMode();
 
         btnUploadImage.setOnClickListener(
-                v -> openImagePicker()
+                v -> openGallery()
         );
 
+        // Camera
         btnTakePhoto.setOnClickListener(
                 v -> openCamera()
         );
 
+        // Save
         btnSaveService.setOnClickListener(
                 v -> saveService()
         );
 
-        btnCancelService.setOnClickListener(v -> {
+        // Cancel
+        btnCancelService.setOnClickListener(
+                v -> {
 
-            setResult(
-                    RESULT_CANCELED
-            );
+                    setResult(
+                            RESULT_CANCELED
+                    );
 
-            finish();
-        });
+                    finish();
+                }
+        );
     }
 
     private void initializeViews() {
@@ -183,73 +246,10 @@ public class ServiceFormActivity extends AppCompatActivity {
                 );
     }
 
-    private void openImagePicker() {
-
-        imagePicker.launch("image/*");
-    }
-
-    private void openCamera() {
-
-        cameraLauncher.launch(null);
-    }
-
-    private String saveBitmapToInternalStorage(Bitmap bitmap) {
-
-        File directory =
-                new File(
-                        getFilesDir(),
-                        "service_images"
-                );
-
-        if (!directory.exists()) {
-
-            if (!directory.mkdirs()) {
-                return null;
-            }
-        }
-
-        String fileName =
-                "service_"
-                        + System.currentTimeMillis()
-                        + ".jpg";
-
-        File imageFile =
-                new File(
-                        directory,
-                        fileName
-                );
-
-        try {
-
-            FileOutputStream outputStream =
-                    new FileOutputStream(imageFile);
-
-            bitmap.compress(
-                    Bitmap.CompressFormat.JPEG,
-                    90,
-                    outputStream
-            );
-
-            outputStream.flush();
-            outputStream.close();
-
-            return Uri.fromFile(imageFile).toString();
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-
-            return null;
-        }
-    }
-
     private void checkEditMode() {
 
-        Intent intent =
-                getIntent();
-
         isEditMode =
-                intent.getBooleanExtra(
+                getIntent().getBooleanExtra(
                         "editMode",
                         false
                 );
@@ -257,61 +257,68 @@ public class ServiceFormActivity extends AppCompatActivity {
         if (!isEditMode) {
 
             txtServiceFormTitle.setText(
-                    "Add Repair Service"
+                    "Add Service"
             );
 
-            btnSaveService.setText(
-                    "Save Service"
+            imgServicePreview.setImageResource(
+                    android.R.drawable.ic_menu_gallery
             );
 
             return;
         }
 
+        txtServiceFormTitle.setText(
+                "Edit Service"
+        );
+
         serviceId =
-                intent.getIntExtra(
+                getIntent().getIntExtra(
                         "serviceId",
                         -1
                 );
 
-        txtServiceFormTitle.setText(
-                "Edit Repair Service"
-        );
-
-        btnSaveService.setText(
-                "Update Service"
-        );
-
-        edtServiceName.setText(
-                intent.getStringExtra(
+        String name =
+                getIntent().getStringExtra(
                         "name"
-                )
-        );
+                );
 
-        edtServiceDescription.setText(
-                intent.getStringExtra(
+        String imageUri =
+                getIntent().getStringExtra(
+                        "imageUri"
+                );
+
+        String description =
+                getIntent().getStringExtra(
                         "description"
-                )
-        );
+                );
 
         double price =
-                intent.getDoubleExtra(
+                getIntent().getDoubleExtra(
                         "price",
                         0.0
                 );
 
-        edtServicePrice.setText(
-                String.format(
-                        Locale.getDefault(),
-                        "%.2f",
-                        price
-                )
-        );
-
         int estimatedDays =
-                intent.getIntExtra(
+                getIntent().getIntExtra(
                         "estimatedDays",
-                        0
+                        1
                 );
+
+        if (name != null) {
+
+            edtServiceName.setText(name);
+        }
+
+        if (description != null) {
+
+            edtServiceDescription.setText(
+                    description
+            );
+        }
+
+        edtServicePrice.setText(
+                String.valueOf(price)
+        );
 
         edtServiceEstimatedDays.setText(
                 String.valueOf(
@@ -319,28 +326,323 @@ public class ServiceFormActivity extends AppCompatActivity {
                 )
         );
 
-        selectedImageUri =
-                intent.getStringExtra(
-                        "imageUri"
+        if (
+                imageUri != null
+                        &&
+                        !imageUri.trim().isEmpty()
+        ) {
+
+            selectedImageUri =
+                    imageUri.trim();
+
+            loadImage(
+                    selectedImageUri
+            );
+        }
+    }
+
+
+    private void openGallery() {
+
+        imagePickerLauncher.launch(
+                "image/*"
+        );
+    }
+
+
+    private void openCamera() {
+
+        if (
+                ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.CAMERA
+                )
+                        ==
+                        PackageManager.PERMISSION_GRANTED
+        ) {
+
+            cameraLauncher.launch(null);
+
+        } else {
+
+            cameraPermissionLauncher.launch(
+                    Manifest.permission.CAMERA
+            );
+        }
+    }
+
+
+    private String saveCameraImage(
+            Bitmap bitmap
+    ) {
+
+        FileOutputStream outputStream = null;
+
+        try {
+
+            String fileName =
+                    "service_camera_"
+                            +
+                            System.currentTimeMillis()
+                            +
+                            ".jpg";
+
+            File imageFile =
+                    new File(
+                            getFilesDir(),
+                            fileName
+                    );
+
+            outputStream =
+                    new FileOutputStream(
+                            imageFile
+                    );
+
+            boolean success =
+                    bitmap.compress(
+                            Bitmap.CompressFormat.JPEG,
+                            90,
+                            outputStream
+                    );
+
+            outputStream.flush();
+
+            if (!success) {
+
+                return null;
+            }
+
+            return Uri.fromFile(
+                    imageFile
+            ).toString();
+
+        } catch (Exception e) {
+
+            Log.e(
+                    TAG,
+                    "Error saving camera image",
+                    e
+            );
+
+            return null;
+
+        } finally {
+
+            if (outputStream != null) {
+
+                try {
+
+                    outputStream.close();
+
+                } catch (Exception ignored) {
+                }
+            }
+        }
+    }
+
+
+    private String copyImageToInternalStorage(
+            Uri sourceUri
+    ) {
+
+        InputStream inputStream = null;
+        FileOutputStream outputStream = null;
+
+        try {
+
+            ContentResolver resolver =
+                    getContentResolver();
+
+            inputStream =
+                    resolver.openInputStream(
+                            sourceUri
+                    );
+
+            if (inputStream == null) {
+
+                return null;
+            }
+
+            String fileName =
+                    "service_gallery_"
+                            +
+                            System.currentTimeMillis()
+                            +
+                            ".jpg";
+
+            File imageFile =
+                    new File(
+                            getFilesDir(),
+                            fileName
+                    );
+
+            outputStream =
+                    new FileOutputStream(
+                            imageFile
+                    );
+
+            byte[] buffer =
+                    new byte[8192];
+
+            int bytesRead;
+
+            while (
+                    (bytesRead =
+                            inputStream.read(buffer))
+                            != -1
+            ) {
+
+                outputStream.write(
+                        buffer,
+                        0,
+                        bytesRead
                 );
+            }
 
-        if (selectedImageUri != null
-                && !selectedImageUri.isEmpty()) {
+            outputStream.flush();
 
-            try {
+            return Uri.fromFile(
+                    imageFile
+            ).toString();
+
+        } catch (Exception e) {
+
+            Log.e(
+                    TAG,
+                    "Error copying gallery image",
+                    e
+            );
+
+            return null;
+
+        } finally {
+
+            if (inputStream != null) {
+
+                try {
+
+                    inputStream.close();
+
+                } catch (Exception ignored) {
+                }
+            }
+
+            if (outputStream != null) {
+
+                try {
+
+                    outputStream.close();
+
+                } catch (Exception ignored) {
+                }
+            }
+        }
+    }
+
+
+    private void loadImage(
+            String imageValue
+    ) {
+
+        if (
+                imageValue == null
+                        ||
+                        imageValue.trim().isEmpty()
+        ) {
+
+            imgServicePreview.setImageResource(
+                    android.R.drawable.ic_menu_gallery
+            );
+
+            return;
+        }
+
+        imageValue =
+                imageValue.trim();
+
+        try {
+
+
+            if (
+                    imageValue.startsWith(
+                            "file://"
+                    )
+            ) {
+
+                Uri uri =
+                        Uri.parse(
+                                imageValue
+                        );
 
                 imgServicePreview.setImageURI(
-                        Uri.parse(
-                                selectedImageUri
-                        )
+                        uri
                 );
 
-            } catch (Exception e) {
+                imgServicePreview.setVisibility(
+                        ImageView.VISIBLE
+                );
+
+                return;
+            }
+
+            if (
+                    imageValue.startsWith(
+                            "content://"
+                    )
+            ) {
+
+                Uri uri =
+                        Uri.parse(
+                                imageValue
+                        );
+
+                imgServicePreview.setImageURI(
+                        uri
+                );
+
+                imgServicePreview.setVisibility(
+                        ImageView.VISIBLE
+                );
+
+                return;
+            }
+
+
+            int resourceId =
+                    getResources().getIdentifier(
+                            imageValue,
+                            "drawable",
+                            getPackageName()
+                    );
+
+            if (resourceId != 0) {
+
+                imgServicePreview.setImageResource(
+                        resourceId
+                );
+
+                imgServicePreview.setVisibility(
+                        ImageView.VISIBLE
+                );
+
+            } else {
 
                 imgServicePreview.setImageResource(
                         android.R.drawable.ic_menu_gallery
                 );
             }
+
+        } catch (Exception e) {
+
+            Log.e(
+                    TAG,
+                    "Unable to load service image",
+                    e
+            );
+
+            imgServicePreview.setImageResource(
+                    android.R.drawable.ic_menu_gallery
+            );
         }
     }
 
@@ -364,7 +666,7 @@ public class ServiceFormActivity extends AppCompatActivity {
                         .toString()
                         .trim();
 
-        String daysText =
+        String estimatedDaysText =
                 edtServiceEstimatedDays
                         .getText()
                         .toString()
@@ -382,6 +684,16 @@ public class ServiceFormActivity extends AppCompatActivity {
             return;
         }
 
+        if (description.isEmpty()) {
+
+            edtServiceDescription.setError(
+                    "Enter service description"
+            );
+
+            edtServiceDescription.requestFocus();
+
+            return;
+        }
 
         if (priceText.isEmpty()) {
 
@@ -394,8 +706,7 @@ public class ServiceFormActivity extends AppCompatActivity {
             return;
         }
 
-
-        if (daysText.isEmpty()) {
+        if (estimatedDaysText.isEmpty()) {
 
             edtServiceEstimatedDays.setError(
                     "Enter estimated days"
@@ -420,7 +731,7 @@ public class ServiceFormActivity extends AppCompatActivity {
         } catch (NumberFormatException e) {
 
             edtServicePrice.setError(
-                    "Enter a valid price"
+                    "Invalid price"
             );
 
             edtServicePrice.requestFocus();
@@ -432,13 +743,13 @@ public class ServiceFormActivity extends AppCompatActivity {
 
             estimatedDays =
                     Integer.parseInt(
-                            daysText
+                            estimatedDaysText
                     );
 
         } catch (NumberFormatException e) {
 
             edtServiceEstimatedDays.setError(
-                    "Enter a valid number"
+                    "Invalid number of days"
             );
 
             edtServiceEstimatedDays.requestFocus();
@@ -452,27 +763,59 @@ public class ServiceFormActivity extends AppCompatActivity {
                     "Price cannot be negative"
             );
 
+            edtServicePrice.requestFocus();
+
             return;
         }
 
         if (estimatedDays <= 0) {
 
             edtServiceEstimatedDays.setError(
-                    "Estimated days must be greater than 0"
+                    "Days must be greater than 0"
             );
+
+            edtServiceEstimatedDays.requestFocus();
 
             return;
         }
 
-        if (isEditMode) {
 
-            if (serviceId == -1) {
+        try {
 
-                Toast.makeText(
-                        this,
-                        "Invalid service ID",
-                        Toast.LENGTH_SHORT
-                ).show();
+
+            if (!isEditMode) {
+
+                long result =
+                        databaseHelper.insertService(
+                                name,
+                                selectedImageUri,
+                                description,
+                                price,
+                                estimatedDays
+                        );
+
+                if (result != -1) {
+
+                    Toast.makeText(
+                            this,
+                            "Service added successfully",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    setResult(
+                            RESULT_OK
+                    );
+
+                    finish();
+
+                } else {
+
+                    Toast.makeText(
+                            this,
+                            "Failed to add service",
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
 
                 return;
             }
@@ -506,42 +849,22 @@ public class ServiceFormActivity extends AppCompatActivity {
                 Toast.makeText(
                         this,
                         "Failed to update service",
-                        Toast.LENGTH_SHORT
+                        Toast.LENGTH_LONG
                 ).show();
             }
 
-            return;
-        }
+        } catch (Exception e) {
 
-        long result =
-                databaseHelper.insertService(
-                        name,
-                        selectedImageUri,
-                        description,
-                        price,
-                        estimatedDays
-                );
-
-        if (result != -1) {
-
-            Toast.makeText(
-                    this,
-                    "Service added successfully",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-            setResult(
-                    RESULT_OK
+            Log.e(
+                    TAG,
+                    "Database error while saving service",
+                    e
             );
 
-            finish();
-
-        } else {
-
             Toast.makeText(
                     this,
-                    "Failed to add service",
-                    Toast.LENGTH_SHORT
+                    "Database error: " + e.getMessage(),
+                    Toast.LENGTH_LONG
             ).show();
         }
     }

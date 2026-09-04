@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.up9.techfix.R;
+import com.up9.techfix.data.Service;
 
 import java.util.List;
 import java.util.Locale;
@@ -19,21 +20,21 @@ import java.util.Locale;
 public class ServiceAdapter
         extends RecyclerView.Adapter<ServiceAdapter.ServiceViewHolder> {
 
-    private final List<RepairService> serviceList;
+    private final List<Service> serviceList;
     private final OnServiceActionListener listener;
 
     public interface OnServiceActionListener {
 
-        void onEdit(RepairService service);
+        void onEdit(Service service);
 
         void onDelete(
-                RepairService service,
+                Service service,
                 int position
         );
     }
 
     public ServiceAdapter(
-            List<RepairService> serviceList,
+            List<Service> serviceList,
             OnServiceActionListener listener
     ) {
         this.serviceList = serviceList;
@@ -47,9 +48,10 @@ public class ServiceAdapter
             int viewType
     ) {
 
-        View view = LayoutInflater
-                .from(parent.getContext())
-                .inflate(
+        View view =
+                LayoutInflater.from(
+                        parent.getContext()
+                ).inflate(
                         R.layout.item_service,
                         parent,
                         false
@@ -64,7 +66,8 @@ public class ServiceAdapter
             int position
     ) {
 
-        RepairService service = serviceList.get(position);
+        Service service =
+                serviceList.get(position);
 
         holder.txtServiceName.setText(
                 service.getName()
@@ -90,10 +93,14 @@ public class ServiceAdapter
                 )
         );
 
-        // Display service image
-        String imageUri = service.getImageUri();
+        String imageUri =
+                service.getImageUri();
 
-        if (imageUri != null && !imageUri.isEmpty()) {
+        if (
+                imageUri != null
+                        &&
+                        !imageUri.trim().isEmpty()
+        ) {
 
             try {
 
@@ -125,7 +132,11 @@ public class ServiceAdapter
                     int adapterPosition =
                             holder.getBindingAdapterPosition();
 
-                    if (adapterPosition != RecyclerView.NO_POSITION) {
+                    if (
+                            adapterPosition
+                                    !=
+                                    RecyclerView.NO_POSITION
+                    ) {
 
                         listener.onDelete(
                                 service,

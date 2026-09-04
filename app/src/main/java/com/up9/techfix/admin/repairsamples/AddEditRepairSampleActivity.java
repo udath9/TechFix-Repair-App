@@ -16,9 +16,9 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
-import com.up9.techfix.admin.services.RepairService;
 import com.up9.techfix.data.Category;
 import com.up9.techfix.data.DatabaseHelper;
+import com.up9.techfix.data.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,15 +50,9 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
     private final List<Category> categoryList =
             new ArrayList<>();
 
-    private final List<RepairService> serviceList =
+    private final List<Service> serviceList =
             new ArrayList<>();
 
-    /*
-     * Image picker
-     *
-     * OpenDocument is used so that we can request
-     * persistent read permission for the selected image.
-     */
     private final ActivityResultLauncher<String[]> imagePicker =
             registerForActivityResult(
                     new ActivityResultContracts.OpenDocument(),
@@ -223,12 +217,12 @@ public class AddEditRepairSampleActivity extends AppCompatActivity {
 
         serviceList.clear();
 
-        serviceList.addAll(databaseHelper.getAllServiceModels());
+        serviceList.addAll(databaseHelper.getAllServices());
 
         List<String> serviceNames =
                 new ArrayList<>();
 
-        for (RepairService service :
+        for (Service service :
                 serviceList) {
 
             serviceNames.add(

@@ -2,10 +2,13 @@ package com.up9.techfix.ActorCustomer.service;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
@@ -15,6 +18,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.up9.techfix.ActorCustomer.service.ServiceDetailsActivity;
 import com.up9.techfix.R;
 import com.up9.techfix.data.DatabaseHelper;
 import com.up9.techfix.data.Service;
@@ -23,20 +27,33 @@ import java.util.List;
 
 public class ServicesActivity extends AppCompatActivity {
 
+    private static final String TAG = "ServicesActivity";
+
     private DatabaseHelper databaseHelper;
+
     private LinearLayout servicesContainer;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreate(
+            Bundle savedInstanceState
+    ) {
+
+        super.onCreate(
+                savedInstanceState
+        );
 
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_services);
+
+        setContentView(
+                R.layout.activity_services
+        );
 
         setupWindowInsets();
 
         servicesContainer =
-                findViewById(R.id.servicesContainer);
+                findViewById(
+                        R.id.servicesContainer
+                );
 
         databaseHelper =
                 new DatabaseHelper(this);
@@ -44,9 +61,12 @@ public class ServicesActivity extends AppCompatActivity {
         loadServices();
     }
 
+
     private void setupWindowInsets() {
+
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main),
+
                 (v, insets) -> {
 
                     Insets systemBars =
@@ -66,17 +86,34 @@ public class ServicesActivity extends AppCompatActivity {
         );
     }
 
-    // Load all repair services from the database.
     private void loadServices() {
+
+        if (servicesContainer == null) {
+            return;
+        }
 
         servicesContainer.removeAllViews();
 
         List<Service> services =
                 databaseHelper.getAllServices();
 
-        LinearLayout currentRow = null;
+        if (
+                services == null
+                        ||
+                        services.isEmpty()
+        ) {
 
-        for (int i = 0; i < services.size(); i++) {
+            return;
+        }
+
+        LinearLayout currentRow =
+                null;
+
+        for (
+                int i = 0;
+                i < services.size();
+                i++
+        ) {
 
             if (i % 2 == 0) {
 
@@ -92,10 +129,13 @@ public class ServicesActivity extends AppCompatActivity {
                     services.get(i);
 
             currentRow.addView(
-                    createServiceButton(service)
+                    createServiceButton(
+                            service
+                    )
             );
         }
     }
+
 
     private LinearLayout createServiceRow() {
 
@@ -110,18 +150,23 @@ public class ServicesActivity extends AppCompatActivity {
                 Gravity.CENTER
         );
 
-        row.setWeightSum(2);
+        row.setWeightSum(
+                2
+        );
 
-        LinearLayout.LayoutParams rowParams =
+        LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
                 );
 
-        row.setLayoutParams(rowParams);
+        row.setLayoutParams(
+                params
+        );
 
         return row;
     }
+
 
     private Button createServiceButton(
             Service service
@@ -130,14 +175,14 @@ public class ServicesActivity extends AppCompatActivity {
         Button button =
                 new Button(this);
 
-        LinearLayout.LayoutParams buttonParams =
+        LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
                         0,
                         300,
                         1
                 );
 
-        buttonParams.setMargins(
+        params.setMargins(
                 8,
                 8,
                 8,
@@ -145,16 +190,24 @@ public class ServicesActivity extends AppCompatActivity {
         );
 
         button.setLayoutParams(
-                buttonParams
+                params
         );
 
         button.setText(
                 service.getName()
         );
 
-        button.setTextSize(16);
-        button.setGravity(Gravity.CENTER);
-        button.setAllCaps(false);
+        button.setTextSize(
+                16
+        );
+
+        button.setGravity(
+                Gravity.CENTER
+        );
+
+        button.setAllCaps(
+                false
+        );
 
         setServiceImage(
                 button,
@@ -162,7 +215,9 @@ public class ServicesActivity extends AppCompatActivity {
         );
 
         button.setOnClickListener(
-                v -> openServiceDetails(service)
+                v -> openServiceDetails(
+                        service
+                )
         );
 
         return button;
@@ -170,37 +225,134 @@ public class ServicesActivity extends AppCompatActivity {
 
     private void setServiceImage(
             Button button,
-            String imageName
+            String imageValue
     ) {
 
-        if (imageName == null ||
-                imageName.trim().isEmpty()) {
+        if (
+                imageValue == null
+                        ||
+                        imageValue.trim().isEmpty()
+        ) {
 
             return;
         }
 
-        int imageResourceId =
-                getResources().getIdentifier(
-                        imageName.trim(),
-                        "drawable",
-                        getPackageName()
-                );
+        imageValue =
+                imageValue.trim();
 
-        if (imageResourceId == 0) {
-            return;
+        try {
+
+
+            if (
+                    imageValue.startsWith(
+                            "file://"
+                    )
+            ) {
+
+                Uri uri =
+                        Uri.parse(
+                                imageValue
+                        );
+
+                Drawable drawable =
+                        Drawable.createFromPath(
+                                uri.getPath()
+                        );
+
+                if (drawable != null) {
+
+                    setButtonDrawable(
+                            button,
+                            drawable
+                    );
+                }
+
+                return;
+            }
+
+            if (
+                    imageValue.startsWith(
+                            "content://"
+                    )
+            ) {
+
+                Uri uri =
+                        Uri.parse(
+                                imageValue
+                        );
+
+                try {
+
+                    Drawable drawable =
+                            Drawable.createFromStream(
+                                    getContentResolver()
+                                            .openInputStream(uri),
+                                    imageValue
+                            );
+
+                    if (drawable != null) {
+
+                        setButtonDrawable(
+                                button,
+                                drawable
+                        );
+                    }
+
+                } catch (Exception e) {
+
+                    Log.e(
+                            TAG,
+                            "Unable to load content URI",
+                            e
+                    );
+                }
+
+                return;
+            }
+
+
+            int resourceId =
+                    getResources().getIdentifier(
+                            imageValue,
+                            "drawable",
+                            getPackageName()
+                    );
+
+            if (resourceId != 0) {
+
+                Drawable drawable =
+                        ContextCompat.getDrawable(
+                                this,
+                                resourceId
+                        );
+
+                if (drawable != null) {
+
+                    setButtonDrawable(
+                            button,
+                            drawable
+                    );
+                }
+            }
+
+        } catch (Exception e) {
+
+            Log.e(
+                    TAG,
+                    "Unable to load service image",
+                    e
+            );
         }
+    }
 
-        Drawable drawable =
-                ContextCompat.getDrawable(
-                        this,
-                        imageResourceId
-                );
 
-        if (drawable == null) {
-            return;
-        }
+    private void setButtonDrawable(
+            Button button,
+            Drawable drawable
+    ) {
 
-        int imageSize = 80;
+        int imageSize =
+                120;
 
         drawable.setBounds(
                 0,
@@ -216,8 +368,11 @@ public class ServicesActivity extends AppCompatActivity {
                 null
         );
 
-        button.setCompoundDrawablePadding(12);
+        button.setCompoundDrawablePadding(
+                12
+        );
     }
+
 
     private void openServiceDetails(
             Service service
@@ -254,6 +409,25 @@ public class ServicesActivity extends AppCompatActivity {
                 service.getPrice()
         );
 
-        startActivity(intent);
+        intent.putExtra(
+                "estimatedDays",
+                service.getEstimatedDays()
+        );
+
+        startActivity(
+                intent
+        );
+    }
+
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+
+        if (databaseHelper != null) {
+
+            loadServices();
+        }
     }
 }
