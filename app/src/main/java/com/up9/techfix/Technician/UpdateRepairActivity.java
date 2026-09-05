@@ -1,14 +1,16 @@
 package com.up9.techfix.Technician;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.content.Intent;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -18,52 +20,89 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.up9.techfix.R;
 import com.up9.techfix.data.DatabaseHelper;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 public class UpdateRepairActivity extends AppCompatActivity {
 
+    private static final String TAG =
+            "UpdateRepairActivity";
 
+    private TextView tvDevice;
     private Spinner spinnerStatus;
 
     private EditText etNotes;
     private EditText etSparePart;
     private EditText etQuantity;
 
-    private Button btnSaveUpdate;
-    private Button btnTakePhoto;
-
     private ImageView ivRepairPhoto;
 
-    private DatabaseHelper dbHelper;
+    private Button btnTakePhoto;
+    private Button btnSaveUpdate;
+
+
+    private DatabaseHelper databaseHelper;
 
     private int repairId = -1;
-
     private int technicianId = -1;
 
-    private Bitmap repairPhotoBitmap;
 
-    private final String[] statuses = {
-            "Assigned",
-            "In Progress",
-            "Waiting for Parts",
-            "Testing",
-            "Completed",
-            "Ready for Collection"
-    };
+    private String photoUri = "";
 
     private final ActivityResultLauncher<Void> cameraLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.TakePicturePreview(),
                     bitmap -> {
 
-                        if (bitmap != null) {
+                        if (bitmap == null) {
 
-                            repairPhotoBitmap = bitmap;
+                            Toast.makeText(
+                                    this,
+                                    "No photo was captured.",
+                                    Toast.LENGTH_SHORT
+                            ).show();
 
-                            ivRepairPhoto.setImageBitmap(
-                                    bitmap
-                            );
+                            return;
                         }
+
+                        ivRepairPhoto.setImageBitmap(
+                                bitmap
+                        );
+
+                        ivRepairPhoto.setVisibility(
+                                ImageView.VISIBLE
+                        );
+
+
+                        String savedPath =
+                                saveRepairPhoto(
+                                        bitmap
+                                );
+
+                        if (savedPath == null) {
+
+                            photoUri = "";
+
+                            Toast.makeText(
+                                    this,
+                                    "Photo was captured but could not be saved.",
+                                    Toast.LENGTH_LONG
+                            ).show();
+
+                            return;
+                        }
+
+                        photoUri =
+                                savedPath;
+
+                        Toast.makeText(
+                                this,
+                                "Repair photo saved.",
+                                Toast.LENGTH_SHORT
+                        ).show();
                     }
             );
 
@@ -78,19 +117,36 @@ public class UpdateRepairActivity extends AppCompatActivity {
                 R.layout.activity_update_repair
         );
 
-        dbHelper =
+        databaseHelper =
                 new DatabaseHelper(this);
 
-        initializeViews();
+        repairId =
+                getIntent().getIntExtra(
+                        "repair_id",
+                        -1
+                );
 
-        readRepairData();
+        SharedPreferences preferences =
+                getSharedPreferences(
+                        "TechFixSession",
+                        MODE_PRIVATE
+                );
+
+        technicianId =
+                getIntent().getIntExtra(
+                        "technician_id",
+                        preferences.getInt(
+                                "technicianId",
+                                -1
+                        )
+                );
 
         if (repairId <= 0) {
 
             Toast.makeText(
                     this,
-                    "Repair information not found.",
-                    Toast.LENGTH_LONG
+                    "Invalid repair.",
+                    Toast.LENGTH_SHORT
             ).show();
 
             finish();
@@ -98,18 +154,32 @@ public class UpdateRepairActivity extends AppCompatActivity {
             return;
         }
 
+        if (technicianId <= 0) {
+
+            Toast.makeText(
+                    this,
+                    "Technician session not found.",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            finish();
+
+            return;
+        }
+
+        initializeViews();
+
         setupStatusSpinner();
 
-        btnTakePhoto.setOnClickListener(
-                v -> openCamera()
-        );
-
-        btnSaveUpdate.setOnClickListener(
-                v -> saveRepairUpdate()
-        );
+        loadDeviceDetails();
     }
 
     private void initializeViews() {
+
+        tvDevice =
+                findViewById(
+                        R.id.tvDevice
+                );
 
         spinnerStatus =
                 findViewById(
@@ -131,11 +201,6 @@ public class UpdateRepairActivity extends AppCompatActivity {
                         R.id.etQuantity
                 );
 
-        btnSaveUpdate =
-                findViewById(
-                        R.id.btnSaveUpdate
-                );
-
         ivRepairPhoto =
                 findViewById(
                         R.id.ivRepairPhoto
@@ -145,42 +210,38 @@ public class UpdateRepairActivity extends AppCompatActivity {
                 findViewById(
                         R.id.btnTakePhoto
                 );
-    }
 
-
-    private void readRepairData() {
-
-        repairId =
-                getIntent().getIntExtra(
-                        "repair_id",
-                        -1
+        btnSaveUpdate =
+                findViewById(
+                        R.id.btnSaveUpdate
                 );
 
+        btnTakePhoto.setOnClickListener(
+                v -> cameraLauncher.launch(null)
+        );
 
-        technicianId =
-                getIntent().getIntExtra(
-                        "technician_id",
-                        -1
-                );
-
-        if (technicianId <= 0) {
-
-            android.content.SharedPreferences preferences =
-                    getSharedPreferences(
-                            "TechFixSession",
-                            MODE_PRIVATE
-                    );
-
-            technicianId =
-                    preferences.getInt(
-                            "technicianId",
-                            -1
-                    );
-        }
+        btnSaveUpdate.setOnClickListener(
+                v -> saveRepairUpdate()
+        );
     }
 
 
     private void setupStatusSpinner() {
+
+        String[] statuses = {
+
+                "Assigned",
+
+                "In Progress",
+
+                "Waiting for Parts",
+
+                "Testing",
+
+                "Completed",
+
+                "Ready for Collection"
+        };
 
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(
@@ -196,130 +257,122 @@ public class UpdateRepairActivity extends AppCompatActivity {
         spinnerStatus.setAdapter(
                 adapter
         );
+    }
 
-        String currentStatus =
-                getIntent().getStringExtra(
+    private void loadDeviceDetails() {
+
+        android.database.Cursor cursor =
+                databaseHelper.getRepairById(
+                        repairId
+                );
+
+        if (cursor == null ||
+                !cursor.moveToFirst()) {
+
+            Toast.makeText(
+                    this,
+                    "Repair not found.",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            if (cursor != null) {
+
+                cursor.close();
+            }
+
+            finish();
+
+            return;
+        }
+        int deviceIndex =
+                cursor.getColumnIndex(
+                        "device_model"
+                );
+
+        if (deviceIndex != -1 &&
+                !cursor.isNull(deviceIndex)) {
+
+            tvDevice.setText(
+                    cursor.getString(
+                            deviceIndex
+                    )
+            );
+
+        } else {
+
+            tvDevice.setText(
+                    "Device not available"
+            );
+        }
+
+        int statusIndex =
+                cursor.getColumnIndex(
                         "status"
                 );
 
-        if (currentStatus != null &&
-                !currentStatus.trim().isEmpty()) {
+        if (statusIndex != -1 &&
+                !cursor.isNull(statusIndex)) {
 
-            selectStatus(
-                    currentStatus
-            );
-        }
-    }
+            String currentStatus =
+                    cursor.getString(
+                            statusIndex
+                    );
 
-    private void selectStatus(
-            String status
-    ) {
+            ArrayAdapter<String> adapter =
+                    (ArrayAdapter<String>)
+                            spinnerStatus.getAdapter();
 
-        if (status == null) {
-            return;
-        }
+            int spinnerPosition =
+                    adapter.getPosition(
+                            currentStatus
+                    );
 
-        String normalized =
-                status.trim();
+            if (spinnerPosition >= 0) {
 
-        if ("Ready for Pickup"
-                .equalsIgnoreCase(
-                        normalized
-                )) {
-
-            normalized =
-                    "Ready for Collection";
-        }
-
-        for (int i = 0;
-             i < statuses.length;
-             i++) {
-
-            if (statuses[i]
-                    .equalsIgnoreCase(
-                            normalized
-                    )) {
-
-                spinnerStatus.setSelection(i);
-
-                return;
+                spinnerStatus.setSelection(
+                        spinnerPosition
+                );
             }
         }
-    }
 
-    private void openCamera() {
-
-        cameraLauncher.launch(null);
+        cursor.close();
     }
 
     private void saveRepairUpdate() {
-
-        if (repairId <= 0) {
-
-            Toast.makeText(
-                    this,
-                    "Invalid repair.",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-            return;
-        }
-
-        if (technicianId <= 0) {
-
-            Toast.makeText(
-                    this,
-                    "Technician information not found.",
-                    Toast.LENGTH_LONG
-            ).show();
-
-            return;
-        }
-
-        Object selectedStatus =
-                spinnerStatus.getSelectedItem();
-
-        if (selectedStatus == null) {
-
-            Toast.makeText(
-                    this,
-                    "Please select a repair status.",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-            return;
-        }
-
         String status =
-                selectedStatus
+                spinnerStatus
+                        .getSelectedItem()
                         .toString()
                         .trim();
 
         String notes =
-                etNotes.getText()
+                etNotes
+                        .getText()
+                        .toString()
+                        .trim();
+
+        String sparePart =
+                etSparePart
+                        .getText()
+                        .toString()
+                        .trim();
+
+        String quantityText =
+                etQuantity
+                        .getText()
                         .toString()
                         .trim();
 
         if (notes.isEmpty()) {
 
             etNotes.setError(
-                    "Please enter technician notes"
+                    "Please enter repair notes."
             );
 
             etNotes.requestFocus();
 
             return;
         }
-
-        String sparePart =
-                etSparePart.getText()
-                        .toString()
-                        .trim();
-
-        String quantityText =
-                etQuantity.getText()
-                        .toString()
-                        .trim();
 
         int quantity = 0;
 
@@ -332,21 +385,21 @@ public class UpdateRepairActivity extends AppCompatActivity {
                                 quantityText
                         );
 
+                if (quantity < 0) {
+
+                    etQuantity.setError(
+                            "Quantity cannot be negative."
+                    );
+
+                    etQuantity.requestFocus();
+
+                    return;
+                }
+
             } catch (NumberFormatException e) {
 
                 etQuantity.setError(
-                        "Enter a valid quantity"
-                );
-
-                etQuantity.requestFocus();
-
-                return;
-            }
-
-            if (quantity < 0) {
-
-                etQuantity.setError(
-                        "Quantity cannot be negative"
+                        "Enter a valid quantity."
                 );
 
                 etQuantity.requestFocus();
@@ -354,33 +407,51 @@ public class UpdateRepairActivity extends AppCompatActivity {
                 return;
             }
         }
-        String photoUri = "";
-
 
         String updateDate =
-                String.valueOf(
-                        System.currentTimeMillis()
+                new SimpleDateFormat(
+                        "yyyy-MM-dd HH:mm:ss",
+                        Locale.getDefault()
+                ).format(
+                        new Date()
                 );
 
-        boolean updated =
-                dbHelper.updateRepairStatus(
+        boolean statusUpdated =
+                databaseHelper.updateRepairStatus(
                         repairId,
                         status
                 );
 
-        if (!updated) {
+        if (!statusUpdated) {
 
             Toast.makeText(
                     this,
-                    "Unable to update repair status.",
-                    Toast.LENGTH_LONG
+                    "Failed to update repair status.",
+                    Toast.LENGTH_SHORT
             ).show();
 
             return;
         }
 
+        if (!photoUri.isEmpty()) {
+
+            boolean photoUpdated =
+                    databaseHelper.updateRepairInProgressPhoto(
+                            repairId,
+                            photoUri
+                    );
+
+            if (!photoUpdated) {
+
+                Log.e(
+                        TAG,
+                        "Failed to save in-progress photo to repairs table."
+                );
+            }
+        }
+
         long updateResult =
-                dbHelper.insertRepairUpdate(
+                databaseHelper.insertRepairUpdate(
                         repairId,
                         technicianId,
                         status,
@@ -391,36 +462,142 @@ public class UpdateRepairActivity extends AppCompatActivity {
                         updateDate
                 );
 
-        if (updateResult != -1) {
+        if (updateResult == -1) {
+
+            Toast.makeText(
+                    this,
+                    "Status updated, but repair history could not be saved.",
+                    Toast.LENGTH_LONG
+            ).show();
+
+        } else {
 
             Toast.makeText(
                     this,
                     "Repair updated successfully.",
                     Toast.LENGTH_SHORT
             ).show();
+        }
 
-            setResult(
-                    RESULT_OK
+        Intent intent =
+                new Intent(
+                        UpdateRepairActivity.this,
+                        RepairDetailsActivity.class
+                );
+
+        intent.putExtra(
+                "repair_id",
+                repairId
+        );
+
+        intent.putExtra(
+                "technician_id",
+                technicianId
+        );
+
+        intent.addFlags(
+                Intent.FLAG_ACTIVITY_CLEAR_TOP
+        );
+
+        startActivity(
+                intent
+        );
+
+        finish();
+    }
+
+    private String saveRepairPhoto(
+            Bitmap bitmap
+    ) {
+
+        if (bitmap == null) {
+
+            return null;
+        }
+
+        FileOutputStream outputStream =
+                null;
+
+        try {
+
+            File imageDirectory =
+                    new File(
+                            getFilesDir(),
+                            "repair_updates"
+                    );
+
+            if (!imageDirectory.exists()) {
+
+                boolean created =
+                        imageDirectory.mkdirs();
+
+                if (!created &&
+                        !imageDirectory.exists()) {
+
+                    return null;
+                }
+            }
+
+            String fileName =
+                    "repair_"
+                            + repairId
+                            + "_"
+                            + System.currentTimeMillis()
+                            + ".jpg";
+
+            File imageFile =
+                    new File(
+                            imageDirectory,
+                            fileName
+                    );
+
+            outputStream =
+                    new FileOutputStream(
+                            imageFile
+                    );
+
+            bitmap.compress(
+                    Bitmap.CompressFormat.JPEG,
+                    90,
+                    outputStream
             );
 
-            finish();
+            outputStream.flush();
 
-        } else {
+            return imageFile.getAbsolutePath();
 
-            Toast.makeText(
-                    this,
-                    "Repair status updated, but update history could not be saved.",
-                    Toast.LENGTH_LONG
-            ).show();
+        } catch (Exception e) {
+
+            Log.e(
+                    TAG,
+                    "Failed to save repair photo.",
+                    e
+            );
+
+            return null;
+
+        } finally {
+
+            if (outputStream != null) {
+
+                try {
+
+                    outputStream.close();
+
+                } catch (Exception ignored) {
+                }
+            }
         }
     }
 
     @Override
     protected void onDestroy() {
 
-        if (dbHelper != null) {
+        if (databaseHelper != null) {
 
-            dbHelper.close();
+            databaseHelper.close();
+
+            databaseHelper = null;
         }
 
         super.onDestroy();

@@ -2,9 +2,12 @@ package com.up9.techfix.Technician;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,39 +16,62 @@ import com.up9.techfix.data.DatabaseHelper;
 
 public class RepairDetailsActivity extends AppCompatActivity {
 
-    DatabaseHelper dbHelper;
+    private TextView tvCustomerName;
+    private TextView tvCustomerPhone;
+    private TextView tvCustomerEmail;
 
-    int repairId;
+    private TextView tvDeviceCategory;
+    private TextView tvDeviceModel;
 
-    TextView tvCustomerName;
-    TextView tvCustomerPhone;
-    TextView tvCustomerEmail;
+    private TextView tvService;
+    private TextView tvProblem;
+    private TextView tvRepairDate;
 
-    TextView tvDeviceCategory;
-    TextView tvDeviceModel;
+    private TextView tvBranchName;
+    private TextView tvBranchAddress;
+    private TextView tvBranchPhone;
 
-    TextView tvService;
-    TextView tvProblem;
-    TextView tvRepairDate;
+    private TextView tvStatus;
 
-    TextView tvBranchName;
-    TextView tvStatus;
+    private ImageView ivDeviceImage;
+    private Button btnUpdateRepair;
+
+    private DatabaseHelper databaseHelper;
+
+    private int repairId;
+    private int technicianId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_repair_details);
 
+        databaseHelper = new DatabaseHelper(this);
 
-        repairId = getIntent().getIntExtra(
-                "repair_id",
-                1
+        repairId = getIntent().getIntExtra("repair_id", -1);
+
+        technicianId = getIntent().getIntExtra(
+                "technician_id",
+                getSharedPreferences("TechFixSession", MODE_PRIVATE)
+                        .getInt("technicianId", -1)
         );
 
+        if (repairId == -1) {
+            Toast.makeText(
+                    this,
+                    "Invalid repair",
+                    Toast.LENGTH_SHORT
+            ).show();
 
-        dbHelper = new DatabaseHelper(this);
+            finish();
+            return;
+        }
 
+        initializeViews();
+        loadRepairDetails();
+    }
+
+    private void initializeViews() {
 
         tvCustomerName = findViewById(R.id.tvCustomerName);
         tvCustomerPhone = findViewById(R.id.tvCustomerPhone);
@@ -59,14 +85,14 @@ public class RepairDetailsActivity extends AppCompatActivity {
         tvRepairDate = findViewById(R.id.tvRepairDate);
 
         tvBranchName = findViewById(R.id.tvBranchName);
+        tvBranchAddress = findViewById(R.id.tvBranchAddress);
+        tvBranchPhone = findViewById(R.id.tvBranchPhone);
+
         tvStatus = findViewById(R.id.tvStatus);
 
-        Button btnUpdateRepair =
-                findViewById(R.id.btnUpdateRepair);
+        ivDeviceImage = findViewById(R.id.ivDeviceImage);
 
-
-        loadRepair();
-
+        btnUpdateRepair = findViewById(R.id.btnUpdateRepair);
 
         btnUpdateRepair.setOnClickListener(v -> {
 
@@ -75,112 +101,192 @@ public class RepairDetailsActivity extends AppCompatActivity {
                     UpdateRepairActivity.class
             );
 
-            intent.putExtra(
-                    "repair_id",
-                    repairId
-            );
+            intent.putExtra("repair_id", repairId);
+            intent.putExtra("technician_id", technicianId);
 
             startActivity(intent);
         });
     }
 
+    private void loadRepairDetails() {
 
-    private void loadRepair() {
+        Cursor cursor = databaseHelper.getRepairById(repairId);
 
-        Cursor cursor =
-                dbHelper.getRepairById(repairId);
+        if (cursor == null || !cursor.moveToFirst()) {
 
-        if (cursor.moveToFirst()) {
+            Toast.makeText(
+                    this,
+                    "Repair not found",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            if (cursor != null) {
+                cursor.close();
+            }
+
+            finish();
+            return;
+        }
+
+        try {
+
+            // -----------------------------
+            // Customer
+            // -----------------------------
 
             tvCustomerName.setText(
-                    cursor.getString(
-                            cursor.getColumnIndexOrThrow(
-                                    "customer_name"
-                            )
-                    )
+                    getColumnString(cursor, "customer_name")
             );
 
             tvCustomerPhone.setText(
-                    cursor.getString(
-                            cursor.getColumnIndexOrThrow(
-                                    "customer_phone"
-                            )
-                    )
+                    getColumnString(cursor, "customer_phone")
             );
 
             tvCustomerEmail.setText(
-                    cursor.getString(
-                            cursor.getColumnIndexOrThrow(
-                                    "customer_email"
-                            )
-                    )
+                    getColumnString(cursor, "customer_email")
             );
 
+
+            // -----------------------------
+            // Device
+            // -----------------------------
+
             tvDeviceCategory.setText(
-                    cursor.getString(
-                            cursor.getColumnIndexOrThrow(
-                                    "device_category"
-                            )
-                    )
+                    getColumnString(cursor, "category_name")
             );
 
             tvDeviceModel.setText(
-                    cursor.getString(
-                            cursor.getColumnIndexOrThrow(
-                                    "device_model"
-                            )
-                    )
+                    getColumnString(cursor, "device_model")
             );
 
+
+            // -----------------------------
+            // Repair
+            // -----------------------------
+
             tvService.setText(
-                    cursor.getString(
-                            cursor.getColumnIndexOrThrow(
-                                    "service"
-                            )
-                    )
+                    getColumnString(cursor, "service_name")
             );
 
             tvProblem.setText(
-                    cursor.getString(
-                            cursor.getColumnIndexOrThrow(
-                                    "problem"
-                            )
-                    )
+                    getColumnString(cursor, "problem_description")
             );
 
             tvRepairDate.setText(
-                    cursor.getString(
-                            cursor.getColumnIndexOrThrow(
-                                    "repair_date"
-                            )
-                    )
+                    getColumnString(cursor, "repair_date")
             );
+
+
+            // -----------------------------
+            // Branch
+            // -----------------------------
 
             tvBranchName.setText(
-                    cursor.getString(
-                            cursor.getColumnIndexOrThrow(
-                                    "branch"
-                            )
-                    )
+                    getColumnString(cursor, "branch_name")
             );
+
+            tvBranchAddress.setText(
+                    getColumnString(cursor, "branch_address")
+            );
+
+            tvBranchPhone.setText(
+                    getColumnString(cursor, "branch_phone")
+            );
+
+
+            // -----------------------------
+            // Status
+            // -----------------------------
 
             tvStatus.setText(
-                    cursor.getString(
-                            cursor.getColumnIndexOrThrow(
-                                    "status"
-                            )
-                    )
+                    getColumnString(cursor, "status")
             );
-        }
 
-        cursor.close();
+
+            // -----------------------------
+            // Device Image
+            // -----------------------------
+
+            String imageUri = getColumnString(
+                    cursor,
+                    "image_uri"
+            );
+
+            if (!imageUri.equals("Not available")
+                    && !imageUri.trim().isEmpty()) {
+
+                try {
+
+                    ivDeviceImage.setImageURI(
+                            Uri.parse(imageUri)
+                    );
+
+                } catch (Exception e) {
+
+                    ivDeviceImage.setImageResource(
+                            android.R.drawable.ic_menu_gallery
+                    );
+                }
+
+            } else {
+
+                ivDeviceImage.setImageResource(
+                        android.R.drawable.ic_menu_gallery
+                );
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Toast.makeText(
+                    this,
+                    "Unable to load repair details",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+        } finally {
+
+            cursor.close();
+        }
     }
 
+    private String getColumnString(
+            Cursor cursor,
+            String columnName
+    ) {
+
+        int index = cursor.getColumnIndex(columnName);
+
+        if (index == -1 || cursor.isNull(index)) {
+            return "Not available";
+        }
+
+        String value = cursor.getString(index);
+
+        if (value == null || value.trim().isEmpty()) {
+            return "Not available";
+        }
+
+        return value;
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        loadRepair();
+        if (databaseHelper != null && repairId != -1) {
+            loadRepairDetails();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        if (databaseHelper != null) {
+            databaseHelper.close();
+        }
+
+        super.onDestroy();
     }
 }
