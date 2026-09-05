@@ -1,14 +1,20 @@
 package com.up9.techfix.admin.technicians;
-import com.up9.techfix.R;
+
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.widget.Button;
+import android.widget.Toast;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.widget.Button;
+
+import com.up9.techfix.R;
+import com.up9.techfix.data.DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,136 +24,42 @@ public class ManageTechniciansActivity
         implements TechnicianAdapter.OnTechnicianActionListener {
 
     private RecyclerView recyclerTechnicians;
-
     private Button btnAddTechnician;
 
     private TechnicianAdapter technicianAdapter;
-
     private List<Technician> technicianList;
 
-    private int editingPosition = -1;
+    private DatabaseHelper databaseHelper;
+
+    private int editingTechnicianId = -1;
 
     private final ActivityResultLauncher<Intent>
             technicianFormLauncher =
             registerForActivityResult(
-                    new ActivityResultContracts
-                            .StartActivityForResult(),
+                    new ActivityResultContracts.StartActivityForResult(),
                     result -> {
 
                         if (result.getResultCode()
                                 != RESULT_OK) {
+
                             return;
                         }
 
-                        Intent data =
-                                result.getData();
-
-                        if (data == null) {
-                            return;
-                        }
-
-                        String name =
-                                data.getStringExtra(
-                                        "name"
-                                );
-
-                        String phone =
-                                data.getStringExtra(
-                                        "phone"
-                                );
-
-                        String email =
-                                data.getStringExtra(
-                                        "email"
-                                );
-
-                        String specialization =
-                                data.getStringExtra(
-                                        "specialization"
-                                );
-
-                        String branch =
-                                data.getStringExtra(
-                                        "branch"
-                                );
-
-                        boolean available =
-                                data.getBooleanExtra(
-                                        "available",
-                                        true
-                                );
-
-                        if (editingPosition == -1) {
-
-                            int newId =
-                                    technicianList.size()
-                                            + 1;
-
-                            Technician technician =
-                                    new Technician(
-                                            newId,
-                                            name,
-                                            phone,
-                                            email,
-                                            specialization,
-                                            branch,
-                                            available
-                                    );
-
-                            technicianList.add(
-                                    technician
-                            );
-
-                            technicianAdapter
-                                    .notifyItemInserted(
-                                            technicianList.size() - 1
-                                    );
-
-                        } else {
-
-                            Technician technician =
-                                    technicianList.get(
-                                            editingPosition
-                                    );
-
-                            technician.setName(name);
-
-                            technician.setPhone(phone);
-
-                            technician.setEmail(email);
-
-                            technician.setSpecialization(
-                                    specialization
-                            );
-
-                            technician.setBranch(
-                                    branch
-                            );
-
-                            technician.setAvailable(
-                                    available
-                            );
-
-                            technicianAdapter
-                                    .notifyItemChanged(
-                                            editingPosition
-                                    );
-
-                            editingPosition = -1;
-                        }
+                        loadTechnicians();
                     }
             );
 
     @Override
-    protected void onCreate(
-            Bundle savedInstanceState
-    ) {
-
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(
                 R.layout.activity_manage_technicians
         );
+
+        databaseHelper =
+                new DatabaseHelper(this);
+
 
         recyclerTechnicians =
                 findViewById(
@@ -166,8 +78,6 @@ public class ManageTechniciansActivity
         technicianList =
                 new ArrayList<>();
 
-        loadSampleTechnicians();
-
         technicianAdapter =
                 new TechnicianAdapter(
                         technicianList,
@@ -179,72 +89,118 @@ public class ManageTechniciansActivity
         );
 
         btnAddTechnician.setOnClickListener(
-                v -> {
-
-                    editingPosition = -1;
-
-                    Intent intent =
-                            new Intent(
-                                    this,
-                                    TechnicianFormActivity.class
-                            );
-
-                    technicianFormLauncher.launch(
-                            intent
-                    );
-                }
+                v -> openAddForm()
         );
+
+        loadTechnicians();
     }
 
-    private void loadSampleTechnicians() {
+    private void loadTechnicians() {
 
-        technicianList.add(
-                new Technician(
-                        1,
-                        "Kasun Perera",
-                        "0771234567",
-                        "kasun@techfix.lk",
-                        "Mobile Phone Repair",
-                        "Colombo",
-                        true
-                )
+        technicianList.clear();
+
+        Cursor cursor =
+                databaseHelper.getAllTechnicians();
+
+        if (cursor != null) {
+
+            try {
+
+                while (cursor.moveToNext()) {
+
+                    int id =
+                            cursor.getInt(
+                                    cursor.getColumnIndexOrThrow(
+                                            "id"
+                                    )
+                            );
+
+                    String name =
+                            cursor.getString(
+                                    cursor.getColumnIndexOrThrow(
+                                            "full_name"
+                                    )
+                            );
+
+                    String phone =
+                            cursor.getString(
+                                    cursor.getColumnIndexOrThrow(
+                                            "phone"
+                                    )
+                            );
+
+                    String email =
+                            cursor.getString(
+                                    cursor.getColumnIndexOrThrow(
+                                            "email"
+                                    )
+                            );
+
+                    String specialization =
+                            cursor.getString(
+                                    cursor.getColumnIndexOrThrow(
+                                            "specialization"
+                                    )
+                            );
+
+                    String branch =
+                            cursor.getString(
+                                    cursor.getColumnIndexOrThrow(
+                                            "branch"
+                                    )
+                            );
+
+                    boolean available =
+                            cursor.getInt(
+                                    cursor.getColumnIndexOrThrow(
+                                            "available"
+                                    )
+                            ) == 1;
+
+                    technicianList.add(
+                            new Technician(
+                                    id,
+                                    safe(name),
+                                    safe(phone),
+                                    safe(email),
+                                    "",
+                                    safe(specialization),
+                                    safe(branch),
+                                    available
+                            )
+                    );
+                }
+
+            } finally {
+
+                cursor.close();
+            }
+        }
+
+        technicianAdapter.notifyDataSetChanged();
+    }
+
+    private String safe(String value) {
+
+        return value == null ? "" : value;
+    }
+
+    private void openAddForm() {
+
+        editingTechnicianId = -1;
+
+        Intent intent =
+                new Intent(
+                        this,
+                        TechnicianFormActivity.class
+                );
+
+        intent.putExtra(
+                "editMode",
+                false
         );
 
-        technicianList.add(
-                new Technician(
-                        2,
-                        "Nimal Fernando",
-                        "0712345678",
-                        "nimal@techfix.lk",
-                        "Laptop Repair",
-                        "Colombo",
-                        true
-                )
-        );
-
-        technicianList.add(
-                new Technician(
-                        3,
-                        "Amal Silva",
-                        "0763456789",
-                        "amal@techfix.lk",
-                        "Desktop Repair",
-                        "Galle",
-                        false
-                )
-        );
-
-        technicianList.add(
-                new Technician(
-                        4,
-                        "Saman Perera",
-                        "0754567890",
-                        "saman@techfix.lk",
-                        "Hardware Repair",
-                        "Galle",
-                        true
-                )
-        );
+        technicianFormLauncher.launch(intent);
     }
 
     @Override
@@ -252,10 +208,8 @@ public class ManageTechniciansActivity
             Technician technician
     ) {
 
-        editingPosition =
-                technicianList.indexOf(
-                        technician
-                );
+        editingTechnicianId =
+                technician.getId();
 
         Intent intent =
                 new Intent(
@@ -315,32 +269,72 @@ public class ManageTechniciansActivity
     ) {
 
         new AlertDialog.Builder(this)
+
                 .setTitle(
                         "Delete Technician"
                 )
+
                 .setMessage(
                         "Are you sure you want to delete "
                                 + technician.getName()
                                 + "?"
                 )
+
                 .setPositiveButton(
                         "Delete",
                         (dialog, which) -> {
 
-                            technicianList.remove(
-                                    position
-                            );
+                            int result =
+                                    databaseHelper
+                                            .deleteTechnician(
+                                                    technician.getId()
+                                            );
 
-                            technicianAdapter
-                                    .notifyItemRemoved(
-                                            position
-                                    );
+                            if (result > 0) {
+
+                                Toast.makeText(
+                                        this,
+                                        "Technician deleted",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+
+                                loadTechnicians();
+
+                            } else {
+
+                                Toast.makeText(
+                                        this,
+                                        "Unable to delete technician",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
                         }
                 )
+
                 .setNegativeButton(
                         "Cancel",
                         null
                 )
+
                 .show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (databaseHelper != null) {
+            loadTechnicians();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        if (databaseHelper != null) {
+            databaseHelper.close();
+        }
+
+        super.onDestroy();
     }
 }

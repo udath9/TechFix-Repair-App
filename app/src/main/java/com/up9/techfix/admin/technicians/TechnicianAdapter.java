@@ -17,7 +17,6 @@ public class TechnicianAdapter
         extends RecyclerView.Adapter<TechnicianAdapter.TechnicianViewHolder> {
 
     private final List<Technician> technicianList;
-
     private final OnTechnicianActionListener listener;
 
     public interface OnTechnicianActionListener {
@@ -34,6 +33,7 @@ public class TechnicianAdapter
             List<Technician> technicianList,
             OnTechnicianActionListener listener
     ) {
+
         this.technicianList = technicianList;
         this.listener = listener;
     }
@@ -75,39 +75,47 @@ public class TechnicianAdapter
         );
 
         holder.txtTechnicianBranch.setText(
-                "Branch: " + technician.getBranch()
+                "Branch: " +
+                        technician.getBranch()
         );
 
         holder.txtTechnicianPhone.setText(
-                "Phone: " + technician.getPhone()
+                "Phone: " +
+                        technician.getPhone()
         );
 
         holder.txtTechnicianEmail.setText(
-                "Email: " + technician.getEmail()
+                "Email: " +
+                        technician.getEmail()
         );
 
-        if (technician.isAvailable()) {
-
-            holder.txtTechnicianAvailability.setText(
-                    "Available"
-            );
-
-        } else {
-
-            holder.txtTechnicianAvailability.setText(
-                    "Unavailable"
-            );
-        }
+        holder.txtTechnicianAvailability.setText(
+                technician.isAvailable()
+                        ? "Available"
+                        : "Unavailable"
+        );
 
         holder.btnEditTechnician.setOnClickListener(
-                v -> listener.onEdit(technician)
+                v -> listener.onEdit(
+                        technician
+                )
         );
 
         holder.btnDeleteTechnician.setOnClickListener(
-                v -> listener.onDelete(
-                        technician,
-                        holder.getAdapterPosition()
-                )
+                v -> {
+
+                    int adapterPosition =
+                            holder.getBindingAdapterPosition();
+
+                    if (adapterPosition !=
+                            RecyclerView.NO_POSITION) {
+
+                        listener.onDelete(
+                                technician,
+                                adapterPosition
+                        );
+                    }
+                }
         );
     }
 

@@ -9,18 +9,22 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.up9.techfix.R;
+import com.up9.techfix.data.DatabaseHelper;
 
-public class TechnicianFormActivity extends AppCompatActivity {
+public class TechnicianFormActivity
+        extends AppCompatActivity {
 
     private TextView txtTechnicianFormTitle;
 
     private EditText edtTechnicianName;
     private EditText edtTechnicianPhone;
     private EditText edtTechnicianEmail;
+    private EditText edtTechnicianPassword;
 
     private Spinner spinnerSpecialization;
     private Spinner spinnerBranch;
@@ -30,7 +34,10 @@ public class TechnicianFormActivity extends AppCompatActivity {
     private Button btnSaveTechnician;
     private Button btnCancelTechnician;
 
+    private DatabaseHelper databaseHelper;
+
     private boolean isEditMode = false;
+    private int technicianId = -1;
 
     private final String[] specializations = {
             "Mobile Phone Repair",
@@ -50,37 +57,15 @@ public class TechnicianFormActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.technician_form);
+        setContentView(
+                R.layout.technician_form
+        );
 
-        txtTechnicianFormTitle =
-                findViewById(R.id.txtTechnicianFormTitle);
+        databaseHelper =
+                new DatabaseHelper(this);
 
-        edtTechnicianName =
-                findViewById(R.id.edtTechnicianName);
-
-        edtTechnicianPhone =
-                findViewById(R.id.edtTechnicianPhone);
-
-        edtTechnicianEmail =
-                findViewById(R.id.edtTechnicianEmail);
-
-        spinnerSpecialization =
-                findViewById(R.id.spinnerSpecialization);
-
-        spinnerBranch =
-                findViewById(R.id.spinnerBranch);
-
-        checkAvailable =
-                findViewById(R.id.checkAvailable);
-
-        btnSaveTechnician =
-                findViewById(R.id.btnSaveTechnician);
-
-        btnCancelTechnician =
-                findViewById(R.id.btnCancelTechnician);
-
+        initializeViews();
         setupSpinners();
-
         checkEditMode();
 
         btnSaveTechnician.setOnClickListener(
@@ -92,9 +77,63 @@ public class TechnicianFormActivity extends AppCompatActivity {
         );
     }
 
+    private void initializeViews() {
+
+        txtTechnicianFormTitle =
+                findViewById(
+                        R.id.txtTechnicianFormTitle
+                );
+
+        edtTechnicianName =
+                findViewById(
+                        R.id.edtTechnicianName
+                );
+
+        edtTechnicianPhone =
+                findViewById(
+                        R.id.edtTechnicianPhone
+                );
+
+        edtTechnicianEmail =
+                findViewById(
+                        R.id.edtTechnicianEmail
+                );
+
+        edtTechnicianPassword =
+                findViewById(
+                        R.id.edtTechnicianPassword
+                );
+
+        spinnerSpecialization =
+                findViewById(
+                        R.id.spinnerSpecialization
+                );
+
+        spinnerBranch =
+                findViewById(
+                        R.id.spinnerBranch
+                );
+
+        checkAvailable =
+                findViewById(
+                        R.id.checkAvailable
+                );
+
+        btnSaveTechnician =
+                findViewById(
+                        R.id.btnSaveTechnician
+                );
+
+        btnCancelTechnician =
+                findViewById(
+                        R.id.btnCancelTechnician
+                );
+    }
+
     private void setupSpinners() {
 
-        ArrayAdapter<String> specializationAdapter =
+        ArrayAdapter<String>
+                specializationAdapter =
                 new ArrayAdapter<>(
                         this,
                         android.R.layout.simple_spinner_item,
@@ -109,7 +148,8 @@ public class TechnicianFormActivity extends AppCompatActivity {
                 specializationAdapter
         );
 
-        ArrayAdapter<String> branchAdapter =
+        ArrayAdapter<String>
+                branchAdapter =
                 new ArrayAdapter<>(
                         this,
                         android.R.layout.simple_spinner_item,
@@ -127,7 +167,8 @@ public class TechnicianFormActivity extends AppCompatActivity {
 
     private void checkEditMode() {
 
-        Intent intent = getIntent();
+        Intent intent =
+                getIntent();
 
         isEditMode =
                 intent.getBooleanExtra(
@@ -136,8 +177,21 @@ public class TechnicianFormActivity extends AppCompatActivity {
                 );
 
         if (!isEditMode) {
+
+            txtTechnicianFormTitle.setText(
+                    "Add Technician"
+            );
+
+            checkAvailable.setChecked(true);
+
             return;
         }
+
+        technicianId =
+                intent.getIntExtra(
+                        "technicianId",
+                        -1
+                );
 
         txtTechnicianFormTitle.setText(
                 "Edit Technician"
@@ -153,6 +207,10 @@ public class TechnicianFormActivity extends AppCompatActivity {
 
         edtTechnicianEmail.setText(
                 intent.getStringExtra("email")
+        );
+
+        edtTechnicianPassword.setHint(
+                "Leave blank to keep current password"
         );
 
         checkAvailable.setChecked(
@@ -190,12 +248,12 @@ public class TechnicianFormActivity extends AppCompatActivity {
              i < spinner.getCount();
              i++) {
 
-            if (spinner.getItemAtPosition(i)
+            if (spinner
+                    .getItemAtPosition(i)
                     .toString()
                     .equals(value)) {
 
                 spinner.setSelection(i);
-
                 break;
             }
         }
@@ -221,6 +279,11 @@ public class TechnicianFormActivity extends AppCompatActivity {
                         .toString()
                         .trim();
 
+        String password =
+                edtTechnicianPassword
+                        .getText()
+                        .toString();
+
         String specialization =
                 spinnerSpecialization
                         .getSelectedItem()
@@ -241,46 +304,22 @@ public class TechnicianFormActivity extends AppCompatActivity {
             );
 
             edtTechnicianName.requestFocus();
-
             return;
         }
 
-        if (phone.isEmpty()) {
-
-            edtTechnicianPhone.setError(
-                    "Enter phone number"
-            );
-
-            edtTechnicianPhone.requestFocus();
-
-            return;
-        }
-
-        if (!phone.matches(
-                "0[0-9]{9}"
-        )) {
+        if (phone.isEmpty()
+                || !phone.matches("0[0-9]{9}")) {
 
             edtTechnicianPhone.setError(
                     "Enter a valid Sri Lankan phone number"
             );
 
             edtTechnicianPhone.requestFocus();
-
             return;
         }
 
-        if (email.isEmpty()) {
-
-            edtTechnicianEmail.setError(
-                    "Enter email"
-            );
-
-            edtTechnicianEmail.requestFocus();
-
-            return;
-        }
-
-        if (!Patterns.EMAIL_ADDRESS
+        if (email.isEmpty()
+                || !Patterns.EMAIL_ADDRESS
                 .matcher(email)
                 .matches()) {
 
@@ -289,59 +328,128 @@ public class TechnicianFormActivity extends AppCompatActivity {
             );
 
             edtTechnicianEmail.requestFocus();
-
             return;
         }
 
-        Intent resultIntent =
-                new Intent();
+        if (!isEditMode &&
+                password.trim().isEmpty()) {
 
-        resultIntent.putExtra(
-                "name",
-                name
-        );
-
-        resultIntent.putExtra(
-                "phone",
-                phone
-        );
-
-        resultIntent.putExtra(
-                "email",
-                email
-        );
-
-        resultIntent.putExtra(
-                "specialization",
-                specialization
-        );
-
-        resultIntent.putExtra(
-                "branch",
-                branch
-        );
-
-        resultIntent.putExtra(
-                "available",
-                available
-        );
-
-        if (isEditMode) {
-
-            resultIntent.putExtra(
-                    "technicianId",
-                    getIntent().getIntExtra(
-                            "technicianId",
-                            -1
-                    )
+            edtTechnicianPassword.setError(
+                    "Enter a password"
             );
+
+            edtTechnicianPassword.requestFocus();
+            return;
+        }
+
+        if (!password.trim().isEmpty()
+                && password.length() < 6) {
+
+            edtTechnicianPassword.setError(
+                    "Password must be at least 6 characters"
+            );
+
+            edtTechnicianPassword.requestFocus();
+            return;
+        }
+
+        if (!isEditMode) {
+
+            long result =
+                    databaseHelper.createTechnician(
+                            name,
+                            phone,
+                            email,
+                            password,
+                            specialization,
+                            branch,
+                            available
+                    );
+
+            if (result == -2) {
+
+                edtTechnicianEmail.setError(
+                        "Email is already registered"
+                );
+
+                edtTechnicianEmail.requestFocus();
+                return;
+            }
+
+            if (result == -1) {
+
+                Toast.makeText(
+                        this,
+                        "Failed to create technician",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            Toast.makeText(
+                    this,
+                    "Technician created successfully",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+        } else {
+
+            int result =
+                    databaseHelper.updateTechnician(
+                            technicianId,
+                            name,
+                            phone,
+                            email,
+                            password,
+                            specialization,
+                            branch,
+                            available
+                    );
+
+            if (result == -2) {
+
+                edtTechnicianEmail.setError(
+                        "Email is already registered"
+                );
+
+                edtTechnicianEmail.requestFocus();
+                return;
+            }
+
+            if (result <= 0) {
+
+                Toast.makeText(
+                        this,
+                        "Failed to update technician",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            Toast.makeText(
+                    this,
+                    "Technician updated successfully",
+                    Toast.LENGTH_SHORT
+            ).show();
         }
 
         setResult(
                 RESULT_OK,
-                resultIntent
+                new Intent()
         );
 
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        if (databaseHelper != null) {
+            databaseHelper.close();
+        }
+
+        super.onDestroy();
     }
 }

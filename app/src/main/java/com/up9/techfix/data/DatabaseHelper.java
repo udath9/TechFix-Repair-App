@@ -18,7 +18,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "TechFix.db";
-    private static final int DATABASE_VERSION = 12;
+    private static final int DATABASE_VERSION = 14;
 
     // TABLE NAMES
     public static final String TABLE_CUSTOMERS = "customers";
@@ -45,6 +45,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_CUSTOMER_FULL_NAME = "full_name";
     public static final String COL_CUSTOMER_EMAIL = "email";
     public static final String COL_CUSTOMER_PHONE = "phone";
+    public static final String COL_USER_SPECIALIZATION = "specialization";
+    public static final String COL_USER_BRANCH = "branch";
+    public static final String COL_USER_AVAILABLE = "available";
     public static final String COL_CUSTOMER_PASSWORD = "password";
 
     // BRANCH COLUMNS
@@ -147,7 +150,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         createRepairUpdatesTable(db);
 
         insertDefaultAdmin(db);
-        insertDefaultTechnician(db);
+
     }
 
     @Override
@@ -268,6 +271,50 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             " TEXT"
             );
         }
+        if (!columnExists(
+                db,
+                TABLE_USERS,
+                COL_USER_SPECIALIZATION
+        )) {
+
+            db.execSQL(
+                    "ALTER TABLE " +
+                            TABLE_USERS +
+                            " ADD COLUMN " +
+                            COL_USER_SPECIALIZATION +
+                            " TEXT"
+            );
+        }
+
+        if (!columnExists(
+                db,
+                TABLE_USERS,
+                COL_USER_BRANCH
+        )) {
+
+            db.execSQL(
+                    "ALTER TABLE " +
+                            TABLE_USERS +
+                            " ADD COLUMN " +
+                            COL_USER_BRANCH +
+                            " TEXT"
+            );
+        }
+
+        if (!columnExists(
+                db,
+                TABLE_USERS,
+                COL_USER_AVAILABLE
+        )) {
+
+            db.execSQL(
+                    "ALTER TABLE " +
+                            TABLE_USERS +
+                            " ADD COLUMN " +
+                            COL_USER_AVAILABLE +
+                            " INTEGER NOT NULL DEFAULT 1"
+            );
+        }
 
         if (!columnExists(
                 db,
@@ -285,7 +332,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         insertDefaultAdmin(db);
-        insertDefaultTechnician(db);
+
     }
 
     private void createUsersTable(SQLiteDatabase db) {
@@ -299,7 +346,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         "email TEXT UNIQUE NOT NULL, " +
                         "phone TEXT, " +
                         "password TEXT NOT NULL, " +
-                        "role TEXT NOT NULL" +
+                        "role TEXT NOT NULL, " +
+                        "specialization TEXT, " +
+                        "branch TEXT, " +
+                        "available INTEGER NOT NULL DEFAULT 1" +
                         ")"
         );
     }
@@ -773,60 +823,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 values
         );
     }
-    private void insertDefaultTechnician(SQLiteDatabase db) {
 
-        Cursor cursor = db.rawQuery(
-                "SELECT id FROM " +
-                        TABLE_USERS +
-                        " WHERE email = ? LIMIT 1",
-                new String[]{
-                        "technician@techfix.com"
-                }
-        );
-
-        boolean exists =
-                cursor.moveToFirst();
-
-        cursor.close();
-
-        if (exists) {
-            return;
-        }
-
-        ContentValues values =
-                new ContentValues();
-
-        values.put(
-                COL_USER_FULL_NAME,
-                "TechFix Technician"
-        );
-
-        values.put(
-                COL_USER_EMAIL,
-                "technician@techfix.com"
-        );
-
-        values.put(
-                COL_USER_PHONE,
-                "0771234567"
-        );
-
-        values.put(
-                COL_USER_PASSWORD,
-                "tech123"
-        );
-
-        values.put(
-                COL_USER_ROLE,
-                "TECHNICIAN"
-        );
-
-        db.insert(
-                TABLE_USERS,
-                null,
-                values
-        );
-    }
     public int getCustomerId(
             String email,
             String password
@@ -2028,7 +2025,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         "id, " +
                         "full_name, " +
                         "phone, " +
-                        "email " +
+                        "email, " +
+                        "specialization, " +
+                        "branch, " +
+                        "available " +
                         "FROM " +
                         TABLE_USERS +
                         " WHERE role = ? " +
@@ -2038,7 +2038,206 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
         );
     }
+    public long createTechnician(
+            String name,
+            String phone,
+            String email,
+            String password,
+            String specialization,
+            String branch,
+            boolean available
+    ) {
 
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        Cursor cursor =
+                db.rawQuery(
+                        "SELECT id FROM " +
+                                TABLE_USERS +
+                                " WHERE email = ? " +
+                                "LIMIT 1",
+                        new String[]{
+                                email
+                        }
+                );
+
+        boolean emailExists =
+                cursor.moveToFirst();
+
+        cursor.close();
+
+        if (emailExists) {
+            return -2;
+        }
+
+        ContentValues values =
+                new ContentValues();
+
+        values.put(
+                COL_USER_FULL_NAME,
+                name
+        );
+
+        values.put(
+                COL_USER_PHONE,
+                phone
+        );
+
+        values.put(
+                COL_USER_EMAIL,
+                email
+        );
+
+        values.put(
+                COL_USER_PASSWORD,
+                password
+        );
+
+        values.put(
+                COL_USER_ROLE,
+                "TECHNICIAN"
+        );
+
+        values.put(
+                COL_USER_SPECIALIZATION,
+                specialization
+        );
+
+        values.put(
+                COL_USER_BRANCH,
+                branch
+        );
+
+        values.put(
+                COL_USER_AVAILABLE,
+                available ? 1 : 0
+        );
+
+        return db.insert(
+                TABLE_USERS,
+                null,
+                values
+        );
+    }
+    public int updateTechnician(
+            int technicianId,
+            String name,
+            String phone,
+            String email,
+            String password,
+            String specialization,
+            String branch,
+            boolean available
+    ) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        Cursor cursor =
+                db.rawQuery(
+                        "SELECT id FROM " +
+                                TABLE_USERS +
+                                " WHERE email = ? " +
+                                "AND id != ? " +
+                                "LIMIT 1",
+                        new String[]{
+                                email,
+                                String.valueOf(technicianId)
+                        }
+                );
+
+        boolean emailExists =
+                cursor.moveToFirst();
+
+        cursor.close();
+
+        if (emailExists) {
+            return -2;
+        }
+
+        ContentValues values =
+                new ContentValues();
+
+        values.put(
+                COL_USER_FULL_NAME,
+                name
+        );
+
+        values.put(
+                COL_USER_PHONE,
+                phone
+        );
+
+        values.put(
+                COL_USER_EMAIL,
+                email
+        );
+
+        values.put(
+                COL_USER_SPECIALIZATION,
+                specialization
+        );
+
+        values.put(
+                COL_USER_BRANCH,
+                branch
+        );
+
+        values.put(
+                COL_USER_AVAILABLE,
+                available ? 1 : 0
+        );
+
+        if (password != null &&
+                !password.trim().isEmpty()) {
+
+            values.put(
+                    COL_USER_PASSWORD,
+                    password
+            );
+        }
+
+        return db.update(
+                TABLE_USERS,
+                values,
+                "id = ? AND role = ?",
+                new String[]{
+                        String.valueOf(technicianId),
+                        "TECHNICIAN"
+                }
+        );
+    }
+    public int deleteTechnician(
+            int technicianId
+    ) {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        return db.delete(
+                TABLE_USERS,
+                "id = ? AND role = ?",
+                new String[]{
+                        String.valueOf(technicianId),
+                        "TECHNICIAN"
+                }
+        );
+    }
+    public int deleteDefaultTechnician() {
+
+        SQLiteDatabase db =
+                getWritableDatabase();
+
+        return db.delete(
+                TABLE_USERS,
+                "email = ? AND role = ?",
+                new String[]{
+                        "technician@techfix.com",
+                        "TECHNICIAN"
+                }
+        );
+    }
     public long createRepair(
             int customerId,
             int categoryId,
@@ -2790,6 +2989,167 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return rows > 0;
     }
+    public Cursor getAssignedRepairsForTechnician(
+            int technicianId
+    ) {
+
+        SQLiteDatabase db =
+                getReadableDatabase();
+
+        String query =
+                "SELECT " +
+                        "r.id AS repair_id, " +
+                        "r.customer_id AS customer_id, " +
+
+                        "cu.full_name AS customer_name, " +
+                        "cu.email AS customer_email, " +
+                        "cu.phone AS customer_phone, " +
+
+                        "r.category_id AS category_id, " +
+                        "c.name AS category_name, " +
+
+                        "r.device_model AS device_model, " +
+
+                        "r.service_id AS service_id, " +
+                        "s.name AS service_name, " +
+
+                        "r.problem_description AS problem_description, " +
+
+                        "r.branch_id AS branch_id, " +
+                        "b.name AS branch_name, " +
+                        "b.address AS branch_address, " +
+                        "b.phone AS branch_phone, " +
+
+                        "r.image_uri AS image_uri, " +
+                        "r.in_progress_photo_uri AS in_progress_photo_uri, " +
+
+                        "r.assigned_technician_id AS assigned_technician_id, " +
+                        "r.technician_name AS technician_name, " +
+
+                        "r.status AS status, " +
+                        "r.repair_date AS repair_date, " +
+                        "r.final_price AS final_price " +
+
+                        "FROM " +
+                        TABLE_REPAIRS +
+                        " r " +
+
+                        "LEFT JOIN " +
+                        TABLE_CUSTOMERS +
+                        " cu ON r.customer_id = cu.id " +
+
+                        "LEFT JOIN " +
+                        TABLE_CATEGORIES +
+                        " c ON r.category_id = c.id " +
+
+                        "LEFT JOIN " +
+                        TABLE_SERVICES +
+                        " s ON r.service_id = s.id " +
+
+                        "LEFT JOIN " +
+                        TABLE_BRANCHES +
+                        " b ON r.branch_id = b.id " +
+
+                        "WHERE r.assigned_technician_id = ? " +
+
+                        "ORDER BY r.id DESC";
+
+        return db.rawQuery(
+                query,
+                new String[]{
+                        String.valueOf(technicianId)
+                }
+        );
+    }
+
+    public int getTechnicianRepairCountByStatus(
+            int technicianId,
+            String status
+    ) {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT COUNT(*) FROM repairs " +
+                        "WHERE assigned_technician_id = ? " +
+                        "AND status = ?",
+                new String[]{
+                        String.valueOf(technicianId),
+                        status
+                }
+        );
+
+        int count = 0;
+
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+
+        cursor.close();
+
+        return count;
+    }
+    public Cursor getRepairHistoryForTechnician(int technicianId) {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query =
+                "SELECT ru.id, " +
+                        "ru.repair_id, " +
+                        "ru.technician_id, " +
+                        "ru.status, " +
+                        "ru.notes, " +
+                        "ru.spare_part, " +
+                        "ru.quantity, " +
+                        "ru.photo_uri, " +
+                        "ru.update_date, " +
+                        "r.device_model, " +
+                        "s.name AS service_name " +
+                        "FROM repair_updates ru " +
+                        "LEFT JOIN repairs r " +
+                        "ON ru.repair_id = r.id " +
+                        "LEFT JOIN services s " +
+                        "ON r.service_id = s.id " +
+                        "WHERE ru.technician_id = ? " +
+                        "ORDER BY ru.id DESC";
+
+        return db.rawQuery(
+                query,
+                new String[]{
+                        String.valueOf(technicianId)
+                }
+        );
+    }
+    public Cursor getRepairsById(int repairId) {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query =
+                "SELECT r.id, " +
+                        "r.device_model, " +
+                        "r.problem_description, " +
+                        "r.status, " +
+                        "r.repair_date, " +
+                        "r.final_price, " +
+                        "c.full_name AS customer_name, " +
+                        "c.email AS customer_email, " +
+                        "c.phone AS customer_phone, " +
+                        "cat.name AS category_name, " +
+                        "s.name AS service_name, " +
+                        "b.name AS branch_name " +
+                        "FROM repairs r " +
+                        "LEFT JOIN customers c ON r.customer_id = c.id " +
+                        "LEFT JOIN categories cat ON r.category_id = cat.id " +
+                        "LEFT JOIN services s ON r.service_id = s.id " +
+                        "LEFT JOIN branches b ON r.branch_id = b.id " +
+                        "WHERE r.id = ?";
+
+        return db.rawQuery(
+                query,
+                new String[]{String.valueOf(repairId)}
+        );
+    }
+
 
     public int assignTechnician(
             int repairId,
@@ -3082,9 +3442,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    public int updateRepairInProgressPhoto(
+    public boolean updateRepairInProgressPhoto(
             int repairId,
-            String imageUri
+            String photoUri
     ) {
 
         SQLiteDatabase db =
@@ -3093,28 +3453,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values =
                 new ContentValues();
 
-        if (imageUri != null) {
-
-            values.put(
-                    COL_REPAIR_IN_PROGRESS_PHOTO_URI,
-                    imageUri
-            );
-
-        } else {
-
-            values.putNull(
-                    COL_REPAIR_IN_PROGRESS_PHOTO_URI
-            );
-        }
-
-        return db.update(
-                TABLE_REPAIRS,
-                values,
-                "id = ?",
-                new String[]{
-                        String.valueOf(repairId)
-                }
+        values.put(
+                "in_progress_photo_uri",
+                photoUri
         );
+
+        int rowsUpdated =
+                db.update(
+                        "repairs",
+                        values,
+                        "id = ?",
+                        new String[]{
+                                String.valueOf(repairId)
+                        }
+                );
+
+        return rowsUpdated > 0;
     }
     public int getTotalRepairs() {
 
@@ -3255,6 +3609,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 values
         );
     }
+
     public Cursor getRepairsAssignedToTechnician(int technicianId) {
 
         SQLiteDatabase db = getReadableDatabase();
