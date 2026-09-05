@@ -1,6 +1,7 @@
 package com.up9.techfix.Technician;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -13,42 +14,105 @@ import com.up9.techfix.data.DatabaseHelper;
 
 public class TechnicianDashboardActivity extends AppCompatActivity {
 
-    private Button btnViewRepairs;
-    private Button btnRepairHistory;
+    private TextView txtWelcome;
+    private TextView txtAssignedCount;
+    private TextView txtInProgressCount;
+    private TextView txtWaitingCount;
+    private TextView txtCompletedCount;
 
-    private TextView tvAssignedCount;
-    private TextView tvProgressCount;
-    private TextView tvWaitingCount;
-    private TextView tvCompletedCount;
+    private Button btnAssignedRepairs;
+    private Button btnRepairHistory;
+    private Button btnLogout;
 
     private DatabaseHelper databaseHelper;
+
+    private int technicianId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_technician_dashboard);
 
         databaseHelper = new DatabaseHelper(this);
 
+        SharedPreferences preferences =
+                getSharedPreferences(
+                        "TechFixSession",
+                        MODE_PRIVATE
+                );
+
+        technicianId = preferences.getInt(
+                "technicianId",
+                -1
+        );
+
+        String technicianName =
+                preferences.getString(
+                        "technicianName",
+                        "Technician"
+                );
+
+        if (technicianId == -1) {
+
+            Toast.makeText(
+                    this,
+                    "Technician session not found",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            finish();
+            return;
+        }
+
         initializeViews();
-        setupListeners();
+
+        txtWelcome.setText(
+                "Welcome, " + technicianName
+        );
+
+        setupButtons();
+
+        loadDashboardCounts();
     }
 
     private void initializeViews() {
 
-        btnViewRepairs = findViewById(R.id.btnViewRepairs);
-        btnRepairHistory = findViewById(R.id.btnRepairHistory);
+        txtWelcome = findViewById(
+                R.id.txtWelcome
+        );
 
-        tvAssignedCount = findViewById(R.id.tvAssignedCount);
-        tvProgressCount = findViewById(R.id.tvProgressCount);
-        tvWaitingCount = findViewById(R.id.tvWaitingCount);
-        tvCompletedCount = findViewById(R.id.tvCompletedCount);
+        txtAssignedCount = findViewById(
+                R.id.txtAssignedCount
+        );
+
+        txtInProgressCount = findViewById(
+                R.id.txtInProgressCount
+        );
+
+        txtWaitingCount = findViewById(
+                R.id.txtWaitingCount
+        );
+
+        txtCompletedCount = findViewById(
+                R.id.txtCompletedCount
+        );
+
+        btnAssignedRepairs = findViewById(
+                R.id.btnAssignedRepairs
+        );
+
+        btnRepairHistory = findViewById(
+                R.id.btnRepairHistory
+        );
+
+        btnLogout = findViewById(
+                R.id.btnLogout
+        );
     }
 
-    private void setupListeners() {
+    private void setupButtons() {
 
-        btnViewRepairs.setOnClickListener(v -> {
+        btnAssignedRepairs.setOnClickListener(v -> {
 
             Intent intent = new Intent(
                     TechnicianDashboardActivity.this,
@@ -67,65 +131,96 @@ public class TechnicianDashboardActivity extends AppCompatActivity {
 
             startActivity(intent);
         });
+
+        btnLogout.setOnClickListener(v -> logout());
+    }
+
+    private void loadDashboardCounts() {
+
+        int assigned =
+                databaseHelper.getTechnicianRepairCountByStatus(
+                        technicianId,
+                        "Assigned"
+                );
+
+        int inProgress =
+                databaseHelper.getTechnicianRepairCountByStatus(
+                        technicianId,
+                        "In Progress"
+                );
+
+        int waiting =
+                databaseHelper.getTechnicianRepairCountByStatus(
+                        technicianId,
+                        "Waiting for Parts"
+                );
+
+        int completed =
+                databaseHelper.getTechnicianRepairCountByStatus(
+                        technicianId,
+                        "Completed"
+                );
+
+        txtAssignedCount.setText(
+                String.valueOf(assigned)
+        );
+
+        txtInProgressCount.setText(
+                String.valueOf(inProgress)
+        );
+
+        txtWaitingCount.setText(
+                String.valueOf(waiting)
+        );
+
+        txtCompletedCount.setText(
+                String.valueOf(completed)
+        );
+    }
+
+    private void logout() {
+
+        getSharedPreferences(
+                "TechFixSession",
+                MODE_PRIVATE
+        )
+                .edit()
+                .clear()
+                .apply();
+
+        Intent intent = new Intent(
+                TechnicianDashboardActivity.this,
+                com.up9.techfix.ActorCustomer.auth.LoginActivity.class
+        );
+
+        intent.setFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK |
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK
+        );
+
+        startActivity(intent);
+
+        finish();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        loadDashboardCounts();
-    }
+        if (databaseHelper != null
+                && technicianId != -1) {
 
-    private void loadDashboardCounts() {
-
-        try {
-
-            int assigned =
-                    databaseHelper.getRepairCountByStatus("Assigned");
-
-            int progress =
-                    databaseHelper.getRepairCountByStatus("In Progress");
-
-            int waiting =
-                    databaseHelper.getRepairCountByStatus("Waiting for Parts");
-
-            int completed =
-                    databaseHelper.getRepairCountByStatus("Completed");
-
-            tvAssignedCount.setText(
-                    String.valueOf(assigned)
-            );
-
-            tvProgressCount.setText(
-                    String.valueOf(progress)
-            );
-
-            tvWaitingCount.setText(
-                    String.valueOf(waiting)
-            );
-
-            tvCompletedCount.setText(
-                    String.valueOf(completed)
-            );
-
-        } catch (Exception e) {
-
-            Toast.makeText(
-                    this,
-                    "Unable to load repair statistics",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-            e.printStackTrace();
+            loadDashboardCounts();
         }
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
 
         if (databaseHelper != null) {
             databaseHelper.close();
         }
+
+        super.onDestroy();
     }
 }

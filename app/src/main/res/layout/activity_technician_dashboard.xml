@@ -11,8 +11,7 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-
-
+        <!-- Header -->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -54,10 +53,10 @@
 
         </LinearLayout>
 
-
-
+        <!-- Welcome -->
 
         <TextView
+            android:id="@+id/txtWelcome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="28dp"
@@ -74,7 +73,7 @@
             android:textColor="#666666"
             android:textSize="14sp" />
 
-
+        <!-- First row of statistics -->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -82,8 +81,7 @@
             android:layout_marginTop="22dp"
             android:orientation="horizontal">
 
-
-
+            <!-- Assigned -->
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -96,7 +94,7 @@
                 android:padding="12dp">
 
                 <TextView
-                    android:id="@+id/tvAssignedCount"
+                    android:id="@+id/txtAssignedCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
@@ -115,7 +113,7 @@
 
             </LinearLayout>
 
-
+            <!-- In Progress -->
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -128,7 +126,7 @@
                 android:padding="12dp">
 
                 <TextView
-                    android:id="@+id/tvProgressCount"
+                    android:id="@+id/txtInProgressCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
@@ -149,8 +147,7 @@
 
         </LinearLayout>
 
-
-
+        <!-- Second row of statistics -->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -158,8 +155,7 @@
             android:layout_marginTop="16dp"
             android:orientation="horizontal">
 
-
-
+            <!-- Waiting for Parts -->
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -172,7 +168,7 @@
                 android:padding="12dp">
 
                 <TextView
-                    android:id="@+id/tvWaitingCount"
+                    android:id="@+id/txtWaitingCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
@@ -191,8 +187,7 @@
 
             </LinearLayout>
 
-
-
+            <!-- Completed -->
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -205,7 +200,7 @@
                 android:padding="12dp">
 
                 <TextView
-                    android:id="@+id/tvCompletedCount"
+                    android:id="@+id/txtCompletedCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
@@ -218,7 +213,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:gravity="center"
-                    android:text="Completed&#10;Today"
+                    android:text="Completed&#10;Repairs"
                     android:textColor="#666666"
                     android:textSize="13sp" />
 
@@ -226,8 +221,7 @@
 
         </LinearLayout>
 
-
-
+        <!-- Quick Actions -->
 
         <TextView
             android:layout_width="wrap_content"
@@ -238,15 +232,13 @@
             android:textSize="19sp"
             android:textStyle="bold" />
 
-
         <Button
-            android:id="@+id/btnViewRepairs"
+            android:id="@+id/btnAssignedRepairs"
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:layout_marginTop="15dp"
             android:text="View My Repairs"
             android:textSize="15sp" />
-
 
         <Button
             android:id="@+id/btnRepairHistory"
@@ -254,6 +246,15 @@
             android:layout_height="55dp"
             android:layout_marginTop="12dp"
             android:text="Repair History"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="16dp"
+            android:text="Logout"
             android:textSize="15sp" />
 
     </LinearLayout>
