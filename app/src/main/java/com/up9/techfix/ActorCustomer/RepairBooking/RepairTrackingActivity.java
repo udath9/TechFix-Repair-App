@@ -3,12 +3,16 @@ package com.up9.techfix.ActorCustomer.RepairBooking;
 import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -16,15 +20,17 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.card.MaterialCardView;
 import com.up9.techfix.R;
 import com.up9.techfix.data.DatabaseHelper;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.io.InputStream;
 import java.util.Locale;
 
-public class RepairTrackingActivity
-        extends AppCompatActivity {
+public class RepairTrackingActivity extends AppCompatActivity {
+
+    private static final String TAG =
+            "RepairTrackingActivity";
 
     private DatabaseHelper databaseHelper;
 
@@ -72,11 +78,21 @@ public class RepairTrackingActivity
         loadRepairs();
     }
 
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+
+        if (databaseHelper != null) {
+            loadRepairs();
+        }
+    }
+
     private void loadRepairs() {
 
         repairsContainer.removeAllViews();
 
-        if (customerId == -1) {
+        if (customerId <= 0) {
 
             showNoRepairsMessage(
                     "Customer information not found.\n"
@@ -136,46 +152,210 @@ public class RepairTrackingActivity
                 );
 
         String categoryName =
-                cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                "category_name"
-                        )
+                getColumnValue(
+                        cursor,
+                        "category_name"
                 );
 
         String deviceModel =
-                cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                "device_model"
-                        )
+                getColumnValue(
+                        cursor,
+                        "device_model"
                 );
 
         String serviceName =
-                cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                "service_name"
-                        )
-                );
-
-        String status =
-                cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                "status"
-                        )
+                getColumnValue(
+                        cursor,
+                        "service_name"
                 );
 
         String branchName =
-                cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                "branch_name"
-                        )
+                getColumnValue(
+                        cursor,
+                        "branch_name"
+                );
+
+        String branchAddress =
+                getColumnValue(
+                        cursor,
+                        "branch_address"
                 );
 
         String repairDate =
-                cursor.getString(
-                        cursor.getColumnIndexOrThrow(
-                                "repair_date"
-                        )
+                getColumnValue(
+                        cursor,
+                        "repair_date"
                 );
+
+        String technicianName =
+                getColumnValue(
+                        cursor,
+                        "technician_name"
+                );
+
+        String status =
+                getColumnValue(
+                        cursor,
+                        "status"
+                );
+
+        MaterialCardView card =
+                createCard();
+
+        LinearLayout cardContent =
+                new LinearLayout(this);
+
+        cardContent.setOrientation(
+                LinearLayout.VERTICAL
+        );
+
+        cardContent.setPadding(
+                20,
+                20,
+                20,
+                20
+        );
+
+        card.addView(cardContent);
+
+        // =========================================
+        // HEADER
+        // =========================================
+
+        LinearLayout header =
+                new LinearLayout(this);
+
+        header.setOrientation(
+                LinearLayout.HORIZONTAL
+        );
+
+        header.setGravity(
+                Gravity.CENTER_VERTICAL
+        );
+
+        TextView repairIdText =
+                createTextView(
+                        "Repair #" + repairId,
+                        20,
+                        true
+                );
+
+        LinearLayout.LayoutParams titleParams =
+                new LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        1
+                );
+
+        header.addView(
+                repairIdText,
+                titleParams
+        );
+
+        TextView statusBadge =
+                createStatusBadge(status);
+
+        header.addView(
+                statusBadge
+        );
+
+        cardContent.addView(header);
+
+        // =========================================
+        // DEVICE INFORMATION
+        // =========================================
+
+        cardContent.addView(
+                createSectionTitle(
+                        "Device Information"
+                )
+        );
+
+        cardContent.addView(
+                createInfoRow(
+                        "Category",
+                        safeString(categoryName)
+                )
+        );
+
+        cardContent.addView(
+                createInfoRow(
+                        "Model",
+                        safeString(deviceModel)
+                )
+        );
+
+        // =========================================
+        // SERVICE INFORMATION
+        // =========================================
+
+        cardContent.addView(
+                createSectionTitle(
+                        "Repair Service"
+                )
+        );
+
+        cardContent.addView(
+                createInfoRow(
+                        "Service",
+                        safeString(serviceName)
+                )
+        );
+
+        cardContent.addView(
+                createInfoRow(
+                        "Booking Date",
+                        safeString(repairDate)
+                )
+        );
+
+
+        cardContent.addView(
+                createSectionTitle(
+                        "Repair Branch"
+                )
+        );
+
+        cardContent.addView(
+                createInfoRow(
+                        "Branch",
+                        safeString(branchName)
+                )
+        );
+
+        cardContent.addView(
+                createInfoRow(
+                        "Address",
+                        safeString(branchAddress)
+                )
+        );
+
+        if (!isEmpty(technicianName)) {
+
+            cardContent.addView(
+                    createSectionTitle(
+                            "Assigned Technician"
+                    )
+            );
+
+            cardContent.addView(
+                    createInfoRow(
+                            "Technician",
+                            technicianName
+                    )
+            );
+        }
+
+        cardContent.addView(
+                createSectionTitle(
+                        "Repair Progress"
+                )
+        );
+
+        cardContent.addView(
+                createProgressView(status)
+        );
+
 
         String customerImageUri =
                 getColumnValue(
@@ -189,89 +369,26 @@ public class RepairTrackingActivity
                         "in_progress_photo_uri"
                 );
 
-        LinearLayout card =
-                createCard();
+        if (!isEmpty(customerImageUri)
+                || !isEmpty(progressImageUri)) {
 
-        card.addView(
-                createTextView(
-                        "Repair ID: #" + repairId,
-                        20,
-                        true
-                )
-        );
+            cardContent.addView(
+                    createSectionTitle(
+                            "Repair Photos"
+                    )
+            );
 
-        card.addView(
-                createTextView(
-                        "Device: "
-                                + safeString(categoryName)
-                                + " - "
-                                + safeString(deviceModel),
-                        17,
-                        false
-                )
-        );
+            cardContent.addView(
+                    createImageSection(
+                            customerImageUri,
+                            progressImageUri
+                    )
+            );
+        }
 
-        card.addView(
-                createTextView(
-                        "Service: "
-                                + safeString(serviceName),
-                        17,
-                        false
-                )
-        );
-
-        card.addView(
-                createTextView(
-                        "Branch: "
-                                + safeString(branchName),
-                        17,
-                        false
-                )
-        );
-
-        card.addView(
-                createTextView(
-                        "Booking Date: "
-                                + formatRepairDate(
-                                repairDate
-                        ),
-                        16,
-                        false
-                )
-        );
-
-        addRepairImages(
-                card,
-                customerImageUri,
-                progressImageUri
-        );
-
-        TextView statusText =
-                createTextView(
-                        "Status: "
-                                + safeString(status),
-                        18,
-                        true
-                );
-
-        statusText.setPadding(
-                0,
-                20,
-                0,
-                15
-        );
-
-        card.addView(statusText);
-
-        card.addView(
-                createTextView(
-                        getProgressText(status),
-                        16,
-                        false
-                )
-        );
-
-        if ("Pending".equalsIgnoreCase(status)) {
+        if ("Pending".equalsIgnoreCase(
+                safeString(status)
+        )) {
 
             Button btnCancel =
                     new Button(this);
@@ -280,69 +397,80 @@ public class RepairTrackingActivity
                     "Cancel Booking"
             );
 
-            btnCancel.setOnClickListener(
-                    v -> showCancelConfirmation(
-                            repairId
-                    )
-            );
-
-            LinearLayout.LayoutParams params =
+            LinearLayout.LayoutParams buttonParams =
                     new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT
                     );
 
-            params.setMargins(
+            buttonParams.setMargins(
                     0,
                     20,
                     0,
                     0
             );
 
-            btnCancel.setLayoutParams(params);
+            btnCancel.setLayoutParams(
+                    buttonParams
+            );
 
-            card.addView(btnCancel);
+            btnCancel.setOnClickListener(
+                    v -> showCancelConfirmation(
+                            repairId
+                    )
+            );
+
+            cardContent.addView(
+                    btnCancel
+            );
         }
 
         repairsContainer.addView(card);
     }
 
-    private String getColumnValue(
-            Cursor cursor,
-            String columnName
+    private TextView createTextView(
+            String text,
+            float textSize,
+            boolean bold
     ) {
 
-        int index =
-                cursor.getColumnIndex(
-                        columnName
-                );
+        TextView textView =
+                new TextView(this);
 
-        if (index == -1) {
-            return null;
+        textView.setText(
+                text
+        );
+
+        textView.setTextSize(
+                textSize
+        );
+
+        textView.setTextColor(
+                0xFF222222
+        );
+
+        textView.setPadding(
+                0,
+                8,
+                0,
+                8
+        );
+
+        if (bold) {
+
+            textView.setTypeface(
+                    null,
+                    Typeface.BOLD
+            );
         }
 
-        return cursor.getString(index);
+        return textView;
     }
 
-    private LinearLayout createCard() {
+    private MaterialCardView createCard() {
 
-        LinearLayout card =
-                new LinearLayout(this);
-
-        card.setOrientation(
-                LinearLayout.VERTICAL
-        );
-
-        card.setPadding(
-                30,
-                25,
-                30,
-                25
-        );
-
-        card.setBackgroundResource(
-                android.R.drawable.dialog_holo_light_frame
-        );
+        MaterialCardView card =
+                new MaterialCardView(this);
 
         LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(
@@ -354,72 +482,430 @@ public class RepairTrackingActivity
                 0,
                 0,
                 0,
-                25
+                18
         );
 
-        card.setLayoutParams(params);
+        card.setLayoutParams(
+                params
+        );
+
+        card.setRadius(
+                20
+        );
+
+        card.setCardElevation(
+                4
+        );
+
+        card.setUseCompatPadding(
+                true
+        );
+
+        card.setStrokeWidth(
+                0
+        );
 
         return card;
     }
 
-    private void addRepairImages(
-            LinearLayout card,
+    private TextView createSectionTitle(
+            String text
+    ) {
+
+        TextView textView =
+                new TextView(this);
+
+        textView.setText(
+                text
+        );
+
+        textView.setTextSize(
+                16
+        );
+
+        textView.setTypeface(
+                null,
+                Typeface.BOLD
+        );
+
+        textView.setTextColor(
+                0xFF222222
+        );
+
+        textView.setPadding(
+                0,
+                22,
+                0,
+                8
+        );
+
+        return textView;
+    }
+
+    private TextView createInfoRow(
+            String label,
+            String value
+    ) {
+
+        TextView textView =
+                new TextView(this);
+
+        textView.setText(
+                label + "\n" + value
+        );
+
+        textView.setTextSize(
+                14
+        );
+
+        textView.setTextColor(
+                0xFF555555
+        );
+
+        textView.setPadding(
+                0,
+                5,
+                0,
+                5
+        );
+
+        return textView;
+    }
+
+    private TextView createStatusBadge(
+            String status
+    ) {
+
+        String safeStatus =
+                safeString(status);
+
+        TextView badge =
+                new TextView(this);
+
+        badge.setText(
+                safeStatus
+        );
+
+        badge.setTextSize(
+                12
+        );
+
+        badge.setTypeface(
+                null,
+                Typeface.BOLD
+        );
+
+        badge.setGravity(
+                Gravity.CENTER
+        );
+
+        badge.setPadding(
+                18,
+                10,
+                18,
+                10
+        );
+
+        String normalized =
+                safeStatus.toLowerCase(
+                        Locale.ROOT
+                );
+
+        if ("pending".equals(normalized)) {
+
+            badge.setTextColor(
+                    0xFF8A5A00
+            );
+
+            badge.setBackgroundColor(
+                    0xFFFFF1CC
+            );
+
+        } else if ("assigned".equals(normalized)) {
+
+            badge.setTextColor(
+                    0xFF1557A6
+            );
+
+            badge.setBackgroundColor(
+                    0xFFE8F0FE
+            );
+
+        } else if ("in progress".equals(normalized)) {
+
+            badge.setTextColor(
+                    0xFF8A4B00
+            );
+
+            badge.setBackgroundColor(
+                    0xFFFFE8CC
+            );
+
+        } else if ("waiting for parts"
+                .equals(normalized)) {
+
+            badge.setTextColor(
+                    0xFF6A4C93
+            );
+
+            badge.setBackgroundColor(
+                    0xFFF0E6FA
+            );
+
+        } else if ("testing".equals(normalized)) {
+
+            badge.setTextColor(
+                    0xFF00695C
+            );
+
+            badge.setBackgroundColor(
+                    0xFFE0F2F1
+            );
+
+        } else if ("ready for collection"
+                .equals(normalized)
+                || "completed".equals(normalized)) {
+
+            badge.setTextColor(
+                    0xFF287A3D
+            );
+
+            badge.setBackgroundColor(
+                    0xFFE6F4EA
+            );
+
+        } else if ("cancelled"
+                .equals(normalized)) {
+
+            badge.setTextColor(
+                    0xFFC62828
+            );
+
+            badge.setBackgroundColor(
+                    0xFFFFEBEE
+            );
+
+        } else {
+
+            badge.setTextColor(
+                    0xFF444444
+            );
+
+            badge.setBackgroundColor(
+                    0xFFEFEFEF
+            );
+        }
+
+        return badge;
+    }
+
+    private LinearLayout createProgressView(
+            String status
+    ) {
+
+        LinearLayout container =
+                new LinearLayout(this);
+
+        container.setOrientation(
+                LinearLayout.VERTICAL
+        );
+
+        container.setPadding(
+                10,
+                8,
+                10,
+                5
+        );
+
+        String normalizedStatus =
+                status == null
+                        ? ""
+                        : status.toLowerCase(
+                        Locale.ROOT
+                );
+
+        if ("cancelled".equals(
+                normalizedStatus
+        )) {
+
+            TextView cancelled =
+                    createTextView(
+                            "● Appointment Cancelled",
+                            14,
+                            true
+                    );
+
+            cancelled.setTextColor(
+                    0xFFC62828
+            );
+
+            container.addView(
+                    cancelled
+            );
+
+            return container;
+        }
+
+        String[] stages = {
+                "Appointment Received",
+                "Accepted",
+                "Assigned",
+                "In Progress",
+                "Waiting for Parts",
+                "Testing",
+                "Ready for Collection",
+                "Completed"
+        };
+
+        int currentStage =
+                getStatusStage(
+                        normalizedStatus
+                );
+
+        for (
+                int i = 0;
+                i < stages.length;
+                i++
+        ) {
+
+            boolean completed =
+                    i <= currentStage;
+
+            TextView stage =
+                    createTextView(
+                            (completed
+                                    ? "● "
+                                    : "○ ")
+                                    + stages[i],
+                            14,
+                            completed
+                    );
+
+            if (completed) {
+
+                stage.setTextColor(
+                        0xFF1A73E8
+                );
+
+            } else {
+
+                stage.setTextColor(
+                        0xFF999999
+                );
+            }
+
+            container.addView(
+                    stage
+            );
+        }
+
+        return container;
+    }
+
+    private int getStatusStage(
+            String status
+    ) {
+
+        if ("pending".equals(status)) {
+            return 0;
+        }
+
+        if ("accepted".equals(status)) {
+            return 1;
+        }
+
+        if ("assigned".equals(status)) {
+            return 2;
+        }
+
+        if ("in progress".equals(status)) {
+            return 3;
+        }
+
+        if ("waiting for parts".equals(status)) {
+            return 4;
+        }
+
+        if ("testing".equals(status)) {
+            return 5;
+        }
+
+        if ("ready for collection".equals(status)) {
+            return 6;
+        }
+
+        if ("completed".equals(status)) {
+            return 7;
+        }
+
+        return 0;
+    }
+
+    private LinearLayout createImageSection(
             String customerImageUri,
             String progressImageUri
     ) {
 
-        TextView title =
-                createTextView(
-                        "Repair Photos",
-                        17,
-                        true
-                );
+        HorizontalScrollView scrollView =
+                new HorizontalScrollView(this);
 
-        title.setPadding(
-                0,
-                15,
-                0,
-                10
+        scrollView.setHorizontalScrollBarEnabled(
+                false
         );
 
-        card.addView(title);
-
-        LinearLayout imageContainer =
+        LinearLayout container =
                 new LinearLayout(this);
 
-        imageContainer.setOrientation(
+        container.setOrientation(
                 LinearLayout.HORIZONTAL
         );
 
-        imageContainer.setGravity(
-                Gravity.CENTER
+        if (!isEmpty(customerImageUri)) {
+
+            container.addView(
+                    createImageCard(
+                            "Customer Photo",
+                            customerImageUri
+                    )
+            );
+        }
+
+        if (!isEmpty(progressImageUri)) {
+
+            container.addView(
+                    createImageCard(
+                            "Repair Progress",
+                            progressImageUri
+                    )
+            );
+        }
+
+        scrollView.addView(
+                container
         );
 
-        imageContainer.setLayoutParams(
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        150
-                )
+        return createImageWrapper(
+                scrollView
         );
-
-        imageContainer.addView(
-                createImageBox(
-                        "Customer Photo",
-                        customerImageUri
-                )
-        );
-
-        imageContainer.addView(
-                createImageBox(
-                        "Progress Photo",
-                        progressImageUri
-                )
-        );
-
-        card.addView(imageContainer);
     }
 
-    private LinearLayout createImageBox(
+    private LinearLayout createImageWrapper(
+            View view
+    ) {
+
+        LinearLayout wrapper =
+                new LinearLayout(this);
+
+        wrapper.setOrientation(
+                LinearLayout.VERTICAL
+        );
+
+        wrapper.addView(view);
+
+        return wrapper;
+    }
+
+    private LinearLayout createImageCard(
             String label,
             String imageUri
     ) {
@@ -431,25 +917,22 @@ public class RepairTrackingActivity
                 LinearLayout.VERTICAL
         );
 
-        box.setGravity(
-                Gravity.CENTER
-        );
-
         LinearLayout.LayoutParams boxParams =
                 new LinearLayout.LayoutParams(
-                        0,
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        1
+                        220,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
                 );
 
         boxParams.setMargins(
-                5,
-                5,
-                5,
-                5
+                0,
+                0,
+                12,
+                0
         );
 
-        box.setLayoutParams(boxParams);
+        box.setLayoutParams(
+                boxParams
+        );
 
         ImageView imageView =
                 new ImageView(this);
@@ -457,7 +940,7 @@ public class RepairTrackingActivity
         imageView.setLayoutParams(
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        110
+                        170
                 )
         );
 
@@ -465,30 +948,18 @@ public class RepairTrackingActivity
                 ImageView.ScaleType.CENTER_CROP
         );
 
-        if (imageUri != null &&
-                !imageUri.trim().isEmpty()) {
+        imageView.setBackgroundColor(
+                0xFFEAEAEA
+        );
 
-            try {
+        loadImageIntoView(
+                imageView,
+                imageUri
+        );
 
-                imageView.setImageURI(
-                        Uri.parse(imageUri)
-                );
-
-            } catch (Exception e) {
-
-                imageView.setImageResource(
-                        android.R.drawable.ic_menu_report_image
-                );
-            }
-
-        } else {
-
-            imageView.setImageResource(
-                    android.R.drawable.ic_menu_gallery
-            );
-        }
-
-        box.addView(imageView);
+        box.addView(
+                imageView
+        );
 
         TextView labelView =
                 createTextView(
@@ -501,9 +972,100 @@ public class RepairTrackingActivity
                 Gravity.CENTER
         );
 
-        box.addView(labelView);
+        box.addView(
+                labelView
+        );
 
         return box;
+    }
+    private void loadImageIntoView(
+            ImageView imageView,
+            String imageLocation
+    ) {
+
+        if (imageView == null) {
+            return;
+        }
+
+        if (imageLocation == null ||
+                imageLocation.trim().isEmpty()) {
+
+            imageView.setVisibility(
+                    ImageView.GONE
+            );
+
+            return;
+        }
+
+        try {
+
+            String cleanPath =
+                    imageLocation.trim();
+
+            java.io.File imageFile =
+                    new java.io.File(
+                            cleanPath
+                    );
+
+            if (imageFile.exists() &&
+                    imageFile.isFile()) {
+
+                android.graphics.Bitmap bitmap =
+                        android.graphics.BitmapFactory
+                                .decodeFile(
+                                        imageFile.getAbsolutePath()
+                                );
+
+                if (bitmap != null) {
+
+                    imageView.setImageBitmap(
+                            bitmap
+                    );
+
+                    imageView.setVisibility(
+                            ImageView.VISIBLE
+                    );
+
+                    return;
+                }
+            }
+
+            Uri imageUri =
+                    Uri.parse(
+                            cleanPath
+                    );
+
+            if ("content".equalsIgnoreCase(
+                    imageUri.getScheme()
+            ) ||
+                    "file".equalsIgnoreCase(
+                            imageUri.getScheme()
+                    )) {
+
+                imageView.setImageURI(
+                        imageUri
+                );
+
+                imageView.setVisibility(
+                        ImageView.VISIBLE
+                );
+
+                return;
+            }
+
+        } catch (Exception e) {
+
+            android.util.Log.e(
+                    "RepairTrackingActivity",
+                    "Failed to load image: "
+                            + imageLocation,
+                    e
+            );
+        }
+
+        imageView.setVisibility(
+                ImageView.GONE
+        );
     }
 
     private void showCancelConfirmation(
@@ -511,24 +1073,30 @@ public class RepairTrackingActivity
     ) {
 
         new AlertDialog.Builder(this)
+
                 .setTitle(
                         "Cancel Repair Booking"
                 )
+
                 .setMessage(
-                        "Are you sure you want to cancel "
-                                + "Repair #"
+                        "Are you sure you want to cancel Repair #"
                                 + repairId
                                 + "?"
                 )
+
                 .setNegativeButton(
                         "No",
                         null
                 )
+
                 .setPositiveButton(
                         "Yes, Cancel",
                         (dialog, which) ->
-                                cancelRepair(repairId)
+                                cancelRepair(
+                                        repairId
+                                )
                 )
+
                 .show();
     }
 
@@ -562,127 +1130,24 @@ public class RepairTrackingActivity
         loadRepairs();
     }
 
-    private String getProgressText(
-            String status
+    private String getColumnValue(
+            Cursor cursor,
+            String columnName
     ) {
 
-        if (status == null) {
-            return "";
+        int index =
+                cursor.getColumnIndex(
+                        columnName
+                );
+
+        if (index == -1 ||
+                cursor.isNull(index)) {
+
+            return null;
         }
 
-        switch (status.toLowerCase(Locale.ROOT)) {
-
-            case "pending":
-                return "● Appointment Received\n"
-                        + "○ Accepted\n"
-                        + "○ Assigned\n"
-                        + "○ Diagnosing\n"
-                        + "○ Repairing\n"
-                        + "○ Ready for Pickup\n"
-                        + "○ Completed";
-
-            case "accepted":
-                return "● Appointment Received\n"
-                        + "● Accepted\n"
-                        + "○ Assigned\n"
-                        + "○ Diagnosing\n"
-                        + "○ Repairing\n"
-                        + "○ Ready for Pickup\n"
-                        + "○ Completed";
-
-            case "assigned":
-                return "● Appointment Received\n"
-                        + "● Accepted\n"
-                        + "● Assigned\n"
-                        + "○ Diagnosing\n"
-                        + "○ Repairing\n"
-                        + "○ Ready for Pickup\n"
-                        + "○ Completed";
-
-            case "diagnosing":
-                return "● Appointment Received\n"
-                        + "● Accepted\n"
-                        + "● Assigned\n"
-                        + "● Diagnosing\n"
-                        + "○ Repairing\n"
-                        + "○ Ready for Pickup\n"
-                        + "○ Completed";
-
-            case "repairing":
-                return "● Appointment Received\n"
-                        + "● Accepted\n"
-                        + "● Assigned\n"
-                        + "● Diagnosing\n"
-                        + "● Repairing\n"
-                        + "○ Ready for Pickup\n"
-                        + "○ Completed";
-
-            case "ready for pickup":
-                return "● Appointment Received\n"
-                        + "● Accepted\n"
-                        + "● Assigned\n"
-                        + "● Diagnosing\n"
-                        + "● Repairing\n"
-                        + "● Ready for Pickup\n"
-                        + "○ Completed";
-
-            case "completed":
-                return "● Appointment Received\n"
-                        + "● Accepted\n"
-                        + "● Assigned\n"
-                        + "● Diagnosing\n"
-                        + "● Repairing\n"
-                        + "● Ready for Pickup\n"
-                        + "● Completed";
-
-            case "cancelled":
-                return "● Appointment Cancelled";
-
-            default:
-                return "Current Status: " + status;
-        }
+        return cursor.getString(index);
     }
-
-    private TextView createTextView(
-            String text,
-            float textSize,
-            boolean bold
-    ) {
-
-        TextView textView =
-                new TextView(this);
-
-        textView.setText(text);
-        textView.setTextSize(textSize);
-
-        textView.setPadding(
-                0,
-                8,
-                0,
-                8
-        );
-
-        if (bold) {
-            textView.setTypeface(
-                    null,
-                    Typeface.BOLD
-            );
-        }
-
-        return textView;
-    }
-
-    private void showNoRepairsMessage(
-            String message
-    ) {
-
-        tvNoRepairs.setText(message);
-
-        tvNoRepairs.setVisibility(
-                View.VISIBLE
-        );
-    }
-
     private String safeString(
             String value
     ) {
@@ -696,37 +1161,26 @@ public class RepairTrackingActivity
         return value;
     }
 
-    private String formatRepairDate(
-            String dateValue
+    private boolean isEmpty(
+            String value
     ) {
 
-        if (dateValue == null ||
-                dateValue.trim().isEmpty()) {
-
-            return "Not available";
-        }
-
-        try {
-
-            long timestamp =
-                    Long.parseLong(dateValue);
-
-            SimpleDateFormat formatter =
-                    new SimpleDateFormat(
-                            "dd MMM yyyy, hh:mm a",
-                            Locale.getDefault()
-                    );
-
-            return formatter.format(
-                    new Date(timestamp)
-            );
-
-        } catch (NumberFormatException e) {
-
-            return dateValue;
-        }
+        return value == null ||
+                value.trim().isEmpty();
     }
 
+    private void showNoRepairsMessage(
+            String message
+    ) {
+
+        tvNoRepairs.setText(
+                message
+        );
+
+        tvNoRepairs.setVisibility(
+                View.VISIBLE
+        );
+    }
     @Override
     protected void onDestroy() {
 

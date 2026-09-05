@@ -40,6 +40,7 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
 
         btnLogin = findViewById(R.id.btnLogin);
+        tvRegister = findViewById(R.id.tvRegister);
         btnLogin.setOnClickListener(v -> validateLogin());
 
         tvRegister.setOnClickListener(v -> {
@@ -210,15 +211,24 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        if ("TECHNICIAN".equalsIgnoreCase(
-                user.getRole()
-        )) {
-
+        if ("TECHNICIAN".equalsIgnoreCase(user.getRole())) {
 
             preferences.edit()
                     .putInt(
                             "technicianId",
                             user.getId()
+                    )
+                    .putString(
+                            "technicianName",
+                            user.getFullName()
+                    )
+                    .putString(
+                            "technicianEmail",
+                            user.getEmail()
+                    )
+                    .putString(
+                            "technicianPhone",
+                            user.getPhone()
                     )
                     .apply();
 
@@ -235,10 +245,9 @@ public class LoginActivity extends AppCompatActivity {
                     );
 
             startActivity(intent);
-
             finish();
-
             return;
+
         }
         Toast.makeText(
                 this,

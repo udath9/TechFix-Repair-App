@@ -28,9 +28,8 @@ public class RepairHistoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-
         setContentView(
-                R.layout.activity_repair_history
+                R.layout.activity_customer_repair_history
         );
 
         databaseHelper =
