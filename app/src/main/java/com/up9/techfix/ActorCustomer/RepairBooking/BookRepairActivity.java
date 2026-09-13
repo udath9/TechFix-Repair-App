@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,9 +23,11 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.up9.techfix.R;
 import com.up9.techfix.data.Branch;
@@ -32,6 +35,8 @@ import com.up9.techfix.data.Category;
 import com.up9.techfix.data.DatabaseHelper;
 import com.up9.techfix.data.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -39,6 +44,9 @@ import java.util.Locale;
 public class BookRepairActivity extends AppCompatActivity {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+
+    private String pendingCameraFilePath;
+    private Uri pendingCameraUri;
 
     private DatabaseHelper databaseHelper;
 
@@ -48,8 +56,8 @@ public class BookRepairActivity extends AppCompatActivity {
     private EditText etDeviceModel;
     private EditText etProblemDescription;
 
-    private Button btnLocation;
-    private Button btnUploadImage;
+    private LinearLayout btnLocation;
+    private LinearLayout btnUploadImage;
     private Button btnSubmitRepair;
 
     private TextView tvNearestBranch;
@@ -236,6 +244,184 @@ public class BookRepairActivity extends AppCompatActivity {
                     }
             );
 
+    private final ActivityResultLauncher<Uri> takePictureLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.TakePicture(),
+                    success -> {
+
+                        if (!success || pendingCameraFilePath == null) {
+
+                            Toast.makeText(
+                                    this,
+                                    "Failed to capture photo.",
+                                    Toast.LENGTH_LONG
+                            ).show();
+
+                            return;
+                        }
+
+                        selectedImageUri =
+                                pendingCameraFilePath;
+
+                        if (ivDeviceImage != null) {
+
+                            ivDeviceImage.setImageURI(
+                                    Uri.fromFile(
+                                            new File(
+                                                    pendingCameraFilePath
+                                            )
+                                    )
+                            );
+
+                            ivDeviceImage.setVisibility(
+                                    ImageView.VISIBLE
+                            );
+                        }
+
+                        Toast.makeText(
+                                this,
+                                "Photo captured.",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+            );
+
+    private final ActivityResultLauncher<String> requestCameraPermissionLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.RequestPermission(),
+                    granted -> {
+
+                        if (granted) {
+
+                            launchCameraCapture();
+
+                        } else {
+
+                            Toast.makeText(
+                                    this,
+                                    "Camera permission was denied.",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        }
+                    }
+            );
+
+    private void showImageSourceDialog() {
+
+        String[] options = {
+                "Take Photo",
+                "Choose from Gallery"
+        };
+
+        new AlertDialog.Builder(this)
+                .setTitle("Add device image")
+                .setItems(
+                        options,
+                        (dialog, which) -> {
+
+                            if (which == 0) {
+
+                                openCamera();
+
+                            } else {
+
+                                imagePickerLauncher.launch(
+                                        "image/*"
+                                );
+                            }
+                        }
+                )
+                .show();
+    }
+
+    private void openCamera() {
+
+        boolean cameraGranted =
+                ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.CAMERA
+                ) == PackageManager.PERMISSION_GRANTED;
+
+        if (!cameraGranted) {
+
+            requestCameraPermissionLauncher.launch(
+                    Manifest.permission.CAMERA
+            );
+
+            return;
+        }
+
+        launchCameraCapture();
+    }
+
+    private void launchCameraCapture() {
+
+        File photoFile;
+
+        try {
+
+            photoFile =
+                    createEmptyImageFile();
+
+        } catch (IOException e) {
+
+            Toast.makeText(
+                    this,
+                    "Unable to prepare camera storage.",
+                    Toast.LENGTH_LONG
+            ).show();
+
+            return;
+        }
+
+        pendingCameraFilePath =
+                photoFile.getAbsolutePath();
+
+        pendingCameraUri =
+                FileProvider.getUriForFile(
+                        this,
+                        getPackageName() + ".fileprovider",
+                        photoFile
+                );
+
+        takePictureLauncher.launch(
+                pendingCameraUri
+        );
+    }
+
+    private File createEmptyImageFile() throws IOException {
+
+        File imageDirectory =
+                new File(
+                        getFilesDir(),
+                        "repair_images"
+                );
+
+        if (!imageDirectory.exists()) {
+
+            boolean created =
+                    imageDirectory.mkdirs();
+
+            if (!created &&
+                    !imageDirectory.exists()) {
+
+                throw new IOException(
+                        "Could not create repair_images directory"
+                );
+            }
+        }
+
+        String fileName =
+                "repair_"
+                        + System.currentTimeMillis()
+                        + ".jpg";
+
+        return new File(
+                imageDirectory,
+                fileName
+        );
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -281,7 +467,7 @@ public class BookRepairActivity extends AppCompatActivity {
         );
 
         btnUploadImage.setOnClickListener(
-                v -> openImagePicker()
+                v -> showImageSourceDialog()
         );
 
         btnSubmitRepair.setOnClickListener(

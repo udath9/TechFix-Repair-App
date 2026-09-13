@@ -1,105 +1,334 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/page_bg"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="32dp">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New request"
+            android:textColor="@color/slate"
+            android:textSize="13sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Book a Repair"
-            android:textSize="28sp"
+            android:layout_marginTop="2dp"
+            android:text="Book a repair"
+            android:textColor="@color/ink"
+            android:textSize="24sp"
             android:textStyle="bold"
-            android:layout_gravity="center"
-            android:layout_marginBottom="24dp" />
+            android:fontFamily="sans-serif-medium" />
 
+        <!-- Section: Device details -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Device Category"
-            android:textStyle="bold"
-            android:textSize="16sp" />
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="4dp"
+            android:text="Device details"
+            android:textColor="@color/slate"
+            android:textSize="13sp" />
 
-        <Spinner
-            android:id="@+id/spinnerDeviceCategory"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp" />
+            app:cardBackgroundColor="@color/card_white"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/border"
+            app:strokeWidth="1dp">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Device category"
+                    android:textColor="@color/ink"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinnerDeviceCategory"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_input_field"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="18dp"
+                    android:layout_marginBottom="4dp"
+                    android:background="@color/border" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:text="Repair service"
+                    android:textColor="@color/ink"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinnerService"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_input_field"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    app:boxBackgroundColor="@color/page_bg"
+                    app:boxCornerRadiusBottomEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusTopStart="10dp"
+                    app:boxStrokeColor="@color/teal"
+                    app:hintTextColor="@color/teal">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etDeviceModel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Device model"
+                        android:inputType="text"
+                        android:textColor="@color/ink" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    app:boxBackgroundColor="@color/page_bg"
+                    app:boxCornerRadiusBottomEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusTopStart="10dp"
+                    app:boxStrokeColor="@color/teal"
+                    app:hintTextColor="@color/teal">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etProblemDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="120dp"
+                        android:gravity="top"
+                        android:hint="Describe the problem"
+                        android:inputType="textMultiLine"
+                        android:textColor="@color/ink" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Section: Location -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Repair Service"
-            android:textStyle="bold"
-            android:textSize="16sp" />
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="4dp"
+            android:text="Location"
+            android:textColor="@color/slate"
+            android:textSize="13sp" />
 
-        <Spinner
-            android:id="@+id/spinnerService"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp" />
+            app:cardBackgroundColor="@color/card_white"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/border"
+            app:strokeWidth="1dp">
 
-        <EditText
-            android:id="@+id/etDeviceModel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Device Model"
-            android:inputType="text"
-            android:layout_marginBottom="16dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/etProblemDescription"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:hint="Describe the problem"
-            android:gravity="top"
-            android:inputType="textMultiLine"
-            android:layout_marginBottom="16dp" />
+                <LinearLayout
+                    android:id="@+id/btnLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp">
 
-        <Button
-            android:id="@+id/btnLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="📍 Find Nearest Branch"
-            android:layout_marginBottom="12dp" />
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_map_pin"
+                        app:tint="@color/teal" />
 
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:text="Find nearest branch"
+                        android:textColor="@color/ink"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/slate" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvNearestBranch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/bg_pill_teal"
+                    android:padding="12dp"
+                    android:text="Nearest branch will appear here"
+                    android:textColor="@color/teal"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Section: Photo -->
         <TextView
-            android:id="@+id/tvNearestBranch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="4dp"
+            android:text="Photo"
+            android:textColor="@color/slate"
+            android:textSize="13sp" />
+
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nearest branch will appear here"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:padding="12dp"
-            android:visibility="gone"
-            android:layout_marginBottom="12dp" />
+            app:cardBackgroundColor="@color/card_white"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/border"
+            app:strokeWidth="1dp">
 
-        <Button
-            android:id="@+id/btnUploadImage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="📷 Upload Device Image"
-            android:layout_marginBottom="20dp" />
-        <ImageView
-            android:id="@+id/ivDeviceImage"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginBottom="20dp"
-            android:scaleType="centerCrop"
-            android:visibility="gone"
-            android:contentDescription="Uploaded device image" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <Button
+                <LinearLayout
+                    android:id="@+id/btnUploadImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_camera"
+                        app:tint="@color/teal" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:text="Upload device image"
+                        android:textColor="@color/ink"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/slate" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/ivDeviceImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/bg_image_placeholder"
+                    android:contentDescription="Uploaded device image"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Submit -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSubmitRepair"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Submit Repair Request" />
+            android:layout_height="52dp"
+            android:layout_marginTop="28dp"
+            android:backgroundTint="@color/teal"
+            android:text="Submit repair request"
+            android:textAllCaps="false"
+            android:textColor="@color/card_white"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:cornerRadius="12dp" />
 
     </LinearLayout>
 
-</ScrollView>
+</androidx.core.widget.NestedScrollView>
