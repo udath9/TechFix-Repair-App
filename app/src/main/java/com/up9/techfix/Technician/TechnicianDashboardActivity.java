@@ -3,7 +3,7 @@ package com.up9.techfix.Technician;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,9 +20,9 @@ public class TechnicianDashboardActivity extends AppCompatActivity {
     private TextView txtWaitingCount;
     private TextView txtCompletedCount;
 
-    private Button btnAssignedRepairs;
-    private Button btnRepairHistory;
-    private Button btnLogout;
+    private LinearLayout btnAssignedRepairs;
+    private LinearLayout btnRepairHistory;
+    private LinearLayout btnLogout;
 
     private DatabaseHelper databaseHelper;
 
@@ -31,6 +31,7 @@ public class TechnicianDashboardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_technician_dashboard);
 
         databaseHelper = new DatabaseHelper(this);
