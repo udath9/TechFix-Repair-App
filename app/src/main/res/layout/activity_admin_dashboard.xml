@@ -1,26 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  TechFix Admin Dashboard — redesigned
-  Palette: ink #1B2430, teal #0F6E56 (brand/accent), amber #BA7517 (attention),
-           page bg #F4F6F8, card white #FFFFFF, border #E4E7EB
-  Add these to res/values/colors.xml:
-    <color name="ink">#1B2430</color>
-    <color name="slate">#6B7280</color>
-    <color name="teal">#0F6E56</color>
-    <color name="teal_bg">#E1F5EE</color>
-    <color name="amber">#BA7517</color>
-    <color name="amber_bg">#FAEEDA</color>
-    <color name="danger">#A32D2D</color>
-    <color name="page_bg">#F4F6F8</color>
-    <color name="card_white">#FFFFFF</color>
-    <color name="border">#E4E7EB</color>
-
-  Requires: com.google.android.material:material (MaterialCardView)
-  Icons: swap the ic_* drawables below for Material vector assets
-         (Android Studio > New > Vector Asset), outline style.
-  All original view IDs are preserved so existing click-handling
-  Java/Kotlin code keeps working unchanged.
--->
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
